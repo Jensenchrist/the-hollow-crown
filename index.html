@@ -299,6 +299,22 @@ h2 { font-size: 22px; line-height: 1.15; }
 .switch[aria-checked="false"] i { left: 5px; }
 .offlbl { font-weight: 700; font-size: 14px; letter-spacing: .04em; color: var(--muted); opacity: .45; transition: opacity .2s; }
 .offlbl.is-off { opacity: 1; color: var(--ink); }
+
+/* ===== Floresta e peixe em anéis ===== */
+.res { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; justify-items: center; }
+.gauge { margin: 0; position: relative; width: min(150px, 100%); display: grid; justify-items: center; gap: 8px; }
+.gauge .ring { width: 100%; height: auto; display: block; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .35)); }
+.gauge .track { fill: rgba(255, 255, 255, .07); stroke: rgba(255, 255, 255, .1); stroke-width: 14; }
+.gauge .arc { fill: none; stroke: var(--accent); stroke-width: 14; stroke-linecap: round; transition: stroke-dasharray .8s ease, stroke .8s ease; }
+.gauge.low .arc { stroke: var(--bad); }
+.gauge .disc { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 64%; aspect-ratio: 1 / 1; margin-top: 18%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, .16), rgba(255, 255, 255, .04) 70%); border: 1px solid rgba(255, 255, 255, .12);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .15);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+@supports not (aspect-ratio: 1 / 1) { .gauge .disc { height: 0; padding-bottom: 64%; } }
+.gauge .disc b { font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1; }
+.gauge .ico { width: 22px; height: 22px; fill: none; stroke: var(--accent); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.gauge figcaption { text-align: center; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -383,8 +399,16 @@ h2 { font-size: 22px; line-height: 1.15; }
         <div class="fields" id="fields" aria-label="Fertilidade dos 10 campos"></div>
         <div class="legend"><span style="--c: #e6c063">plantado</span><span style="--c: rgba(185, 164, 99, .55)">em descanso</span><span>altura da espiga = fertilidade (%)</span></div>
         <div class="res">
-          <div><div class="lbl">Floresta <em id="forest-v"></em></div><div class="meter"><i id="forest"></i></div></div>
-          <div><div class="lbl">Peixe no rio <em id="fish-v"></em></div><div class="meter"><i id="fish"></i></div></div>
+          <figure class="gauge" id="g-forest" aria-label="Floresta">
+            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="50"/><circle class="arc" id="forest" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/></svg>
+            <div class="disc"><b id="forest-v"></b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l5 7h-3l4 6H6l4-6H7z"/><path d="M12 16v5"/></svg></div>
+            <figcaption class="lbl">Floresta</figcaption>
+          </figure>
+          <figure class="gauge" id="g-fish" aria-label="Peixe no rio">
+            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="50"/><circle class="arc" id="fish" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/></svg>
+            <div class="disc"><b id="fish-v"></b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c3-4.5 9-5.5 13-2l4-3v10l-4-3c-4 3.5-10 2.5-13-2z"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg></div>
+            <figcaption class="lbl">Peixe no rio</figcaption>
+          </figure>
         </div>
       </section>
 
@@ -923,8 +947,12 @@ h2 { font-size: 22px; line-height: 1.15; }
     $('fields').innerHTML = s.fields.map((v, i) => `<div class="f${s.planted.includes(i) ? ' p' : ''}" title="Campo ${i + 1}: fertilidade ${v}%"><span class="ear" style="height:${Math.max(18, v)}%"><svg viewBox="0 0 40 100" aria-hidden="true"><path class="st" d="M20 100V22"/><path d="M20 6c5 6 5 14 0 20-5-6-5-14 0-20z"/><path d="M19 34C11 33 6 27 5 19c8 1 13 6 14 15zM21 34c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 50C11 49 6 43 5 35c8 1 13 6 14 15zM21 50c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 66C11 65 6 59 5 51c8 1 13 6 14 15zM21 66c8-1 13-7 14-15-8 1-13 6-14 15z"/></svg></span><b>${v}</b></div>`).join('');
     $('land-sub').textContent = s.planted.length ? `${s.planted.length} campos plantados neste ano. Plantar todo ano cansa a terra; os campos em descanso se recuperam.`
       : 'Plantar todo ano cansa a terra; campos em descanso se recuperam. Na primavera, os mais férteis são plantados primeiro.';
-    $('forest').style.width = s.forest + '%'; $('forest-v').textContent = Math.round(s.forest) + '%';
-    $('fish').style.width = s.fish + '%'; $('fish-v').textContent = Math.round(s.fish) + '%';
+    [['forest', s.forest], ['fish', s.fish]].forEach(([k, v]) => {
+      const p = Math.max(0, Math.min(100, Math.round(v)));
+      $(k).setAttribute('stroke-dasharray', p + ' 100');
+      $(k + '-v').textContent = p + '%';
+      $('g-' + k).classList.toggle('low', p < 30);
+    });
 
     $('goal').textContent = `Meta da Fase 1: chegar a ${H.GOAL_POP} pessoas com o povo satisfeito (felicidade ${H.GOAL_HAPPY}+).`;
 
@@ -1079,7 +1107,7 @@ h2 { font-size: 22px; line-height: 1.15; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031203319';
+  var BUILD = '20261031205337';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
