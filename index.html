@@ -930,5 +930,20 @@ body, .meter i, .go, .seg button, .fields .f.p i { transition: background-color 
 })();
 </script>
 
+<script>
+/* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
+(function () {
+  var BUILD = '20261031194300';
+  function check() {
+    try {
+      fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+        if (d && d.v && d.v !== BUILD && location.search.indexOf('v=' + d.v) < 0) location.replace('./?v=' + d.v);
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  check();
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') check(); });
+})();
+</script>
 </body>
 </html>
