@@ -224,11 +224,7 @@ h1 { font-family: var(--title); font-weight: 700; font-size: clamp(40px, 11vw, 6
 .when { text-align: left; position: relative; text-shadow: 0 1px 8px rgba(255, 255, 255, .25); }
 .months { justify-content: flex-start; gap: 2px; flex-wrap: nowrap; white-space: nowrap; }
 .months span { padding: 1px 6px; }
-.castle { position: absolute; right: -4px; bottom: 0; width: min(46%, 380px); height: auto; z-index: 0; fill: var(--castle); transition: fill .8s ease; }
-.castle .flag { fill: var(--accent); }
-.castle .gate { fill: rgba(0, 0, 0, .35); }
-.castle .win rect { fill: #ffd27a; opacity: var(--win); transition: opacity .8s ease; filter: drop-shadow(0 0 3px rgba(255, 200, 100, .9)); }
-@media (min-width: 720px) { .sky { min-height: 260px; } .castle { width: 40%; } }
+@media (min-width: 720px) { .sky { min-height: 300px; } }
 /* ===== Textos corridos em tipo de livro antigo ===== */
 .sub, .task .hint, ul.notes li, .ok, .taxinfo, .foot, .acts small, .rv .q, #land-sub { font-family: var(--text); }
 .sub, ul.notes li { font-size: 15.5px; line-height: 1.4; }
@@ -236,25 +232,31 @@ h1 { font-family: var(--title); font-weight: 700; font-size: clamp(40px, 11vw, 6
 .log h3 { font-size: 18px; }
 /* Transição das cores da estação */
 body, .meter i, .go, .seg button, .fields .f.p i { transition: background-color .8s ease, color .8s ease; }
+
+/* ===== Pinturas das estações no cartão do topo ===== */
+.sky { color: #fbf3e4; background-color: var(--sky-a); }
+.sky::after { display: none; }
+.art { position: absolute; inset: 0; z-index: 0; }
+.art img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: right bottom; opacity: 0; transition: opacity 1.6s ease; }
+.art img.on { opacity: 1; }
+.art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(12, 10, 8, .62) 0%, rgba(12, 10, 8, .38) 45%, rgba(12, 10, 8, 0) 75%), linear-gradient(0deg, rgba(12, 10, 8, .45) 0%, rgba(12, 10, 8, 0) 45%); }
+.art .dim { position: absolute; inset: 0; background: #0b1020; opacity: var(--dim, 0); transition: opacity 1.2s ease; z-index: 1; }
+.sky h1 { color: #fbf3e4; text-shadow: 0 2px 18px rgba(0, 0, 0, .55); }
+.sky .when, .sky .phase { color: #f3eadb; text-shadow: 0 1px 8px rgba(0, 0, 0, .6); }
+.months span.now { background: rgba(255, 255, 255, .22); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
 </head>
 <body>
 <header class="sky">
-  <svg class="castle" viewBox="60 -18 280 188" aria-hidden="true" preserveAspectRatio="xMaxYMax meet">
-    <path d="M60 170C120 166 150 136 190 128S300 126 340 118V170Z"/>
-    <path d="M96 128V98h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v30Z"/>
-    <path d="M118 128V46h30v82Z"/><path d="M114 46l19-34 19 34Z"/>
-    <path d="M154 128V66h68v62Z"/><path d="M154 66v-8h8v8h7v-8h8v8h7v-8h8v8h7v-8h8v8h7v-8h8v8Z"/>
-    <path d="M174 66V30h28v36Z"/><path d="M170 30l18-30 18 30Z"/>
-    <path d="M228 128V54h26v74Z"/><path d="M224 54l17-28 17 28Z"/>
-    <path d="M188 0v-14l12 5-12 5" class="flag"/>
-    <path d="M133 12v-12l10 4-10 4" class="flag"/>
-    <path d="M241 26v-11l10 4-10 4" class="flag"/>
-    <path d="M180 128v-22a8 8 0 0 1 16 0v22Z" class="gate"/>
-    <g class="win"><rect x="129" y="62" width="6" height="10" rx="3"/><rect x="129" y="88" width="6" height="10" rx="3"/><rect x="185" y="40" width="6" height="10" rx="3"/><rect x="166" y="80" width="6" height="9" rx="3"/><rect x="206" y="80" width="6" height="9" rx="3"/><rect x="238" y="70" width="6" height="10" rx="3"/><rect x="238" y="96" width="6" height="10" rx="3"/></g>
-  </svg>
+  <div class="art" aria-hidden="true">
+    <img src="castelo-primavera.jpg" alt="" data-s="0" class="on">
+    <img src="castelo-verao.jpg" alt="" data-s="1">
+    <img src="castelo-outono.jpg" alt="" data-s="2">
+    <img src="castelo-inverno.jpg" alt="" data-s="3">
+    <i class="dim"></i>
+  </div>
   <div class="sky-in">
     <div class="brand">
       <div class="phase">Fase 1 · versão 12 meses</div>
@@ -664,9 +666,11 @@ body, .meter i, .go, .seg button, .fields .f.p i { transition: background-color 
     st.setProperty('--sky-a', c[0]); st.setProperty('--sky-b', c[1]); st.setProperty('--sky-ink', c[2]);
     const k = SEASON_SKIN[Math.floor((m || 0) / 3)] || SEASON_SKIN[0];
     st.setProperty('--bg', k.bg); st.setProperty('--bg-hi', k.hi); st.setProperty('--accent', k.a); st.setProperty('--accent-2', k.a2); st.setProperty('--accent-ink', k.ink);
-    const night = m >= 8;               // de novembro a fevereiro, anoitecendo
-    st.setProperty('--castle', night ? 'rgba(10, 12, 24, .78)' : 'rgba(28, 22, 30, .55)');
-    st.setProperty('--win', m >= 9 ? '1' : m === 8 ? '.6' : '0');
+    // Pintura da estação + leve escurecimento conforme o mês (o ano como um dia)
+    const season = Math.floor((m || 0) / 3);
+    document.querySelectorAll('.art img').forEach(img => img.classList.toggle('on', Number(img.dataset.s) === season));
+    const DIM = [0.12, 0, 0, 0, 0, 0.06, 0, 0.1, 0.32, 0, 0.08, 0.04];
+    st.setProperty('--dim', String(DIM[m] || 0));
   }
   function load() {
     try {
