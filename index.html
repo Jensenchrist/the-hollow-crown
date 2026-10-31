@@ -301,7 +301,7 @@ h2 { font-size: 22px; line-height: 1.15; }
 .offlbl.is-off { opacity: 1; color: var(--ink); }
 
 /* ===== Floresta e peixe em anéis ===== */
-.res { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; justify-items: center; }
+.res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; justify-items: center; }
 .gauge { margin: 0; position: relative; width: min(150px, 100%); display: grid; justify-items: center; gap: 8px; }
 .gauge .ring { width: 100%; height: auto; display: block; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, .35)); }
 .gauge .track { fill: rgba(255, 255, 255, .07); stroke: rgba(255, 255, 255, .1); stroke-width: 14; }
@@ -312,7 +312,7 @@ h2 { font-size: 22px; line-height: 1.15; }
   box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .15);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
 @supports not (aspect-ratio: 1 / 1) { .gauge .disc { height: 0; padding-bottom: 64%; } }
-.gauge .disc b { font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1; }
+.gauge .disc b { font-size: clamp(16px, 4.6vw, 22px); font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1; }
 .gauge .ico { width: 22px; height: 22px; fill: none; stroke: var(--accent); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .gauge figcaption { text-align: center; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -407,7 +407,12 @@ h2 { font-size: 22px; line-height: 1.15; }
           <figure class="gauge" id="g-fish" aria-label="Peixe no rio">
             <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="50"/><circle class="arc" id="fish" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/></svg>
             <div class="disc"><b id="fish-v"></b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c3-4.5 9-5.5 13-2l4-3v10l-4-3c-4 3.5-10 2.5-13-2z"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg></div>
-            <figcaption class="lbl">Peixe no rio</figcaption>
+            <figcaption class="lbl">Peixe</figcaption>
+          </figure>
+          <figure class="gauge" id="g-hunt" aria-label="Caça">
+            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="50"/><circle class="arc" id="hunt" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/></svg>
+            <div class="disc"><b id="hunt-v"></b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-2.4 0-4-1.9-4-4.6V13h8v3.4c0 2.7-1.6 4.6-4 4.6z"/><path d="M8 13c-2.6 0-4.6-2-4.6-4.8M5 9.6V5.5M3.4 7.2 5 8.6M16 13c2.6 0 4.6-2 4.6-4.8M19 9.6V5.5M20.6 7.2 19 8.6"/><path d="M10.3 17h.01M13.7 17h.01"/></svg></div>
+            <figcaption class="lbl">Caça</figcaption>
           </figure>
         </div>
       </section>
@@ -431,7 +436,8 @@ h2 { font-size: 22px; line-height: 1.15; }
   'use strict';
 
   const SEASONS = ['Primavera', 'Verão', 'Outono', 'Inverno'];
-  const TASKS = ['campos', 'gado', 'pesca', 'madeira'];
+  const TASKS = ['campos', 'gado', 'pesca', 'caca', 'madeira'];
+  const HUNT_YIELD = [1.8, 1.5, 2.6, 3.0];  // comida por caçador por estação (outono e inverno rendem mais)
   const RATIONS = [0.5, 1, 1.5];            // meia, normal, dupla
   const RATION_HAPPY = [-10, 0, 6];
   // Impostos de 0 a 100%: ouro por pessoa sobe em linha reta, a insatisfação sobe cada vez mais rápido
@@ -471,10 +477,10 @@ h2 { font-size: 22px; line-height: 1.15; }
       pop: 120, food: 260, herd: 20, gold: 60, wood: 30, happy: 55,
       fields: [90, 85, 80, 80, 75, 70, 65, 60, 55, 50],
       planted: [], lastPlanted: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], cropHealth: 1,
-      forest: 80, fish: 80,
+      forest: 80, fish: 80, hunt: 70,
       // Reservas minerais do condado: ainda não exploradas na Fase 1
       county: { name: 'Kent', stone: 6000, iron: 2500, coastKm: 18 },
-      alloc: { campos: 80, gado: 5, pesca: 15, madeira: 10 },
+      alloc: { campos: 80, gado: 5, pesca: 15, caca: 0, madeira: 10 },
       rations: 1, taxRate: 30,
       won: false, lost: false, lowHappyStreak: 0,
       history: []
@@ -499,7 +505,11 @@ h2 { font-size: 22px; line-height: 1.15; }
     TASKS.forEach(k => { s.alloc[k] = Math.max(0, Math.floor(s.alloc[k])); });
   }
 
+  // Jogos salvos antes da caça
+  function migrate(s) { if (s.alloc && s.alloc.caca == null) s.alloc.caca = 0; if (s.hunt == null) s.hunt = 70; return s; }
+
   function setAlloc(s, task, value) {
+    migrate(s);
     if (!TASKS.includes(task)) return s;
     const others = assigned(s) - s.alloc[task];
     s.alloc[task] = clamp(Math.floor(value), 0, s.pop - others);
@@ -587,6 +597,11 @@ h2 { font-size: 22px; line-height: 1.15; }
     foodIn += Math.round(a.pesca * FISH_YIELD[s.season] / 3 * s.fish / 100 * mult);
     s.fish = clamp(s.fish + (12 - a.pesca * 0.6) / 3, 0, 100);
 
+    // Caça: depende dos animais da floresta; a floresta sustenta a reprodução deles
+    const caca = a.caca || 0;
+    foodIn += Math.round(caca * HUNT_YIELD[s.season] / 3 * s.hunt / 100 * mult);
+    s.hunt = clamp(s.hunt + (8 * s.forest / 100 - caca * 0.7) / 3, 0, 100);
+
     // Madeira
     const woodIn = Math.round(a.madeira * WOOD_YIELD[s.season] / 3 * s.forest / 100 * mult);
     s.wood += woodIn;
@@ -652,7 +667,7 @@ h2 { font-size: 22px; line-height: 1.15; }
 
   // Uma estação inteira = 3 meses. Devolve também cada mês, para a interface mostrar passando.
   function step(input, rand) {
-    const s = clone(input);
+    const s = migrate(clone(input));
     if (s.lost) return { state: s, report: [], months: [] };
     if (s.month == null) s.month = s.season * 3;
     fitAlloc(s);
@@ -710,6 +725,7 @@ h2 { font-size: 22px; line-height: 1.15; }
     if (s.season === 3 && s.wood < winterNeed) warnings.push(`Faltará lenha: o inverno pede ${winterNeed}.`);
     if (s.season === 2 && next.wood < winterNeed) warnings.push(`Lenha curta para o inverno (precisa de ${winterNeed}).`);
     if (s.fish < 30) warnings.push('O rio está ficando sem peixe.');
+    if (s.hunt < 30) warnings.push('A caça está ficando escassa na floresta.');
     if (s.forest < 30) warnings.push('A floresta está rareando.');
     return {
       food: next.food, pop: next.pop, happy: next.happy, wood: next.wood, gold: next.gold,
@@ -720,7 +736,7 @@ h2 { font-size: 22px; line-height: 1.15; }
 
   const api = { SEASONS, MONTHS, TASKS, BUY_FOOD, BUY_COST, GOAL_POP, GOAL_HAPPY, WORKERS_PER_FIELD_PLANT,
     FEAST_GOLD, FEAST_FOOD, FEAST_HAPPY, taxRateOf, taxGoldPer, taxHappy,
-    rng, newGame, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
+    rng, newGame, migrate, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.HC = api;
 })(this);
@@ -765,7 +781,7 @@ h2 { font-size: 22px; line-height: 1.15; }
   function load() {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) { const d = JSON.parse(raw); if (d && d.game && d.game.fields && d.game.fields.length === 10) { game = d.game; log = d.log || []; return; } }
+      if (raw) { const d = JSON.parse(raw); if (d && d.game && d.game.fields && d.game.fields.length === 10) { game = H.migrate(d.game); log = d.log || []; return; } }
     } catch (e) {}
     fresh();
   }
@@ -778,6 +794,7 @@ h2 { font-size: 22px; line-height: 1.15; }
       : s.season === 2 ? (s.planted.length ? `${s.planted.length * 8} colhem tudo` : 'Nada para colher')
       : 'Inverno: a terra descansa' },
     gado: { name: 'Gado', hint: s => `${s.herd} cabeças · 1 pessoa cuida de 4 · dá leite e carne` },
+    caca: { name: 'Caça', hint: s => ['Primavera: caça moderada', 'Verão: animais espalhados, pouca caça', 'Outono: melhor época de caça', 'Inverno: caça rende bem, falta comida'][s.season] + ' · caçar demais esvazia a floresta' },
     pesca: { name: 'Pesca', hint: s => ['Primavera: boa pesca', 'Verão: pesca farta', 'Outono: a pesca cai', 'Inverno: rio frio, pouco peixe'][s.season] + ' · pescar demais esvazia o rio' },
     madeira: { name: 'Madeira', hint: s => `O inverno pede ${H.woodNeedWinter(s)} de lenha · cortar demais desmata` }
   };
@@ -847,6 +864,7 @@ h2 { font-size: 22px; line-height: 1.15; }
     campos: '<path d="M12 21V8"/><path d="M12 12c-2.5 0-4-1.6-4-4 2.5 0 4 1.6 4 4zM12 12c2.5 0 4-1.6 4-4-2.5 0-4 1.6-4 4zM12 16c-2.5 0-4-1.6-4-4 2.5 0 4 1.6 4 4zM12 16c2.5 0 4-1.6 4-4-2.5 0-4 1.6-4 4z"/><path d="M12 8c-1-1.2-1-3 0-5 1 2 1 3.8 0 5z"/>',
     floresta: '<path d="M12 3l5 7h-3l4 6H6l4-6H7z"/><path d="M12 16v5"/>',
     peixe: '<path d="M3 12c3-4.5 9-5.5 13-2l4-3v10l-4-3c-4 3.5-10 2.5-13-2z"/><circle cx="8" cy="11" r=".6" fill="currentColor"/>',
+    caca: '<path d="M12 21c-2.4 0-4-1.9-4-4.6V13h8v3.4c0 2.7-1.6 4.6-4 4.6z"/><path d="M8 13c-2.6 0-4.6-2-4.6-4.8M5 9.6V5.5M3.4 7.2 5 8.6M16 13c2.6 0 4.6-2 4.6-4.8M19 9.6V5.5M20.6 7.2 19 8.6"/><path d="M10.3 17h.01M13.7 17h.01"/>',
     gado: '<path d="M5 6c0 2 1.5 3 3 3M19 6c0 2-1.5 3-3 3"/><path d="M8 8h8l1 7c0 3-2.2 5-5 5s-5-2-5-5z"/><path d="M10 16.5h.01M14 16.5h.01"/><path d="M8 11h.01M16 11h.01"/>',
     pedra: '<path d="M4 18l2.5-7 5-4 5.5 2 3 9z"/><path d="M11.5 7l-1 5 4.5 2M10.5 12L6.5 11"/>',
     ferro: '<path d="M3 9h12c0 3-2 4-5 4v3h3v3H6v-3h3v-3C6 13 4 11.5 3 9z"/><path d="M15 9h5l-1 2h-4"/>',
@@ -869,6 +887,7 @@ h2 { font-size: 22px; line-height: 1.15; }
       ['campos', 'Terra fértil', `${s.fields.length} campos`, level(fert), `fertilidade ${fert}%`],
       ['floresta', 'Floresta', `${num(s.forest * 100)} árvores`, level(s.forest), 'de 10.000'],
       ['peixe', 'Peixe no rio', `${num(s.fish * 10)} peixes`, level(s.fish), 'de 1.000'],
+      ['caca', 'Caça', `${num((s.hunt == null ? 70 : s.hunt) * 3)} animais`, level(s.hunt == null ? 70 : s.hunt), 'cervos e javalis, de 300'],
       ['gado', 'Gado', `${s.herd} cabeças`, level(s.herd / 80 * 100), 'pasto para 80'],
       ['pedra', 'Pedra', `${num(c.stone)} carroças`, level(c.stone / 100), 'calcário', true],
       ['ferro', 'Ferro', `${num(c.iron)} cargas`, level(c.iron / 100), 'minério na mata do sul', true],
@@ -947,7 +966,7 @@ h2 { font-size: 22px; line-height: 1.15; }
     $('fields').innerHTML = s.fields.map((v, i) => `<div class="f${s.planted.includes(i) ? ' p' : ''}" title="Campo ${i + 1}: fertilidade ${v}%"><span class="ear" style="height:${Math.max(18, v)}%"><svg viewBox="0 0 40 100" aria-hidden="true"><path class="st" d="M20 100V22"/><path d="M20 6c5 6 5 14 0 20-5-6-5-14 0-20z"/><path d="M19 34C11 33 6 27 5 19c8 1 13 6 14 15zM21 34c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 50C11 49 6 43 5 35c8 1 13 6 14 15zM21 50c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 66C11 65 6 59 5 51c8 1 13 6 14 15zM21 66c8-1 13-7 14-15-8 1-13 6-14 15z"/></svg></span><b>${v}</b></div>`).join('');
     $('land-sub').textContent = s.planted.length ? `${s.planted.length} campos plantados neste ano. Plantar todo ano cansa a terra; os campos em descanso se recuperam.`
       : 'Plantar todo ano cansa a terra; campos em descanso se recuperam. Na primavera, os mais férteis são plantados primeiro.';
-    [['forest', s.forest], ['fish', s.fish]].forEach(([k, v]) => {
+    [['forest', s.forest], ['fish', s.fish], ['hunt', s.hunt == null ? 70 : s.hunt]].forEach(([k, v]) => {
       const p = Math.max(0, Math.min(100, Math.round(v)));
       $(k).setAttribute('stroke-dasharray', p + ' 100');
       $(k + '-v').textContent = p + '%';
@@ -1107,7 +1126,7 @@ h2 { font-size: 22px; line-height: 1.15; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031205337';
+  var BUILD = '20261031205812';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
