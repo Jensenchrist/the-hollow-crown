@@ -266,6 +266,17 @@ h2 { font-size: 22px; line-height: 1.15; }
 .snd .x { display: none; }
 .snd[aria-pressed="false"] .w1, .snd[aria-pressed="false"] .w2 { display: none; }
 .snd[aria-pressed="false"] .x { display: inline; }
+
+/* ===== Campos como espigas de trigo: altura = fertilidade ===== */
+.fields { height: 112px; gap: 2px; align-items: end; }
+.fields .f { background: none !important; border-radius: 0; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; }
+.fields .f .ear { display: flex; align-items: flex-end; justify-content: center; width: 100%; transition: height .6s ease; }
+.fields .f svg { height: 100%; width: auto; max-width: 100%; fill: #b9a463; overflow: visible; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .25)); }
+.fields .f svg .st { fill: none; stroke: #b9a463; stroke-width: 2.4; stroke-linecap: round; }
+.fields .f.p svg { fill: #e6c063; }
+.fields .f.p svg .st { stroke: #e6c063; }
+.fields .f:not(.p) svg { opacity: .55; }
+.fields .f b { font-size: 11px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -342,7 +353,7 @@ h2 { font-size: 22px; line-height: 1.15; }
         <h2 id="h-land">A terra</h2>
         <p class="sub" id="land-sub"></p>
         <div class="fields" id="fields" aria-label="Fertilidade dos 10 campos"></div>
-        <div class="legend"><span style="--c: var(--accent)">plantado</span><span style="--c: #b9a35a">em descanso</span><span>altura = fertilidade</span></div>
+        <div class="legend"><span style="--c: #e6c063">plantado</span><span style="--c: rgba(185, 164, 99, .55)">em descanso</span><span>altura da espiga = fertilidade (%)</span></div>
         <div class="res">
           <div><div class="lbl">Floresta <em id="forest-v"></em></div><div class="meter"><i id="forest"></i></div></div>
           <div><div class="lbl">Peixe no rio <em id="fish-v"></em></div><div class="meter"><i id="fish"></i></div></div>
@@ -873,7 +884,7 @@ h2 { font-size: 22px; line-height: 1.15; }
     $('go').disabled = s.lost && !playing;
     $('go').classList.toggle('skip', playing);
 
-    $('fields').innerHTML = s.fields.map((v, i) => `<div class="f${s.planted.includes(i) ? ' p' : ''}" title="Campo ${i + 1}: fertilidade ${v}"><i style="height:${v}%"></i></div>`).join('');
+    $('fields').innerHTML = s.fields.map((v, i) => `<div class="f${s.planted.includes(i) ? ' p' : ''}" title="Campo ${i + 1}: fertilidade ${v}%"><span class="ear" style="height:${Math.max(18, v)}%"><svg viewBox="0 0 40 100" aria-hidden="true"><path class="st" d="M20 100V22"/><path d="M20 6c5 6 5 14 0 20-5-6-5-14 0-20z"/><path d="M19 34C11 33 6 27 5 19c8 1 13 6 14 15zM21 34c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 50C11 49 6 43 5 35c8 1 13 6 14 15zM21 50c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 66C11 65 6 59 5 51c8 1 13 6 14 15zM21 66c8-1 13-7 14-15-8 1-13 6-14 15z"/></svg></span><b>${v}</b></div>`).join('');
     $('land-sub').textContent = s.planted.length ? `${s.planted.length} campos plantados neste ano. Plantar todo ano cansa a terra; os campos em descanso se recuperam.`
       : 'Plantar todo ano cansa a terra; campos em descanso se recuperam. Na primavera, os mais férteis são plantados primeiro.';
     $('forest').style.width = s.forest + '%'; $('forest-v').textContent = Math.round(s.forest) + '%';
@@ -1021,7 +1032,7 @@ h2 { font-size: 22px; line-height: 1.15; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031201159';
+  var BUILD = '20261031201918';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
