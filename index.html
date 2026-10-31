@@ -256,6 +256,16 @@ h2 { font-size: 22px; line-height: 1.15; }
 
 /* Nome do jogo em Uncial Antiqua, caixa alta */
 .sky h1 { font-family: var(--heading); font-weight: 400; text-transform: uppercase; font-size: clamp(30px, 8.6vw, 54px); line-height: 1; letter-spacing: .02em; }
+
+/* ===== Botão de música ===== */
+.snd { position: absolute; top: 14px; right: 14px; z-index: 2; width: 42px; height: 42px; min-height: 42px; padding: 0; border-radius: 50%;
+  background: rgba(10, 8, 6, .35); border: 1px solid rgba(255, 255, 255, .25); color: #fbf3e4; display: grid; place-items: center;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+.snd svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.snd svg path:first-child { fill: currentColor; }
+.snd .x { display: none; }
+.snd[aria-pressed="false"] .w1, .snd[aria-pressed="false"] .w2 { display: none; }
+.snd[aria-pressed="false"] .x { display: inline; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -269,6 +279,9 @@ h2 { font-size: 22px; line-height: 1.15; }
     <img src="castelo-inverno.jpg" alt="" data-s="3">
     <i class="dim"></i>
   </div>
+  <button type="button" class="snd" id="snd" aria-pressed="true" aria-label="Música">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6L8 10z"/><path class="w1" d="M16 9.5c1 .8 1.5 1.6 1.5 2.5s-.5 1.7-1.5 2.5"/><path class="w2" d="M18.5 7c1.7 1.4 2.5 3 2.5 5s-.8 3.6-2.5 5"/><path class="x" d="M17 9.5l5 5M22 9.5l-5 5"/></svg>
+  </button>
   <div class="sky-in">
     <div class="brand">
       <div class="phase">Fase 1 · versão 12 meses</div>
@@ -806,6 +819,7 @@ h2 { font-size: 22px; line-height: 1.15; }
   function render(view, liveMonth) {
     const s = view || game;
     const lock = s.lost || playing;
+    if (typeof syncMusic === 'function') { try { syncMusic(); } catch (e) {} }
     renderReserves(s);
     const first = (playing && seasonStart ? seasonStart.season : s.season) * 3;
     const shownMonth = playing ? liveMonth : first;
@@ -932,6 +946,64 @@ h2 { font-size: 22px; line-height: 1.15; }
   }
   function restoreReset() { $('reset-area').innerHTML = '<button type="button" id="reset">Recomeçar</button>'; bindReset(); }
 
+
+  // ===== Música: uma faixa por estação, tema no começo e no fim; troca com fade =====
+  const MUSIC = { tema: 'musica-tema.mp3', s: ['musica-primavera.mp3', 'musica-verao.mp3', 'musica-outono.mp3', 'musica-inverno.mp3'] };
+  const VOL = 0.8, FADE = 2.5;
+  let ac = null, current = null, soundOn = true;
+  const tracks = {};
+  try { soundOn = localStorage.getItem('hollow-som') !== 'off'; } catch (e) {}
+  function ensureAudio() {
+    if (!ac) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) { try { ac = new AC(); } catch (e) { ac = null; } } }
+    if (ac && ac.state === 'suspended') { try { ac.resume(); } catch (e) {} }
+  }
+  function track(src) {
+    if (tracks[src]) return tracks[src];
+    const a = new Audio(src); a.loop = true; a.preload = 'auto';
+    const t = { src, a, g: null };
+    if (ac) { try { const n = ac.createMediaElementSource(a); t.g = ac.createGain(); t.g.gain.value = 0; n.connect(t.g); t.g.connect(ac.destination); } catch (e) { t.g = null; } }
+    return (tracks[src] = t);
+  }
+  function ramp(t, to, done) {
+    if (t.g && ac) {
+      const now = ac.currentTime, g = t.g.gain;
+      g.cancelScheduledValues(now); g.setValueAtTime(g.value, now); g.linearRampToValueAtTime(to, now + FADE);
+      if (done) setTimeout(done, FADE * 1000 + 100);
+    } else { t.a.volume = to; if (done) done(); }
+  }
+  function wantedMusic() {
+    if (game.lost || game.won && !playing) return MUSIC.tema;
+    if (!playing && !(game.turn > 0)) return MUSIC.tema;
+    const season = playing && seasonStart ? seasonStart.season : game.season;
+    return MUSIC.s[season];
+  }
+  function syncMusic() {
+    if (!soundOn || !ac) return;
+    const src = wantedMusic();
+    if (current && current.src === src) { if (current.a.paused) { const p = current.a.play(); if (p && p.catch) p.catch(() => {}); } return; }
+    const old = current, next = track(src);
+    const p = next.a.play(); if (p && p.catch) p.catch(() => {});
+    ramp(next, VOL);
+    if (old) ramp(old, 0, () => { if (current !== old) old.a.pause(); });
+    current = next;
+  }
+  function stopMusic() { if (current) { const c = current; ramp(c, 0, () => { if (!soundOn) c.a.pause(); }); current = null; } }
+  function setSound(on) {
+    soundOn = on;
+    try { localStorage.setItem('hollow-som', on ? 'on' : 'off'); } catch (e) {}
+    $('snd').setAttribute('aria-pressed', String(on));
+    $('snd').setAttribute('aria-label', on ? 'Desligar música' : 'Ligar música');
+    if (on) { ensureAudio(); syncMusic(); } else stopMusic();
+  }
+  $('snd').addEventListener('click', () => setSound(!soundOn));
+  // iPhone/iPad: o som só pode começar depois do primeiro toque
+  function unlock() { if (soundOn) { ensureAudio(); syncMusic(); } }
+  ['pointerdown', 'touchend', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { passive: true }));
+  document.addEventListener('visibilitychange', () => {
+    if (!ac) return;
+    try { if (document.visibilityState === 'hidden') ac.suspend(); else if (soundOn) ac.resume(); } catch (e) {}
+  });
+
   load();
   buildTasks();
   seg('rations', ['Meia', 'Normal', 'Dupla'], 'rations');
@@ -940,6 +1012,8 @@ h2 { font-size: 22px; line-height: 1.15; }
   hold($('tax-m'), () => setTax(H.taxRateOf(game) - 1));
   hold($('tax-p'), () => setTax(H.taxRateOf(game) + 1));
   bindReset();
+  $('snd').setAttribute('aria-pressed', String(soundOn));
+  $('snd').setAttribute('aria-label', soundOn ? 'Desligar música' : 'Ligar música');
   render(); renderLog();
 })();
 </script>
@@ -947,7 +1021,7 @@ h2 { font-size: 22px; line-height: 1.15; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031195927';
+  var BUILD = '20261031201159';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
