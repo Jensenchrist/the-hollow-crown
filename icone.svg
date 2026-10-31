@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <radialGradient id="fundo" cx="50%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#3a5243"/>
+      <stop offset="0.55" stop-color="#1f2f25"/>
+      <stop offset="1" stop-color="#121c16"/>
+    </radialGradient>
+    <linearGradient id="ouro" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7e3a3"/>
+      <stop offset="0.45" stop-color="#e2b65c"/>
+      <stop offset="1" stop-color="#a8762c"/>
+    </linearGradient>
+    <linearGradient id="ouroEscuro" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c9963f"/>
+      <stop offset="1" stop-color="#7d5220"/>
+    </linearGradient>
+    <radialGradient id="brilho" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#f7e3a3" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#f7e3a3" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#fundo)"/>
+  <circle cx="512" cy="520" r="360" fill="url(#brilho)"/>
+
+  <g transform="translate(512 500) scale(1.2) translate(-512 -500)">
+  <!-- Coroa vazia: só o aro e as pontas, oca por dentro -->
+  <g stroke="#3b2a12" stroke-width="10" stroke-linejoin="round">
+    <!-- parte de trás do aro (vista pelo vazio da coroa) -->
+    <path d="M262 585 C330 545 694 545 762 585 L762 612 C694 575 330 575 262 612 Z" fill="url(#ouroEscuro)"/>
+    <!-- pontas -->
+    <path d="M262 640 L232 360 L372 478 L512 300 L652 478 L792 360 L762 640 C690 600 334 600 262 640 Z" fill="url(#ouro)"/>
+    <!-- recorte oco: o interior vazio da coroa -->
+    <path d="M300 612 L284 452 L376 532 L512 380 L648 532 L740 452 L724 612 C650 582 374 582 300 612 Z" fill="#1a2820"/>
+    <!-- aro da frente -->
+    <path d="M250 640 C336 596 688 596 774 640 L774 712 C688 668 336 668 250 712 Z" fill="url(#ouro)"/>
+  </g>
+  <!-- pedras do aro -->
+  <g stroke="#3b2a12" stroke-width="7">
+    <ellipse cx="512" cy="652" rx="26" ry="20" fill="#7a1f24"/>
+    <ellipse cx="376" cy="662" rx="17" ry="14" fill="#2f5a3c"/>
+    <ellipse cx="648" cy="662" rx="17" ry="14" fill="#2f5a3c"/>
+  </g>
+  <!-- pérolas nas pontas -->
+  <g fill="#fbf3dc" stroke="#3b2a12" stroke-width="7">
+    <circle cx="232" cy="352" r="20"/>
+    <circle cx="512" cy="290" r="24"/>
+    <circle cx="792" cy="352" r="20"/>
+  </g>
+  <!-- reflexos -->
+  <path d="M276 632 C360 600 664 600 748 632" fill="none" stroke="#fff6d6" stroke-opacity=".55" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>

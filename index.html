@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hollow Crown">
+<meta name="theme-color" content="#17221c">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); } body { margin: 0; } [hidden] { display: none !important; } img { max-width: 100%; }</style>
+<title>The Hollow Crown · 12 meses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@600;700&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+/* Layout: um livro-caixa do condado — barra do céu (a estação como hora do dia) no topo, painel de decisões, previsão e crônica */
+:root {
+  /* Visual único, escuro: verde-musgo com cartões de vidro, como uma floresta inglesa à noite */
+  --bg: #17221c;
+  --bg-hi: #2a3a30;
+  --surface: rgba(255, 255, 255, .06);
+  --glass: rgba(255, 255, 255, .075);
+  --glass-hi: rgba(255, 255, 255, .11);
+  --ink: #eef2ea;
+  --muted: #a7b6aa;
+  --line: rgba(255, 255, 255, .11);
+  --accent: #c8d8b2;        /* sálvia clara */
+  --accent-2: #a9bc8f;
+  --accent-ink: #1b281f;
+  --good: #a3d69c;
+  --warn: #ecbd6e;
+  --bad: #f2917f;
+  --bar: rgba(255, 255, 255, .10);
+  --display: 'IM Fell English SC', 'Iowan Old Style', Georgia, serif;
+  --body: 'Alegreya Sans', 'Segoe UI', system-ui, sans-serif;
+  --title: 'Grenze Gotisch', 'UnifrakturMaguntia', 'IM Fell English SC', Georgia, serif;
+  --text: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
+  --castle: rgba(28, 22, 30, .58); --win: 0;
+  --sky-a: #f2b8a6; --sky-b: #f7e2c8; --sky-ink: #3a2522;
+  color-scheme: dark;
+}
+/* Céu por estação (o ano como um dia) */
+body.s0 { --sky-a: #e9a99a; --sky-b: #f6dcc6; --sky-ink: #3a2522; }   /* amanhecer */
+body.s1 { --sky-a: #7fb9de; --sky-b: #d7ecf6; --sky-ink: #12304a; }   /* sol a pino */
+body.s2 { --sky-a: #d98b3a; --sky-b: #f3cf8a; --sky-ink: #3b2408; }   /* fim de tarde */
+body.s3 { --sky-a: #1f2b4a; --sky-b: #4c5f8c; --sky-ink: #eef2ff; }   /* noite de lua */
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 32px;
+}
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 16px; }
+.sky {
+  background: linear-gradient(180deg, var(--sky-a), var(--sky-b));
+  color: var(--sky-ink); transition: background .8s ease;
+}
+.sky-in { max-width: 980px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 8px 16px; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(28px, 6vw, 40px); margin: 0; line-height: 1; letter-spacing: .01em; text-wrap: balance; }
+.when { font-size: 15px; font-weight: 500; }
+.months { display: flex; gap: 6px; justify-content: flex-end; margin-top: 4px; font-size: 13px; }
+.months span { opacity: .55; padding: 1px 7px; border-radius: 999px; transition: opacity .3s, background .3s; }
+.months span.now { opacity: 1; font-weight: 700; background: rgba(255, 255, 255, .35); }
+.months span.done { opacity: .85; }
+.go.skip { background: linear-gradient(90deg, var(--sky-a), var(--sky-b)); color: var(--sky-ink); border-color: transparent; transition: background .8s ease; }
+.when b { font-family: var(--display); font-weight: 400; font-size: 20px; }
+.phase { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; opacity: .8; }
+
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 720px) { .stats { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.stat .k { font-size: 12px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.stat .v { display: flex; justify-content: space-between; align-items: center; gap: 4px; }
+.stat .v svg { flex: none; width: 24px; height: 24px; color: var(--muted); stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.stat .v { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stat .s { font-size: 12.5px; color: var(--muted); }
+.meter { height: 6px; background: var(--bar); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+.meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; transition: width .4s; }
+
+.cols { display: grid; gap: 16px; }
+@media (min-width: 820px) { .cols { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; } }
+.col { display: grid; gap: 16px; min-width: 0; }
+section.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
+h2 { font-family: var(--display); font-weight: 400; font-size: 22px; margin: 0 0 4px; }
+.sub { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+
+.task { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.task:first-of-type { border-top: 0; }
+.task .name { font-weight: 700; }
+.task .hint { grid-column: 1 / -1; font-size: 13px; color: var(--muted); }
+.stepper { display: flex; align-items: center; gap: 4px; }
+.stepper output { min-width: 3ch; text-align: center; font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+button {
+  font: inherit; color: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); padding: 6px 10px; min-height: 40px;
+}
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.stepper button { width: 44px; padding: 0; font-size: 20px; font-weight: 700; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.idle { display: flex; justify-content: space-between; margin-top: 10px; padding: 10px 12px; background: var(--bg); border-radius: 8px; font-size: 15px; }
+.idle b { font-variant-numeric: tabular-nums; }
+
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 6px 0 12px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+.lbl { font-size: 13px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.lbl em { font-style: normal; text-transform: none; letter-spacing: 0; }
+.taxhead { display: flex; justify-content: space-between; align-items: baseline; }
+.taxhead b { font-size: 20px; font-variant-numeric: tabular-nums; }
+.taxrow { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; gap: 8px; align-items: center; margin: 4px 0 2px; }
+.taxrow button { padding: 0; font-size: 20px; font-weight: 700; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+input[type=range] { width: 100%; accent-color: var(--accent); height: 32px; margin: 0; }
+.taxinfo { margin: 0 0 12px; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.acts button { text-align: left; padding: 8px 10px; }
+.acts small { display: block; color: var(--muted); font-size: 12.5px; }
+
+.fc { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+.fc > div { background: var(--bg); border-radius: 8px; padding: 8px 10px; }
+.fc .k { font-size: 12px; color: var(--muted); }
+.fc .v { font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; }
+.up { color: var(--good); } .down { color: var(--bad); }
+ul.notes { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+ul.notes li { padding: 6px 10px; border-radius: 6px; font-size: 14.5px; border-left: 3px solid var(--line); background: var(--bg); }
+li.warn { border-left-color: var(--warn); } li.bad { border-left-color: var(--bad); } li.good { border-left-color: var(--good); }
+li.event { border-left-color: var(--accent); font-weight: 500; } li.sum { color: var(--muted); }
+.ok { color: var(--muted); font-size: 14px; }
+
+.go { width: 100%; min-height: 56px; font-size: 18px; font-weight: 700; background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+
+.fields { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 4px; align-items: end; height: 72px; margin: 8px 0 4px; }
+.fields .f { background: var(--bar); border-radius: 4px 4px 2px 2px; position: relative; height: 100%; display: flex; align-items: end; }
+.fields .f i { display: block; width: 100%; border-radius: 4px 4px 2px 2px; background: #b9a35a; transition: height .5s; }
+.fields .f.p i { background: var(--accent); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+.reserves { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 619px) { .rv:last-child:nth-child(odd) { grid-column: 1 / -1; } }
+@media (min-width: 620px) { .reserves { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+.rv { display: flex; flex-direction: column; gap: 2px; background: var(--bg); border-radius: 10px; padding: 10px; min-width: 0; }
+.rv .hd { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.rv svg { flex: none; width: 30px; height: 30px; padding: 5px; border-radius: 8px; background: var(--surface); color: var(--ink); stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.rv .n { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; line-height: 1.2; }
+.rv .qty { font-size: 17px; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.rv .n { color: var(--muted); }
+.rv .q { font-size: 13px; line-height: 1.25; color: var(--muted); }
+.rv .q b { font-weight: 700; }
+.lv-hi b { color: var(--good); } .lv-mid b { color: var(--ink); } .lv-lo b { color: var(--warn); } .lv-out b { color: var(--bad); }
+.rv.later { opacity: .8; }
+.rv.later .q::after { content: " · não explorada"; }
+.res { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+.res .lbl { margin-bottom: 2px; }
+
+.log { max-height: 340px; overflow-y: auto; display: grid; gap: 12px; }
+.log h3 { font-family: var(--display); font-weight: 400; font-size: 17px; margin: 0 0 4px; }
+.banner { border-radius: 12px; padding: 14px 16px; font-weight: 500; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+.banner.win { background: var(--surface); box-shadow: inset 0 0 0 999px rgba(47, 122, 74, .14); border: 1px solid var(--good); }
+.banner.lose { background: var(--surface); box-shadow: inset 0 0 0 999px rgba(176, 58, 46, .14); border: 1px solid var(--bad); }
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 13px; }
+.foot button { min-height: 34px; font-size: 13px; }
+.confirm { display: flex; gap: 8px; align-items: center; }
+
+/* ===== Pele de vidro ===== */
+body { background-color: var(--bg); background-image: radial-gradient(120% 60% at 50% -10%, var(--bg-hi), var(--bg) 70%); background-attachment: fixed; }
+.sky {
+  margin: 12px auto 0; max-width: 980px; border-radius: 26px; padding: 22px 20px 18px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .18);
+  position: relative; overflow: hidden;
+}
+.sky::after { content: ""; position: absolute; inset: 0; background: radial-gradient(80% 120% at 85% 0%, rgba(255, 255, 255, .28), transparent 60%); pointer-events: none; }
+.sky-in { position: relative; z-index: 1; }
+h1 { font-size: clamp(32px, 7vw, 46px); }
+.months span.now { background: rgba(255, 255, 255, .45); }
+.stat, section.card {
+  background: linear-gradient(180deg, var(--glass-hi), var(--glass));
+  border: 1px solid var(--line);
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .22);
+}
+.stat { border-radius: 18px; padding: 12px 14px; }
+section.card { border-radius: 24px; padding: 20px; }
+h2 { font-size: 24px; }
+.stat .v svg, .rv svg { color: var(--accent); }
+.rv svg { background: rgba(255, 255, 255, .08); border-radius: 12px; width: 34px; height: 34px; padding: 6px; }
+.rv, .fc > div, .idle, ul.notes li { background: rgba(255, 255, 255, .05); }
+.rv { border-radius: 16px; padding: 12px; border: 1px solid rgba(255, 255, 255, .06); }
+.fc > div { border-radius: 14px; padding: 10px 12px; }
+.idle { border-radius: 14px; }
+ul.notes li { border-radius: 10px; }
+button {
+  border-radius: 999px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .13); color: var(--ink);
+}
+button:hover:not(:disabled) { border-color: var(--accent); background: rgba(255, 255, 255, .11); }
+.stepper button, .taxrow button { width: 42px; height: 42px; min-height: 42px; border-radius: 50%; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.acts button { border-radius: 18px; padding: 10px 14px; }
+.go {
+  border-radius: 999px; min-height: 58px; border: 0;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2)); color: var(--accent-ink);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .3), inset 0 1px 0 rgba(255, 255, 255, .5);
+}
+.go.skip { border: 0; box-shadow: 0 10px 26px rgba(0, 0, 0, .3), inset 0 0 0 1px rgba(255, 255, 255, .25); }
+.meter, .fields .f { background: rgba(255, 255, 255, .09); }
+.meter i { background: linear-gradient(90deg, var(--accent-2), var(--accent)); }
+.fields .f { border-radius: 8px 8px 4px 4px; }
+.fields .f i { border-radius: 8px 8px 4px 4px; background: #c9a85a; }
+.fields .f.p i { background: linear-gradient(180deg, var(--accent), var(--accent-2)); }
+.banner { border-radius: 20px; }
+.banner.win { background: rgba(163, 214, 156, .14); box-shadow: none; }
+.banner.lose { background: rgba(242, 145, 127, .14); box-shadow: none; }
+.wrap { padding-top: 4px; }
+
+/* ===== Cartão do topo com castelo ===== */
+.sky { min-height: 250px; display: flex; align-items: stretch; }
+.sky-in { width: 100%; flex-direction: column; justify-content: space-between; align-items: flex-start; }
+.brand { max-width: 72%; }
+h1 { font-family: var(--title); font-weight: 700; font-size: clamp(40px, 11vw, 64px); line-height: .9; letter-spacing: 0; margin-top: 4px; text-shadow: 0 2px 14px rgba(0, 0, 0, .18); }
+.when { text-align: left; position: relative; text-shadow: 0 1px 8px rgba(255, 255, 255, .25); }
+.months { justify-content: flex-start; gap: 2px; max-width: 56%; flex-wrap: wrap; }
+.months span { padding: 1px 6px; }
+.castle { position: absolute; right: -4px; bottom: 0; width: min(46%, 380px); height: auto; z-index: 0; fill: var(--castle); transition: fill .8s ease; }
+.castle .flag { fill: var(--accent); }
+.castle .gate { fill: rgba(0, 0, 0, .35); }
+.castle .win rect { fill: #ffd27a; opacity: var(--win); transition: opacity .8s ease; filter: drop-shadow(0 0 3px rgba(255, 200, 100, .9)); }
+@media (min-width: 720px) { .sky { min-height: 260px; } .castle { width: 40%; } }
+/* ===== Textos corridos em tipo de livro antigo ===== */
+.sub, .task .hint, ul.notes li, .ok, .taxinfo, .foot, .acts small, .rv .q, #land-sub { font-family: var(--text); }
+.sub, ul.notes li { font-size: 15.5px; line-height: 1.4; }
+.task .hint { font-size: 14px; }
+.log h3 { font-size: 18px; }
+/* Transição das cores da estação */
+body, .meter i, .go, .seg button, .fields .f.p i { transition: background-color .8s ease, color .8s ease; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+</head>
+<body>
+<header class="sky">
+  <svg class="castle" viewBox="60 -18 280 188" aria-hidden="true" preserveAspectRatio="xMaxYMax meet">
+    <path d="M60 170C120 166 150 136 190 128S300 126 340 118V170Z"/>
+    <path d="M96 128V98h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v-7h7v7h8v30Z"/>
+    <path d="M118 128V46h30v82Z"/><path d="M114 46l19-34 19 34Z"/>
+    <path d="M154 128V66h68v62Z"/><path d="M154 66v-8h8v8h7v-8h8v8h7v-8h8v8h7v-8h8v8h7v-8h8v8Z"/>
+    <path d="M174 66V30h28v36Z"/><path d="M170 30l18-30 18 30Z"/>
+    <path d="M228 128V54h26v74Z"/><path d="M224 54l17-28 17 28Z"/>
+    <path d="M188 0v-14l12 5-12 5" class="flag"/>
+    <path d="M133 12v-12l10 4-10 4" class="flag"/>
+    <path d="M241 26v-11l10 4-10 4" class="flag"/>
+    <path d="M180 128v-22a8 8 0 0 1 16 0v22Z" class="gate"/>
+    <g class="win"><rect x="129" y="62" width="6" height="10" rx="3"/><rect x="129" y="88" width="6" height="10" rx="3"/><rect x="185" y="40" width="6" height="10" rx="3"/><rect x="166" y="80" width="6" height="9" rx="3"/><rect x="206" y="80" width="6" height="9" rx="3"/><rect x="238" y="70" width="6" height="10" rx="3"/><rect x="238" y="96" width="6" height="10" rx="3"/></g>
+  </svg>
+  <div class="sky-in">
+    <div class="brand">
+      <div class="phase">Fase 1 · versão 12 meses</div>
+      <h1>The Hollow Crown</h1>
+    </div>
+    <div class="when" id="when"></div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="banner"></div>
+  <div class="stats" id="stats"></div>
+
+  <section class="card" aria-labelledby="h-res">
+    <h2 id="h-res">Reservas de Kent</h2>
+    <p class="sub">O que a terra oferece. Em outros condados, essas reservas serão diferentes.</p>
+    <div class="reserves" id="reserves"></div>
+  </section>
+
+  <div class="cols">
+    <div class="col">
+      <section class="card" aria-labelledby="h-tasks">
+        <h2 id="h-tasks">Obrigações</h2>
+        <p class="sub">Distribua o povo de Kent entre as tarefas desta estação. Toque para mudar de 1 em 1; segure para ir mais rápido.</p>
+        <div id="tasks"></div>
+        <div class="idle"><span>Sem tarefa (descansando)</span><b id="idle"></b></div>
+      </section>
+
+      <section class="card" aria-labelledby="h-decrees">
+        <h2 id="h-decrees">Decretos</h2>
+        <div class="lbl" id="l-rations">Rações</div>
+        <div class="seg" role="group" aria-labelledby="l-rations" id="rations"></div>
+        <div class="taxhead"><label class="lbl" for="tax" id="l-taxes">Impostos</label><b id="tax-v"></b></div>
+        <div class="taxrow">
+          <button type="button" id="tax-m" aria-label="Menos 1% de imposto">−</button>
+          <input type="range" id="tax" min="0" max="100" step="1" aria-labelledby="l-taxes">
+          <button type="button" id="tax-p" aria-label="Mais 1% de imposto">+</button>
+        </div>
+        <p class="taxinfo" id="tax-info"></p>
+        <div class="acts">
+          <button id="buy" type="button">Comprar comida<small id="buy-s"></small></button>
+          <button id="feast" type="button">Dar uma festa<small id="feast-s"></small></button>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card" aria-labelledby="h-fc">
+        <h2 id="h-fc">Previsão para o fim da estação</h2>
+        <p class="sub">Estimativa sem imprevistos. Muda conforme você decide.</p>
+        <div class="fc" id="fc"></div>
+        <ul class="notes" id="warn"></ul>
+      </section>
+
+      <button class="go" id="go" type="button"></button>
+
+      <section class="card" aria-labelledby="h-land">
+        <h2 id="h-land">A terra</h2>
+        <p class="sub" id="land-sub"></p>
+        <div class="fields" id="fields" aria-label="Fertilidade dos 10 campos"></div>
+        <div class="legend"><span style="--c: var(--accent)">plantado</span><span style="--c: #b9a35a">em descanso</span><span>altura = fertilidade</span></div>
+        <div class="res">
+          <div><div class="lbl">Floresta <em id="forest-v"></em></div><div class="meter"><i id="forest"></i></div></div>
+          <div><div class="lbl">Peixe no rio <em id="fish-v"></em></div><div class="meter"><i id="fish"></i></div></div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="h-log">
+        <h2 id="h-log">Crônica</h2>
+        <div class="log" id="log"><p class="ok">A crônica de Kent começa em março.</p></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span id="goal"></span>
+    <span class="confirm" id="reset-area"><button type="button" id="reset">Recomeçar</button></span>
+  </div>
+</main>
+
+<script>
+// The Hollow Crown — Fase 1, versão 12 meses: simulação de um condado (sem interface)
+(function (root) {
+  'use strict';
+
+  const SEASONS = ['Primavera', 'Verão', 'Outono', 'Inverno'];
+  const TASKS = ['campos', 'gado', 'pesca', 'madeira'];
+  const RATIONS = [0.5, 1, 1.5];            // meia, normal, dupla
+  const RATION_HAPPY = [-10, 0, 6];
+  // Impostos de 0 a 100%: ouro por pessoa sobe em linha reta, a insatisfação sobe cada vez mais rápido
+  const TAX_GOLD_MAX = 0.8;                  // ouro por pessoa por estação a 100%
+  const taxRateOf = s => clamp(Math.round(s.taxRate != null ? s.taxRate : [10, 30, 50][s.taxes != null ? s.taxes : 1]), 0, 100);
+  const taxGoldPer = rate => TAX_GOLD_MAX * rate / 100;
+  const taxHappy = rate => { const r = rate / 100; return Math.round(4 - 2 * r - 40 * r * r); };
+  const FISH_YIELD = [2.5, 3, 2, 0.6];
+  const WOOD_YIELD = [2, 2, 2, 1];
+  const WORKERS_PER_FIELD_PLANT = 10;
+  const WORKERS_PER_FIELD_TEND = 6;
+  const WORKERS_PER_FIELD_HARVEST = 8;
+  const FIELD_YIELD = 60;
+  const COWS_PER_WORKER = 4;
+  const HERD_MAX = 80;
+  const BUY_FOOD = 50, BUY_COST = 40;
+  const GOAL_POP = 250, GOAL_HAPPY = 50, LOSE_POP = 15;
+
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const r1 = v => Math.round(v * 10) / 10;
+
+  function rng(seed) {
+    let s = seed >>> 0 || 1;
+    return function () {
+      s = (s + 0x6D2B79F5) >>> 0;
+      let t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function newGame(seed) {
+    return {
+      seed: seed || 1, rngCalls: 0,
+      year: 1, season: 0, month: 0, popFrac: 0,
+      pop: 120, food: 260, herd: 20, gold: 60, wood: 30, happy: 55,
+      fields: [90, 85, 80, 80, 75, 70, 65, 60, 55, 50],
+      planted: [], lastPlanted: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], cropHealth: 1,
+      forest: 80, fish: 80,
+      // Reservas minerais do condado: ainda não exploradas na Fase 1
+      county: { name: 'Kent', stone: 6000, iron: 2500, coastKm: 18 },
+      alloc: { campos: 80, gado: 5, pesca: 15, madeira: 10 },
+      rations: 1, taxRate: 30,
+      won: false, lost: false, lowHappyStreak: 0,
+      history: []
+    };
+  }
+
+  const clone = s => JSON.parse(JSON.stringify(s));
+  const assigned = s => TASKS.reduce((a, k) => a + s.alloc[k], 0);
+  const idle = s => s.pop - assigned(s);
+  const productivity = s => 0.7 + 0.6 * s.happy / 100;
+  const eatPerSeason = s => s.pop * RATIONS[s.rations];
+  const woodNeedWinter = s => Math.ceil(s.pop / 8);
+
+  // Mantém a soma das tarefas dentro da população
+  function fitAlloc(s) {
+    let over = assigned(s) - s.pop;
+    while (over > 0) {
+      const k = TASKS.reduce((a, b) => (s.alloc[a] >= s.alloc[b] ? a : b));
+      const cut = Math.min(over, s.alloc[k]);
+      s.alloc[k] -= cut; over -= cut;
+    }
+    TASKS.forEach(k => { s.alloc[k] = Math.max(0, Math.floor(s.alloc[k])); });
+  }
+
+  function setAlloc(s, task, value) {
+    if (!TASKS.includes(task)) return s;
+    const others = assigned(s) - s.alloc[task];
+    s.alloc[task] = clamp(Math.floor(value), 0, s.pop - others);
+    return s;
+  }
+
+  function buyFood(s) {
+    if (s.gold < BUY_COST || s.lost) return false;
+    s.gold -= BUY_COST; s.food += BUY_FOOD;
+    return true;
+  }
+
+  const FEAST_GOLD = 60, FEAST_FOOD = 40, FEAST_HAPPY = 12;
+  function feast(s) {
+    if (s.gold < FEAST_GOLD || s.food < FEAST_FOOD || s.lost || s.feastThisSeason) return false;
+    s.gold -= FEAST_GOLD; s.food -= FEAST_FOOD; s.happy = clamp(s.happy + FEAST_HAPPY, 0, 100);
+    s.feastThisSeason = true;
+    return true;
+  }
+
+  const EVENTS = [
+    { id: 'colheita', when: [2], text: 'Ano de boa colheita: os campos renderam 30% a mais.' },
+    { id: 'praga', when: [0, 1, 2, 3], text: 'Praga no gado: um quarto do rebanho morreu.' },
+    { id: 'ratos', when: [0, 1, 2, 3], text: 'Ratos no celeiro: parte da comida estragou.' },
+    { id: 'bandidos', when: [0, 1, 2], text: 'Bandidos atacaram a estrada e levaram ouro.' },
+    { id: 'festa', when: [0, 1, 2], text: 'Festa na aldeia: o povo ficou mais animado.' },
+    { id: 'rigoroso', when: [3], text: 'Inverno rigoroso: mais comida e lenha consumidas.' },
+    { id: 'peste', when: [1, 2], text: 'Uma febre passou pela aldeia e levou alguns.' }
+  ];
+
+  function pickEvent(s, rand) {
+    if (!rand || rand() > 0.3) return null;
+    const pool = EVENTS.filter(e => e.when.includes(s.season));
+    return pool[Math.floor(rand() * pool.length)] || null;
+  }
+
+  // ===== Versão 12 meses =====
+  // O ano medieval inglês começava em março (Dia da Anunciação). Cada estação tem 3 meses.
+  const MONTHS = ['Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro', 'Janeiro', 'Fevereiro'];
+  const HARVEST_MONTH = 6; // setembro
+
+  // Um mês. ev = evento da estação (já sorteado) e evMonth = em que mês ele acontece.
+  function stepMonth(s, ev, evMonth, totals) {
+    const rep = [];
+    const mi = s.month % 3;                 // 0, 1, 2 dentro da estação
+    const evNow = ev && evMonth === mi ? ev : null;
+    if (evNow) rep.push({ kind: 'event', text: evNow.text });
+    const mult = productivity(s);
+    const a = s.alloc;
+    const winter = s.season === 3;
+    let foodIn = 0;
+
+    // Campos
+    if (s.month === 0) {
+      const n = Math.min(s.fields.length, Math.floor(a.campos / WORKERS_PER_FIELD_PLANT));
+      s.planted = s.fields.map((f, i) => i).sort((x, y) => s.fields[y] - s.fields[x]).slice(0, n).sort((x, y) => x - y);
+      s.cropHealth = 1;
+      s.planted.forEach(i => { s.lastPlanted[i] = s.year; });
+      rep.push({ kind: 'info', text: n ? `Plantados ${n} de ${s.fields.length} campos.` : 'Nenhum campo foi plantado.' });
+    } else if (s.season === 1 && s.planted.length) {
+      const ratio = Math.min(1, a.campos / (s.planted.length * WORKERS_PER_FIELD_TEND));
+      s.cropHealth *= Math.pow(0.5 + 0.5 * ratio, 1 / 3);
+      if (ratio < 1 && mi === 0) rep.push({ kind: 'warn', text: 'Falta gente cuidando das plantações; parte vai se perder.' });
+    } else if (s.month === HARVEST_MONTH && s.planted.length) {
+      const ratio = Math.min(1, a.campos / (s.planted.length * WORKERS_PER_FIELD_HARVEST));
+      const base = s.planted.reduce((acc, i) => acc + s.fields[i] / 100 * FIELD_YIELD, 0);
+      const harvest = Math.round(base * s.cropHealth * ratio * mult * (ev && ev.id === 'colheita' ? 1.3 : 1));
+      foodIn += harvest;
+      s.planted.forEach(i => { s.fields[i] = clamp(s.fields[i] - 12, 10, 100); });
+      rep.push({ kind: 'good', text: `Colheita: ${harvest} de comida.` });
+      if (ratio < 1) rep.push({ kind: 'warn', text: 'Faltou gente na colheita; trigo ficou no campo.' });
+      s.planted = [];
+    }
+    s.fields = s.fields.map((f, i) => (s.lastPlanted[i] === s.year ? f : clamp(f + 2, 0, 100)));
+
+    // Gado
+    if (evNow && evNow.id === 'praga') s.herd = Math.floor(s.herd * 0.75);
+    const care = s.herd ? Math.min(1, a.gado / (s.herd / COWS_PER_WORKER)) : 1;
+    foodIn += Math.round(s.herd * 0.3 * care * mult * (winter ? 0.5 : 1));
+    if (s.season <= 1) s.herd += Math.round(s.herd * 0.04 * care);
+    if (care < 0.6) s.herd -= Math.ceil(s.herd * 0.035);
+    s.herd = clamp(s.herd, 0, HERD_MAX);
+
+    // Pesca
+    foodIn += Math.round(a.pesca * FISH_YIELD[s.season] / 3 * s.fish / 100 * mult);
+    s.fish = clamp(s.fish + (12 - a.pesca * 0.6) / 3, 0, 100);
+
+    // Madeira
+    const woodIn = Math.round(a.madeira * WOOD_YIELD[s.season] / 3 * s.forest / 100 * mult);
+    s.wood += woodIn;
+    s.forest = clamp(s.forest + (1.5 - a.madeira * 0.25) / 3, 0, 100);
+
+    s.food += foodIn;
+    if (evNow && evNow.id === 'ratos') s.food -= Math.round(s.food * 0.12);
+
+    // Consumo do mês
+    s.taxRate = taxRateOf(s); delete s.taxes;
+    let happyDelta = (RATION_HAPPY[s.rations] + taxHappy(s.taxRate)) / 3;
+    const eat = Math.round(eatPerSeason(s) / 3 * (ev && ev.id === 'rigoroso' ? 1.25 : 1));
+    let starving = false, deaths = 0;
+    const before = s.food;
+    if (s.food >= eat) s.food -= eat;
+    else {
+      const frac = (eat - s.food) / eat;
+      s.food = 0; starving = true;
+      deaths += Math.round(s.pop * frac * 0.25 / 3);
+      happyDelta -= (15 + 20 * frac) / 3;
+      rep.push({ kind: 'bad', text: 'Fome! Não houve comida para todos.' });
+    }
+    if (winter) {
+      const need = Math.ceil(woodNeedWinter(s) / 3 * (ev && ev.id === 'rigoroso' ? 1.5 : 1));
+      if (s.wood >= need) s.wood -= need;
+      else {
+        const frac = (need - s.wood) / need;
+        s.wood = 0;
+        deaths += Math.round(s.pop * 0.01 * frac);
+        happyDelta -= (12 * frac + 2) / 3;
+        rep.push({ kind: 'bad', text: 'Faltou lenha: o povo passou frio.' });
+      }
+    }
+
+    // Ouro e eventos sociais
+    const tax = Math.round(s.pop * taxGoldPer(s.taxRate) / 3);
+    s.gold += tax;
+    if (evNow && evNow.id === 'bandidos') { s.gold = Math.max(0, s.gold - 25); happyDelta -= 5; }
+    if (evNow && evNow.id === 'festa') happyDelta += 8;
+    if (evNow && evNow.id === 'peste') { deaths += Math.round(s.pop * 0.05); happyDelta -= 5; }
+
+    // Felicidade (guardada com uma casa decimal)
+    happyDelta += (50 - s.happy) * 0.035;
+    s.happy = clamp(r1(s.happy + happyDelta), 0, 100);
+
+    // População (frações acumulam de um mês para o outro)
+    s.pop -= deaths;
+    if (!starving) {
+      let rate = s.happy > 70 ? 0.05 : s.happy > 50 ? 0.03 : s.happy > 35 ? 0.01 : -0.03;
+      if (s.season === 0 && rate > 0) rate += 0.01;
+      const exact = s.pop * rate / 3 + (s.popFrac || 0);
+      const change = Math.trunc(exact);
+      s.popFrac = exact - change;
+      s.pop += change;
+      if (change < 0) rep.push({ kind: 'bad', text: `${-change} pessoas foram embora, infelizes.` });
+    }
+    if (deaths > 0) rep.push({ kind: 'bad', text: `${deaths} pessoas morreram.` });
+    s.pop = Math.max(0, s.pop);
+
+    totals.foodIn += foodIn; totals.eaten += Math.min(eat, before); totals.woodIn += woodIn; totals.tax += tax;
+    return rep;
+  }
+
+  // Uma estação inteira = 3 meses. Devolve também cada mês, para a interface mostrar passando.
+  function step(input, rand) {
+    const s = clone(input);
+    if (s.lost) return { state: s, report: [], months: [] };
+    if (s.month == null) s.month = s.season * 3;
+    fitAlloc(s);
+    const ev = pickEvent(s, rand);
+    const evMonth = ev ? Math.floor(rand() * 3) : -1;
+    const totals = { foodIn: 0, eaten: 0, woodIn: 0, tax: 0 };
+    const months = [];
+    const report = [];
+    for (let i = 0; i < 3 && !s.lost; i++) {
+      const name = MONTHS[s.month];
+      const rep = stepMonth(s, ev, evMonth, totals);
+      if (i === 2) {
+        if (s.happy < 15) {
+          s.gold = Math.round(s.gold * 0.8); s.food = Math.round(s.food * 0.8);
+          s.happy = clamp(s.happy + 10, 0, 100);
+          rep.push({ kind: 'bad', text: 'Revolta! O povo saqueou celeiro e tesouro.' });
+        }
+      }
+      if (s.pop <= LOSE_POP) { s.lost = true; rep.push({ kind: 'bad', text: 'O condado se esvaziou. Fim de jogo.' }); }
+      if (!s.won && s.pop >= GOAL_POP && s.happy >= GOAL_HAPPY) {
+        s.won = true; rep.push({ kind: 'good', text: `Meta alcançada: ${GOAL_POP} pessoas e povo satisfeito!` });
+      }
+      fitAlloc(s);
+      s.month = (s.month + 1) % 12;
+      if (s.month === 0) s.year += 1;
+      s.season = Math.floor(s.month / 3);
+      months.push({ name, state: clone(s), report: rep });
+      rep.forEach(r => report.push(Object.assign({ month: name }, r)));
+    }
+    s.feastThisSeason = false;
+    months.forEach(m => { m.state.feastThisSeason = false; });
+    s.history.push({ year: s.year, season: s.season, pop: s.pop, food: s.food, happy: s.happy });
+    if (s.history.length > 80) s.history.shift();
+    report.unshift({ kind: 'sum', text: `Comida +${totals.foodIn} −${totals.eaten} · Madeira +${totals.woodIn} · Ouro +${totals.tax}` });
+    return { state: s, report, months };
+  }
+
+  // Previsão: estimativa sem eventos
+  function forecast(s) {
+    const next = step(s, null).state;
+    const warnings = [];
+    const a = s.alloc;
+    if (s.season === 0) {
+      const n = Math.floor(a.campos / WORKERS_PER_FIELD_PLANT);
+      if (n < s.fields.length) warnings.push(`Só ${n} de ${s.fields.length} campos serão plantados (${WORKERS_PER_FIELD_PLANT} pessoas por campo).`);
+    }
+    if (s.season === 1 && s.planted.length && a.campos < s.planted.length * WORKERS_PER_FIELD_TEND)
+      warnings.push(`Plantações precisam de ${s.planted.length * WORKERS_PER_FIELD_TEND} pessoas cuidando.`);
+    if (s.season === 2 && s.planted.length && a.campos < s.planted.length * WORKERS_PER_FIELD_HARVEST)
+      warnings.push(`A colheita precisa de ${s.planted.length * WORKERS_PER_FIELD_HARVEST} pessoas.`);
+    if (s.herd && a.gado < s.herd / COWS_PER_WORKER)
+      warnings.push(`O gado precisa de ${Math.ceil(s.herd / COWS_PER_WORKER)} pessoas.`);
+    if (next.food === 0) warnings.push('Vai faltar comida nesta estação!');
+    const winterNeed = woodNeedWinter(s);
+    if (s.season === 3 && s.wood < winterNeed) warnings.push(`Faltará lenha: o inverno pede ${winterNeed}.`);
+    if (s.season === 2 && next.wood < winterNeed) warnings.push(`Lenha curta para o inverno (precisa de ${winterNeed}).`);
+    if (s.fish < 30) warnings.push('O rio está ficando sem peixe.');
+    if (s.forest < 30) warnings.push('A floresta está rareando.');
+    return {
+      food: next.food, pop: next.pop, happy: next.happy, wood: next.wood, gold: next.gold,
+      seasonsOfFood: r1(s.food / Math.max(1, eatPerSeason(s))),
+      warnings
+    };
+  }
+
+  const api = { SEASONS, MONTHS, TASKS, BUY_FOOD, BUY_COST, GOAL_POP, GOAL_HAPPY, WORKERS_PER_FIELD_PLANT,
+    FEAST_GOLD, FEAST_FOOD, FEAST_HAPPY, taxRateOf, taxGoldPer, taxHappy,
+    rng, newGame, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.HC = api;
+})(this);
+
+</script>
+<script>
+(function () {
+  'use strict';
+  const H = window.HC;
+  const KEY = 'hollow-crown-12meses';
+  const $ = id => document.getElementById(id);
+
+  let game, log = [];
+  let playing = false, timers = [], seasonFc = null;
+  // Céu de cada mês: o ano como um dia, de março (amanhecer) a fevereiro (fim da noite)
+  const SKY = [
+    ['#e9a99a', '#f6dcc6', '#3a2522'], ['#efb98f', '#f8e4c4', '#3a2618'], ['#f1d08e', '#f6ecd0', '#3a2a10'],
+    ['#8cc0e2', '#dcedf7', '#12304a'], ['#6fb1de', '#d2e9f6', '#0f2b45'], ['#93bede', '#e6efe0', '#1d3346'],
+    ['#e2a24c', '#f5d898', '#3b2408'], ['#d97a3a', '#f0bb7a', '#3a1d08'], ['#9a6a8c', '#d9a98c', '#24121f'],
+    ['#2a3557', '#56688f', '#eef2ff'], ['#161f3a', '#33446b', '#e6ecff'], ['#3c3f6e', '#8a7c9c', '#f3efff']
+  ];
+  // A interface também muda de cor com a estação
+  const SEASON_SKIN = [
+    { bg: '#18241d', hi: '#34483a', a: '#cfe0b4', a2: '#a9c48e', ink: '#1b281f' },   // primavera: verde novo
+    { bg: '#132420', hi: '#2b4c3e', a: '#b7e3a2', a2: '#86c374', ink: '#13261a' },   // verão: verde forte
+    { bg: '#251c13', hi: '#4d3720', a: '#ecc98c', a2: '#d09f58', ink: '#2b1d0c' },   // outono: âmbar
+    { bg: '#151b27', hi: '#2c3a54', a: '#cbd8ee', a2: '#9db1d6', ink: '#16203a' }    // inverno: gelo
+  ];
+  function setSky(m) {
+    const c = SKY[m] || SKY[0], st = document.body.style;
+    st.setProperty('--sky-a', c[0]); st.setProperty('--sky-b', c[1]); st.setProperty('--sky-ink', c[2]);
+    const k = SEASON_SKIN[Math.floor((m || 0) / 3)] || SEASON_SKIN[0];
+    st.setProperty('--bg', k.bg); st.setProperty('--bg-hi', k.hi); st.setProperty('--accent', k.a); st.setProperty('--accent-2', k.a2); st.setProperty('--accent-ink', k.ink);
+    const night = m >= 8;               // de novembro a fevereiro, anoitecendo
+    st.setProperty('--castle', night ? 'rgba(10, 12, 24, .78)' : 'rgba(28, 22, 30, .55)');
+    st.setProperty('--win', m >= 9 ? '1' : m === 8 ? '.6' : '0');
+  }
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (raw) { const d = JSON.parse(raw); if (d && d.game && d.game.fields && d.game.fields.length === 10) { game = d.game; log = d.log || []; return; } }
+    } catch (e) {}
+    fresh();
+  }
+  function fresh() { game = H.newGame(Math.floor(Math.random() * 1e9) + 1); game.turn = 0; log = []; }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify({ game, log })); } catch (e) {} }
+
+  const TASK_INFO = {
+    campos: { name: 'Campos', hint: s => s.season === 0 ? '10 pessoas plantam 1 campo · os mais férteis primeiro'
+      : s.season === 1 ? (s.planted.length ? `${s.planted.length * 6} cuidam bem de ${s.planted.length} campos` : 'Nada plantado este ano')
+      : s.season === 2 ? (s.planted.length ? `${s.planted.length * 8} colhem tudo` : 'Nada para colher')
+      : 'Inverno: a terra descansa' },
+    gado: { name: 'Gado', hint: s => `${s.herd} cabeças · 1 pessoa cuida de 4 · dá leite e carne` },
+    pesca: { name: 'Pesca', hint: s => ['Primavera: boa pesca', 'Verão: pesca farta', 'Outono: a pesca cai', 'Inverno: rio frio, pouco peixe'][s.season] + ' · pescar demais esvazia o rio' },
+    madeira: { name: 'Madeira', hint: s => `O inverno pede ${H.woodNeedWinter(s)} de lenha · cortar demais desmata` }
+  };
+
+  function el(tag, attrs, html) { const e = document.createElement(tag); Object.assign(e, attrs || {}); if (html != null) e.innerHTML = html; return e; }
+
+  function buildTasks() {
+    const box = $('tasks'); box.innerHTML = '';
+    H.TASKS.forEach(t => {
+      const row = el('div', { className: 'task' });
+      row.innerHTML = `<span class="name" id="tn-${t}">${TASK_INFO[t].name}</span>
+        <span class="stepper" role="group" aria-labelledby="tn-${t}">
+          <button type="button" id="m-${t}" aria-label="Menos 1 em ${TASK_INFO[t].name}">−</button>
+          <output id="v-${t}" aria-live="polite"></output>
+          <button type="button" id="p-${t}" aria-label="Mais 1 em ${TASK_INFO[t].name}">+</button>
+        </span>
+        <span class="hint" id="h-${t}"></span>`;
+      box.appendChild(row);
+      hold(row.querySelector('#m-' + t), () => change(t, -1));
+      hold(row.querySelector('#p-' + t), () => change(t, +1));
+    });
+  }
+  // Toque = 1; segurar o botão repete, acelerando
+  function hold(btn, fn) {
+    let timer = null, count = 0;
+    const stop = () => { clearTimeout(timer); timer = null; };
+    const tick = () => {
+      if (btn.disabled) return stop();
+      fn(); count++;
+      timer = setTimeout(tick, count < 6 ? 140 : 50);
+    };
+    btn.addEventListener('pointerdown', e => {
+      if (e.button !== 0 || btn.disabled) return;
+      e.preventDefault(); count = 0; fn();
+      timer = setTimeout(tick, 400);
+    });
+    ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(ev => btn.addEventListener(ev, stop));
+    btn.addEventListener('click', e => { if (e.detail === 0) fn(); }); // teclado
+    btn.addEventListener('contextmenu', e => e.preventDefault());
+  }
+  function change(t, d) {
+    if (game.lost) return;
+    const cur = game.alloc[t];
+    let next = cur + d;
+    if (d > 0) next = Math.min(next, cur + H.idle(game));
+    H.setAlloc(game, t, next); save(); render();
+  }
+
+  function seg(id, labels, key) {
+    const box = $(id); box.innerHTML = '';
+    labels.forEach((l, i) => {
+      const b = el('button', { type: 'button', id: `${id}-${i}` }, l);
+      b.addEventListener('click', () => { if (game.lost) return; game[key] = i; save(); render(); });
+      box.appendChild(b);
+    });
+  }
+
+  function delta(now, next, unit) {
+    const d = next - now;
+    const sign = d > 0 ? '+' : d < 0 ? '−' : '±';
+    const cls = d > 0 ? 'up' : d < 0 ? 'down' : '';
+    return `${next}${unit || ''} <small class="${cls}">${sign}${Math.abs(d)}</small>`;
+  }
+
+
+  const ICONS = {
+    campos: '<path d="M12 21V8"/><path d="M12 12c-2.5 0-4-1.6-4-4 2.5 0 4 1.6 4 4zM12 12c2.5 0 4-1.6 4-4-2.5 0-4 1.6-4 4zM12 16c-2.5 0-4-1.6-4-4 2.5 0 4 1.6 4 4zM12 16c2.5 0 4-1.6 4-4-2.5 0-4 1.6-4 4z"/><path d="M12 8c-1-1.2-1-3 0-5 1 2 1 3.8 0 5z"/>',
+    floresta: '<path d="M12 3l5 7h-3l4 6H6l4-6H7z"/><path d="M12 16v5"/>',
+    peixe: '<path d="M3 12c3-4.5 9-5.5 13-2l4-3v10l-4-3c-4 3.5-10 2.5-13-2z"/><circle cx="8" cy="11" r=".6" fill="currentColor"/>',
+    gado: '<path d="M5 6c0 2 1.5 3 3 3M19 6c0 2-1.5 3-3 3"/><path d="M8 8h8l1 7c0 3-2.2 5-5 5s-5-2-5-5z"/><path d="M10 16.5h.01M14 16.5h.01"/><path d="M8 11h.01M16 11h.01"/>',
+    pedra: '<path d="M4 18l2.5-7 5-4 5.5 2 3 9z"/><path d="M11.5 7l-1 5 4.5 2M10.5 12L6.5 11"/>',
+    ferro: '<path d="M3 9h12c0 3-2 4-5 4v3h3v3H6v-3h3v-3C6 13 4 11.5 3 9z"/><path d="M15 9h5l-1 2h-4"/>',
+    litoral: '<path d="M3 9c2 0 2-1.5 4.5-1.5S9.5 9 12 9s2-1.5 4.5-1.5S18.5 9 21 9"/><path d="M3 14c2 0 2-1.5 4.5-1.5S9.5 14 12 14s2-1.5 4.5-1.5S18.5 14 21 14"/><path d="M3 19c2 0 2-1.5 4.5-1.5S9.5 19 12 19s2-1.5 4.5-1.5S18.5 19 21 19"/>',
+    // Armazém
+    povo: '<circle cx="9" cy="7" r="3"/><path d="M3.5 20c0-3.6 2.5-6 5.5-6s5.5 2.4 5.5 6"/><circle cx="17" cy="8.5" r="2.4"/><path d="M15 14.3c3.2-.5 5.5 1.8 5.5 5.7"/>',
+    comida: '<path d="M6 20h12c1.5 0 2-1 2-2.5C20 13 17 9 12 9s-8 4-8 8.5C4 19 4.5 20 6 20z"/><path d="M9 9.5c0-2 1.3-3.5 3-3.5s3 1.5 3 3.5"/><path d="M10 6c-.5-1.5.5-3 2-3s2.5 1.5 2 3"/>',
+    felicidade: '<circle cx="12" cy="12" r="9"/><path d="M8 14c1 1.8 2.4 2.7 4 2.7s3-.9 4-2.7"/><path d="M9 9.5h.01M15 9.5h.01"/>',
+    ouro: '<ellipse cx="10" cy="8" rx="6" ry="2.5"/><path d="M4 8v4c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5V8"/><path d="M8 14.3V16c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5v-4c0-1.3-2.3-2.3-5.3-2.5"/>',
+    lenha: '<path d="M4 15l13-6"/><path d="M6 19.5l13-6"/><ellipse cx="18.5" cy="11.3" rx="2" ry="2.6" transform="rotate(-25 18.5 11.3)"/><ellipse cx="20.3" cy="15.6" rx="2" ry="2.6" transform="rotate(-25 20.3 15.6)"/><path d="M3.3 13.8c-.8 1.3-.4 3 .9 3.6M5.3 18.3c-.8 1.3-.4 3 .9 3.6"/>'
+  };
+  const icon = k => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[k]}</svg>`;
+  const level = v => v >= 70 ? ['lv-hi', 'farta'] : v >= 45 ? ['lv-mid', 'boa'] : v >= 20 ? ['lv-lo', 'pouca'] : v > 0 ? ['lv-out', 'quase esgotada'] : ['lv-out', 'nenhuma'];
+  const num = v => Math.round(v).toLocaleString('pt-BR');
+  function renderReserves(s) {
+    let c = s.county || {};
+    if (!(c.stone > 100)) c = { name: 'Kent', stone: 6000, iron: 2500, coastKm: 18 };
+    const fert = Math.round(s.fields.reduce((a, b) => a + b, 0) / s.fields.length);
+    const items = [
+      ['campos', 'Terra fértil', `${s.fields.length} campos`, level(fert), `fertilidade ${fert}%`],
+      ['floresta', 'Floresta', `${num(s.forest * 100)} árvores`, level(s.forest), 'de 10.000'],
+      ['peixe', 'Peixe no rio', `${num(s.fish * 10)} peixes`, level(s.fish), 'de 1.000'],
+      ['gado', 'Gado', `${s.herd} cabeças`, level(s.herd / 80 * 100), 'pasto para 80'],
+      ['pedra', 'Pedra', `${num(c.stone)} carroças`, level(c.stone / 100), 'calcário', true],
+      ['ferro', 'Ferro', `${num(c.iron)} cargas`, level(c.iron / 100), 'minério na mata do sul', true],
+      ['litoral', 'Litoral', `${num(c.coastKm)} km de costa`, c.coastKm > 0 ? ['lv-hi', 'pesca no mar'] : ['lv-out', 'sem mar'], '', true]
+    ];
+    $('reserves').innerHTML = items.map(([k, n, qty, [cls, word], detail, later]) =>
+      `<div class="rv ${cls}${later ? ' later' : ''}"><span class="hd">${icon(k)}<span class="n">${n}</span></span><span class="qty">${qty}</span><span class="q"><b>${word}</b>${detail ? ' · ' + detail : ''}</span></div>`).join('');
+  }
+
+
+  function render(view, liveMonth) {
+    const s = view || game;
+    const lock = s.lost || playing;
+    renderReserves(s);
+    const first = (playing && seasonStart ? seasonStart.season : s.season) * 3;
+    const shownMonth = playing ? liveMonth : first;
+    setSky(shownMonth);
+    const trio = [0, 1, 2].map(i => {
+      const m = first + i, cls = !playing ? '' : m === liveMonth ? 'now' : m < liveMonth ? 'done' : '';
+      return `<span class="${cls}">${H.MONTHS[m].toLowerCase()}</span>`;
+    }).join('');
+    $('when').innerHTML = `Kent · Ano ${s.year} · <b>${playing ? H.MONTHS[liveMonth] : H.SEASONS[s.season]}</b><div class="months">${trio}</div>`;
+
+    const f = playing && seasonFc ? seasonFc : H.forecast(s);
+    const happyWord = s.happy >= 70 ? 'contente' : s.happy >= 50 ? 'tranquilo' : s.happy >= 30 ? 'insatisfeito' : 'à beira da revolta';
+    $('stats').innerHTML = [
+      ['Povo', s.pop, `meta: ${H.GOAL_POP}`, null, 'povo'],
+      ['Comida', s.food, `dura ${f.seasonsOfFood.toLocaleString('pt-BR')} ${f.seasonsOfFood === 1 ? 'estação' : 'estações'}`, null, 'comida'],
+      ['Felicidade', Math.round(s.happy), happyWord, s.happy, 'felicidade'],
+      ['Ouro', s.gold, `impostos a ${H.taxRateOf(s)}%`, null, 'ouro'],
+      ['Lenha', s.wood, `inverno pede ${H.woodNeedWinter(s)}`, null, 'lenha'],
+      ['Gado', s.herd, 'cabeças', null, 'gado']
+    ].map(([k, v, sub, m, ic]) => `<div class="stat"><div class="k">${k}</div><div class="v"><span>${v}</span>${icon(ic)}</div><div class="s">${sub}</div>${m != null ? `<div class="meter"><i style="width:${m}%"></i></div>` : ''}</div>`).join('');
+
+    H.TASKS.forEach(t => {
+      $('v-' + t).textContent = s.alloc[t];
+      $('h-' + t).textContent = TASK_INFO[t].hint(s);
+      $('m-' + t).disabled = lock || s.alloc[t] <= 0;
+      $('p-' + t).disabled = lock || H.idle(s) <= 0;
+    });
+    $('idle').textContent = H.idle(s);
+
+    [0, 1, 2].forEach(i => {
+      $('rations-' + i).setAttribute('aria-pressed', String(s.rations === i));
+      $('rations-' + i).disabled = lock;
+
+    });
+    const rate = H.taxRateOf(s), hp = H.taxHappy(rate), gp = Math.round(s.pop * H.taxGoldPer(rate));
+    $('tax').value = rate; $('tax-v').textContent = rate + '%';
+    $('tax').setAttribute('aria-valuetext', rate + '%');
+    $('tax-info').textContent = `+${gp} de ouro por estação · felicidade ${hp > 0 ? '+' + hp : hp === 0 ? 'não muda' : '−' + Math.abs(hp)}`;
+    $('tax').disabled = $('tax-m').disabled = $('tax-p').disabled = lock;
+    $('buy-s').textContent = `${H.BUY_COST} ouro → ${H.BUY_FOOD} comida`;
+    $('feast-s').textContent = s.feastThisSeason ? 'Já houve festa nesta estação' : `${H.FEAST_GOLD} ouro + ${H.FEAST_FOOD} comida → +${H.FEAST_HAPPY} felicidade`;
+    $('buy').disabled = lock || s.gold < H.BUY_COST;
+    $('feast').disabled = lock || s.feastThisSeason || s.gold < H.FEAST_GOLD || s.food < H.FEAST_FOOD;
+
+    $('fc').innerHTML = `<div><div class="k">Comida</div><div class="v">${delta(playing ? seasonStart.food : s.food, f.food)}</div></div>
+      <div><div class="k">Povo</div><div class="v">${delta(playing ? seasonStart.pop : s.pop, f.pop)}</div></div>
+      <div><div class="k">Felicidade</div><div class="v">${delta(Math.round(playing ? seasonStart.happy : s.happy), Math.round(f.happy))}</div></div>`;
+    $('warn').innerHTML = f.warnings.length ? f.warnings.map(w => `<li class="warn">${w}</li>`).join('') : '<li class="good">Nada preocupante à vista.</li>';
+
+    $('go').textContent = s.lost ? 'Fim de jogo' : playing ? `${H.MONTHS[Math.min(liveMonth, first + 2)]} passando · pular ▸▸` : `Viver ${['a Primavera', 'o Verão', 'o Outono', 'o Inverno'][s.season]} →`;
+    $('go').disabled = s.lost && !playing;
+    $('go').classList.toggle('skip', playing);
+
+    $('fields').innerHTML = s.fields.map((v, i) => `<div class="f${s.planted.includes(i) ? ' p' : ''}" title="Campo ${i + 1}: fertilidade ${v}"><i style="height:${v}%"></i></div>`).join('');
+    $('land-sub').textContent = s.planted.length ? `${s.planted.length} campos plantados neste ano. Plantar todo ano cansa a terra; os campos em descanso se recuperam.`
+      : 'Plantar todo ano cansa a terra; campos em descanso se recuperam. Na primavera, os mais férteis são plantados primeiro.';
+    $('forest').style.width = s.forest + '%'; $('forest-v').textContent = Math.round(s.forest) + '%';
+    $('fish').style.width = s.fish + '%'; $('fish-v').textContent = Math.round(s.fish) + '%';
+
+    $('goal').textContent = `Meta da Fase 1: chegar a ${H.GOAL_POP} pessoas com o povo satisfeito (felicidade ${H.GOAL_HAPPY}+).`;
+
+    if (playing) { $('banner').innerHTML = ''; return; }
+    if (s.lost) $('banner').innerHTML = `<div class="banner lose"><span>Kent se esvaziou no ano ${s.year}. O condado não resistiu.</span><button type="button" id="again">Jogar de novo</button></div>`;
+    else if (s.won) $('banner').innerHTML = `<div class="banner win"><span>Meta alcançada! Kent prospera. Você pode continuar jogando.</span></div>`;
+    else $('banner').innerHTML = '';
+    const again = $('again'); if (again) again.addEventListener('click', () => { fresh(); save(); render(); renderLog(); });
+  }
+
+  function renderLog(upTo) {
+    const box = $('log');
+    const items = upTo == null ? log : log.slice(0, upTo);
+    if (!items.length) { box.innerHTML = '<p class="ok">A crônica de Kent começa em março.</p>'; return; }
+    box.innerHTML = items.slice().reverse().map(e => `<div><h3>${e.title}</h3><ul class="notes">${e.items.map(x => `<li class="${x.kind}">${x.text}</li>`).join('')}</ul></div>`).join('');
+  }
+
+  let seasonStart = null;
+  function finish() {
+    timers.forEach(clearTimeout); timers = [];
+    playing = false; seasonFc = null; seasonStart = null;
+    render(); renderLog();
+  }
+  $('go').addEventListener('click', () => {
+    if (playing) { finish(); return; }
+    if (game.lost) return;
+    const turn = game.turn || 0;
+    const rand = H.rng(game.seed * 7 + turn * 7919 + 13);
+    const start = game;
+    const out = H.step(game, rand);
+    // Guarda o resultado já no início: fechar a página no meio não perde nada
+    let year = start.year;
+    out.months.forEach(m => {
+      log.push({ title: `${m.name} do ano ${year}`, items: m.report.length ? m.report : [{ kind: 'sum', text: 'Um mês tranquilo.' }] });
+      year = m.state.year;
+    });
+    while (log.length > 60) log.shift();
+    game = out.state; game.turn = turn + 1;
+    save();
+    // Mostra os meses passando
+    seasonStart = start; seasonFc = H.forecast(start); playing = true;
+    const firstMonth = start.season * 3;
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const gap = reduce ? 500 : 1500;
+    render(start, firstMonth);
+    out.months.forEach((m, i) => {
+      timers.push(setTimeout(() => {
+        const next = firstMonth + i + 1;
+        render(m.state, i < 2 ? next : firstMonth + 2);
+        renderLog(log.length - out.months.length + i + 1);
+        $('log').scrollTop = 0;
+      }, gap * (i + 1)));
+    });
+    timers.push(setTimeout(finish, gap * out.months.length + 700));
+  });
+  $('buy').addEventListener('click', () => { if (H.buyFood(game)) { save(); render(); } });
+  $('feast').addEventListener('click', () => { if (H.feast(game)) { save(); render(); } });
+
+  // Recomeçar com confirmação na própria página
+  function bindReset() {
+    $('reset').addEventListener('click', () => {
+      $('reset-area').innerHTML = '<span>Apagar este jogo?</span><button type="button" id="yes">Sim, recomeçar</button><button type="button" id="no">Cancelar</button>';
+      $('yes').addEventListener('click', () => { fresh(); save(); render(); renderLog(); restoreReset(); });
+      $('no').addEventListener('click', restoreReset);
+    });
+  }
+  function restoreReset() { $('reset-area').innerHTML = '<button type="button" id="reset">Recomeçar</button>'; bindReset(); }
+
+  load();
+  buildTasks();
+  seg('rations', ['Meia', 'Normal', 'Dupla'], 'rations');
+  const setTax = v => { if (game.lost) return; game.taxRate = Math.max(0, Math.min(100, v)); save(); render(); };
+  $('tax').addEventListener('input', e => setTax(Number(e.target.value)));
+  hold($('tax-m'), () => setTax(H.taxRateOf(game) - 1));
+  hold($('tax-p'), () => setTax(H.taxRateOf(game) + 1));
+  bindReset();
+  render(); renderLog();
+})();
+</script>
+
+</body>
+</html>
