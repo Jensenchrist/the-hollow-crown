@@ -99,7 +99,7 @@ button {
   font: inherit; color: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--line);
   background: var(--surface); padding: 6px 10px; min-height: 40px;
 }
-button:hover:not(:disabled) { border-color: var(--accent); }
+@media (hover: hover) { button:not(.go):hover:not(:disabled) { border-color: var(--accent); } }
 button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 button:disabled { opacity: .45; cursor: not-allowed; }
 .stepper button { width: 44px; padding: 0; font-size: 20px; font-weight: 700; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
@@ -167,7 +167,7 @@ li.event { border-left-color: var(--accent); font-weight: 500; } li.sum { color:
 .confirm { display: flex; gap: 8px; align-items: center; }
 
 /* ===== Pele de vidro ===== */
-body { background-color: var(--bg); background-image: radial-gradient(120% 60% at 50% -10%, var(--bg-hi), var(--bg) 70%); background-attachment: fixed; }
+body { background-color: var(--bg); background-image: radial-gradient(120% 60% at 50% -10%, var(--bg-hi), var(--bg) 70%); background-attachment: fixed; transition: background-color 1s ease; }
 .sky {
   margin: 12px auto 0; max-width: 980px; border-radius: 26px; padding: 22px 20px 18px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .18);
@@ -196,7 +196,7 @@ ul.notes li { border-radius: 10px; }
 button {
   border-radius: 999px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .13); color: var(--ink);
 }
-button:hover:not(:disabled) { border-color: var(--accent); background: rgba(255, 255, 255, .11); }
+@media (hover: hover) { button:not(.go):hover:not(:disabled) { border-color: var(--accent); background: rgba(255, 255, 255, .11); } .go:hover:not(:disabled) { filter: brightness(1.06); } }
 .stepper button, .taxrow button { width: 42px; height: 42px; min-height: 42px; border-radius: 50%; }
 .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .acts button { border-radius: 18px; padding: 10px 14px; }
@@ -269,6 +269,7 @@ body, .meter i, .go, .seg button, .fields .f.p i { transition: background-color 
 <main class="wrap">
   <div id="banner"></div>
   <div class="stats" id="stats"></div>
+  <button class="go" id="go" type="button"></button>
 
   <section class="card" aria-labelledby="h-res">
     <h2 id="h-res">Reservas de Kent</h2>
@@ -311,7 +312,6 @@ body, .meter i, .go, .seg button, .fields .f.p i { transition: background-color 
         <ul class="notes" id="warn"></ul>
       </section>
 
-      <button class="go" id="go" type="button"></button>
 
       <section class="card" aria-labelledby="h-land">
         <h2 id="h-land">A terra</h2>
@@ -656,16 +656,18 @@ body, .meter i, .go, .seg button, .fields .f.p i { transition: background-color 
   ];
   // A interface também muda de cor com a estação
   const SEASON_SKIN = [
-    { bg: '#18241d', hi: '#34483a', a: '#cfe0b4', a2: '#a9c48e', ink: '#1b281f' },   // primavera: verde novo
-    { bg: '#132420', hi: '#2b4c3e', a: '#b7e3a2', a2: '#86c374', ink: '#13261a' },   // verão: verde forte
-    { bg: '#251c13', hi: '#4d3720', a: '#ecc98c', a2: '#d09f58', ink: '#2b1d0c' },   // outono: âmbar
-    { bg: '#151b27', hi: '#2c3a54', a: '#cbd8ee', a2: '#9db1d6', ink: '#16203a' }    // inverno: gelo
+    { bg: '#26171f', hi: '#5a3044', a: '#f6c3cf', a2: '#e595aa', ink: '#3a1422', line: 'rgba(255, 214, 226, .14)', muted: '#c9adb6' },   // primavera: flor de cerejeira ao entardecer
+    { bg: '#0e2132', hi: '#1f5078', a: '#f5d77a', a2: '#e6b84a', ink: '#2a1e05', line: 'rgba(200, 228, 255, .14)', muted: '#a9bfd1' },   // verão: céu azul e sol
+    { bg: '#28150b', hi: '#6a2f12', a: '#f6ae62', a2: '#e0823a', ink: '#2e1405', line: 'rgba(255, 210, 170, .14)', muted: '#c9ab95' },   // outono: folhas de bordo
+    { bg: '#0d1424', hi: '#26395e', a: '#d6e4f7', a2: '#a9c0e2', ink: '#14203c', line: 'rgba(214, 228, 247, .16)', muted: '#a6b3c9' }    // inverno: noite de neve
   ];
   function setSky(m) {
     const c = SKY[m] || SKY[0], st = document.body.style;
     st.setProperty('--sky-a', c[0]); st.setProperty('--sky-b', c[1]); st.setProperty('--sky-ink', c[2]);
     const k = SEASON_SKIN[Math.floor((m || 0) / 3)] || SEASON_SKIN[0];
     st.setProperty('--bg', k.bg); st.setProperty('--bg-hi', k.hi); st.setProperty('--accent', k.a); st.setProperty('--accent-2', k.a2); st.setProperty('--accent-ink', k.ink);
+    st.setProperty('--line', k.line); st.setProperty('--muted', k.muted);
+    const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.setAttribute('content', k.bg);
     // Pintura da estação + leve escurecimento conforme o mês (o ano como um dia)
     const season = Math.floor((m || 0) / 3);
     document.querySelectorAll('.art img').forEach(img => img.classList.toggle('on', Number(img.dataset.s) === season));
@@ -933,7 +935,7 @@ body, .meter i, .go, .seg button, .fields .f.p i { transition: background-color 
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031194300';
+  var BUILD = '20261031194821';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
