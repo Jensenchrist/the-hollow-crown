@@ -428,8 +428,13 @@ body.modal-open { overflow: hidden; }
 
   <section class="card" aria-labelledby="h-decrees">
         <h2 id="h-decrees">Decretos</h2>
-        <div class="lbl" id="l-rations">Rações</div>
-        <div class="seg" role="group" aria-labelledby="l-rations" id="rations"></div>
+        <div class="taxhead"><label class="lbl" for="rat" id="l-rations">Rações</label></div>
+        <div class="taxrow">
+          <button type="button" id="rat-m" aria-label="Menos 1% de ração">−</button>
+          <div class="rng"><output class="bubble" id="rat-b" aria-hidden="true"></output><input type="range" id="rat" min="50" max="150" step="1" aria-labelledby="l-rations"><div class="ticks" aria-hidden="true"><span style="--k:0">50</span><span style="--k:.25">75</span><span style="--k:.5">100</span><span style="--k:.75">125</span><span style="--k:1">150</span></div></div>
+          <button type="button" id="rat-p" aria-label="Mais 1% de ração">+</button>
+        </div>
+        <p class="taxinfo" id="rat-info"></p>
         <div class="taxhead"><label class="lbl" for="tax" id="l-taxes">Impostos</label><b id="tax-v"></b></div>
         <div class="taxrow">
           <button type="button" id="tax-m" aria-label="Menos 1% de imposto">−</button>
@@ -491,8 +496,9 @@ body.modal-open { overflow: hidden; }
   const SEASONS = ['Primavera', 'Verão', 'Outono', 'Inverno'];
   const TASKS = ['campos', 'gado', 'pesca', 'caca', 'madeira'];
   const HUNT_YIELD = [1.8, 1.5, 2.6, 3.0];  // comida por caçador por estação (outono e inverno rendem mais)
-  const RATIONS = [0.5, 1, 1.5];            // meia, normal, dupla
-  const RATION_HAPPY = [-10, 0, 6];
+  // Ração de 50% a 150%: comer menos irrita rápido, comer mais agrada aos poucos
+  const rationPctOf = s => clamp(Math.round(s.rationPct != null ? s.rationPct : [50, 100, 150][s.rations != null ? s.rations : 1]), 50, 150);
+  const rationHappy = p => p < 100 ? -10 * (100 - p) / 50 : 6 * (p - 100) / 50;
   // Impostos de 0 a 100%: ouro por pessoa sobe em linha reta, a insatisfação sobe cada vez mais rápido
   const TAX_GOLD_MAX = 0.8;                  // ouro por pessoa por estação a 100%
   const taxRateOf = s => clamp(Math.round(s.taxRate != null ? s.taxRate : [10, 30, 50][s.taxes != null ? s.taxes : 1]), 0, 100);
@@ -535,7 +541,7 @@ body.modal-open { overflow: hidden; }
       // Reservas minerais do condado: ainda não exploradas na Fase 1
       county: { name: 'Kent', stone: 6000, iron: 2500, coastKm: 18 },
       alloc: { campos: 80, gado: 5, pesca: 15, caca: 0, madeira: 10 },
-      rations: 1, taxRate: 30,
+      rationPct: 100, taxRate: 30,
       won: false, lost: false, lowHappyStreak: 0,
       history: []
     };
@@ -545,7 +551,7 @@ body.modal-open { overflow: hidden; }
   const assigned = s => TASKS.reduce((a, k) => a + s.alloc[k], 0);
   const idle = s => s.pop - assigned(s);
   const productivity = s => 0.7 + 0.6 * s.happy / 100;
-  const eatPerSeason = s => s.pop * RATIONS[s.rations];
+  const eatPerSeason = s => s.pop * rationPctOf(s) / 100;
   const woodNeedWinter = s => Math.ceil(s.pop / 8);
 
   // Mantém a soma das tarefas dentro da população
@@ -693,7 +699,8 @@ body.modal-open { overflow: hidden; }
 
     // Consumo do mês
     s.taxRate = taxRateOf(s); delete s.taxes;
-    let happyDelta = (RATION_HAPPY[s.rations] + taxHappy(s.taxRate)) / 3;
+    s.rationPct = rationPctOf(s); delete s.rations;
+    let happyDelta = (rationHappy(s.rationPct) + taxHappy(s.taxRate)) / 3;
     const eat = Math.round(eatPerSeason(s) / 3 * (ev && ev.id === 'rigoroso' ? 1.25 : 1));
     let starving = false, deaths = 0;
     const before = s.food;
@@ -820,7 +827,7 @@ body.modal-open { overflow: hidden; }
 
   const api = { SEASONS, MONTHS, TASKS, BUY_FOOD, BUY_COST, GOAL_POP, GOAL_HAPPY, WORKERS_PER_FIELD_PLANT,
     FEAST_GOLD, FEAST_FOOD, FEAST_HAPPY, taxRateOf, taxGoldPer, taxHappy,
-    FOOD_SRC, HARVEST_MONTH, rng, newGame, migrate, normalizeFood, yieldPerWorker, eatPerSeason, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
+    FOOD_SRC, HARVEST_MONTH, rationPctOf, rationHappy, rng, newGame, migrate, normalizeFood, yieldPerWorker, eatPerSeason, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.HC = api;
 })(this);
@@ -1027,11 +1034,12 @@ body.modal-open { overflow: hidden; }
     });
     $('idle').textContent = H.idle(s);
 
-    [0, 1, 2].forEach(i => {
-      $('rations-' + i).setAttribute('aria-pressed', String(s.rations === i));
-      $('rations-' + i).disabled = lock;
-
-    });
+    const rp = H.rationPctOf(s), rh = Math.round(H.rationHappy(rp) * 10) / 10;
+    $('rat').value = rp; paintRange($('rat'), $('rat-b'));
+    $('rat').setAttribute('aria-valuetext', rp + '%');
+    const rword = rp < 75 ? 'meia ração' : rp < 95 ? 'ração curta' : rp <= 105 ? 'ração normal' : rp < 130 ? 'ração farta' : 'ração dupla';
+    $('rat-info').textContent = `${rword} · o povo come ${Math.round(H.eatPerSeason(s) / 3)} por mês · felicidade ${rh > 0 ? '+' + rh.toLocaleString('pt-BR') : rh === 0 ? 'não muda' : '−' + Math.abs(rh).toLocaleString('pt-BR')}`;
+    $('rat').disabled = $('rat-m').disabled = $('rat-p').disabled = lock;
     const rate = H.taxRateOf(s), hp = H.taxHappy(rate), gp = Math.round(s.pop * H.taxGoldPer(rate));
     $('tax').value = rate; $('tax-v').textContent = rate + '%'; paintRange($('tax'), $('tax-b'));
     $('tax').setAttribute('aria-valuetext', rate + '%');
@@ -1266,7 +1274,10 @@ body.modal-open { overflow: hidden; }
 
   load();
   buildTasks();
-  seg('rations', ['Meia', 'Normal', 'Dupla'], 'rations');
+  const setRation = v => { if (game.lost) return; game.rationPct = Math.max(50, Math.min(150, Math.round(v))); delete game.rations; save(); render(); };
+  $('rat').addEventListener('input', e => setRation(Number(e.target.value)));
+  hold($('rat-m'), () => setRation(H.rationPctOf(game) - 1));
+  hold($('rat-p'), () => setRation(H.rationPctOf(game) + 1));
   const setTax = v => { if (game.lost) return; game.taxRate = Math.max(0, Math.min(100, v)); save(); render(); };
   $('tax').addEventListener('input', e => setTax(Number(e.target.value)));
   hold($('tax-m'), () => setTax(H.taxRateOf(game) - 1));
@@ -1280,7 +1291,7 @@ body.modal-open { overflow: hidden; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031211510';
+  var BUILD = '20261031212254';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
