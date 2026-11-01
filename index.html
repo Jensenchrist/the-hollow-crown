@@ -267,6 +267,11 @@ h2 { font-size: 22px; line-height: 1.15; }
 .fields .f.p svg { fill: #e6c063; }
 .fields .f.p svg .st { stroke: #e6c063; }
 .fields .f:not(.p) svg { opacity: .55; }
+.fields .f.r svg { opacity: .22; }
+.fields .f b small { display: block; font-size: 9.5px; font-weight: 700; color: var(--accent); margin-top: 2px; letter-spacing: .02em; }
+.fields { height: 124px; }
+.fields .f.tap { cursor: pointer; }
+.fields .f.tap:active { transform: scale(.94); }
 .fields .f b { font-size: 11px; font-weight: 500; color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1; }
 
 /* ===== Barras no estilo balão + régua ===== */
@@ -516,7 +521,7 @@ li .who { font-weight: 700; margin-right: 4px; }
         <h2 id="h-land">A terra</h2>
         <p class="sub" id="land-sub"></p>
         <div class="fields" id="fields" aria-label="Fertilidade dos 10 campos"></div>
-        <div class="legend"><span style="--c: #e6c063">plantado</span><span style="--c: rgba(185, 164, 99, .55)">em descanso</span><span>altura da espiga = fertilidade (%)</span></div>
+        <div class="legend"><span style="--c: #e6c063">plantado</span><span style="--c: rgba(185, 164, 99, .55)">sem plantar</span><span style="--c: rgba(185, 164, 99, .2)">desc. = descansa por sua ordem</span><span>altura da espiga = fertilidade (%)</span></div>
         <div class="res">
           <figure class="gauge" id="g-forest" aria-label="Floresta">
             <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="50"/><circle class="arc" id="forest" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/></svg>
@@ -739,6 +744,8 @@ li .who { font-weight: 700; margin-right: 4px; }
     if (!s.foodBy) s.foodBy = { trigo: s.food * 0.6, gado: s.food * 0.2, peixe: s.food * 0.2, caca: 0, compra: 0, pao: 0 };
     if (s.foodBy.pao == null) s.foodBy.pao = 0;
     if (s.bakePct == null) s.bakePct = 0;
+    // campos que o senhor mandou descansar (não entram no plantio)
+    if (!s.rest || s.rest.length !== s.fields.length) s.rest = s.fields.map(() => false);
     if (!s.lastPlanted || s.lastPlanted.length !== s.fields.length) s.lastPlanted = s.fields.map((f, i) => (s.lastPlanted && s.lastPlanted[i]) || 0);
     if (!s.market || s.market.season !== s.season || s.market.year !== s.year) s.market = rollMarket(s, null);
     return s;
@@ -853,11 +860,13 @@ li .who { font-weight: 700; margin-right: 4px; }
 
     // Campos
     if (s.month === 0) {
-      const n = Math.min(s.fields.length, Math.floor(a.campos / WORKERS_PER_FIELD_PLANT));
-      s.planted = s.fields.map((f, i) => i).sort((x, y) => s.fields[y] - s.fields[x]).slice(0, n).sort((x, y) => x - y);
+      const open = s.fields.map((f, i) => i).filter(i => !(s.rest && s.rest[i]));
+      const n = Math.min(open.length, Math.floor(a.campos / WORKERS_PER_FIELD_PLANT));
+      s.planted = open.sort((x, y) => s.fields[y] - s.fields[x]).slice(0, n).sort((x, y) => x - y);
       s.cropHealth = 1;
       s.planted.forEach(i => { s.lastPlanted[i] = s.year; });
-      rep.push({ kind: 'info', text: n ? `Plantados ${n} de ${s.fields.length} campos.` : 'Nenhum campo foi plantado.' });
+      const resting = s.fields.length - open.length;
+      rep.push({ kind: 'info', text: (n ? `Plantados ${n} de ${s.fields.length} campos.` : 'Nenhum campo foi plantado.') + (resting ? ` ${resting} ${resting === 1 ? 'descansa' : 'descansam'} por sua ordem.` : '') });
     } else if (s.season === 1 && s.planted.length) {
       const ratio = Math.min(1, a.campos / (s.planted.length * WORKERS_PER_FIELD_TEND));
       s.cropHealth *= Math.pow(0.5 + 0.5 * ratio, 1 / 3);
@@ -1028,7 +1037,8 @@ li .who { font-weight: 700; margin-right: 4px; }
     const a = s.alloc;
     if (s.season === 0) {
       const n = Math.floor(a.campos / WORKERS_PER_FIELD_PLANT);
-      if (n < s.fields.length) warnings.push(`Só ${n} de ${s.fields.length} campos serão plantados (${WORKERS_PER_FIELD_PLANT} pessoas por campo).`);
+      const open = s.fields.filter((f, i) => !(s.rest && s.rest[i])).length;
+      if (n < open) warnings.push(`Só ${n} de ${open} campos ${open < s.fields.length ? 'escolhidos ' : ''}serão plantados (${WORKERS_PER_FIELD_PLANT} pessoas por campo).`);
     }
     if (s.season === 1 && s.planted.length && a.campos < s.planted.length * WORKERS_PER_FIELD_TEND)
       warnings.push(`Plantações precisam de ${s.planted.length * WORKERS_PER_FIELD_TEND} pessoas cuidando.`);
@@ -1232,6 +1242,7 @@ li .who { font-weight: 700; margin-right: 4px; }
     const set = (t, v) => HC.setAlloc(c, t, Math.max(0, Math.min(HC.idle(c), Math.floor(v))));
     set('gado', Math.ceil(c.herd / 4));
     const good = c.fields.filter(f => f >= 58).length;
+    if (season === 0 || season === 3) c.rest = c.fields.map(f => f < 58);
     // na primavera planta tudo o que a gente der conta; o resto vai para lenha, rio e mata
     const share = focus === 'celeiro' ? 0.85 : focus === 'madeira' ? 0.6 : 0.78;
     const campos = season === 0 ? Math.min(good * 10, Math.floor(HC.idle(c) * share / 10) * 10)
@@ -1820,7 +1831,7 @@ li .who { font-weight: 700; margin-right: 4px; }
   const isAuto = () => mine(sel) && game.focus !== 'manual';
 
   const TASK_INFO = {
-    campos: { name: 'Campos', hint: s => s.season === 0 ? '10 pessoas plantam 1 campo · os mais férteis primeiro'
+    campos: { name: 'Campos', hint: s => s.season === 0 ? `10 pessoas plantam 1 campo · os mais férteis primeiro${(s.rest || []).some(Boolean) ? ', menos os que você mandou descansar' : ''}`
       : s.season === 1 ? (s.planted.length ? `${s.planted.length * 6} cuidam bem de ${s.planted.length} campos` : 'Nada plantado este ano')
       : s.season === 2 ? (s.planted.length ? `${s.planted.length * 8} colhem tudo` : 'Nada para colher')
       : 'Inverno: a terra descansa' },
@@ -2043,8 +2054,11 @@ li .who { font-weight: 700; margin-right: 4px; }
 
     $('fields').style.gridTemplateColumns = `repeat(${s.fields.length}, minmax(0, 1fr))`;
     $('fields').setAttribute('aria-label', `Fertilidade dos ${s.fields.length} campos`);
-    $('fields').innerHTML = s.fields.map((v, i) => `<div class="f${s.planted.includes(i) ? ' p' : ''}" title="Campo ${i + 1}: fertilidade ${v}%"><span class="ear" style="height:${Math.max(18, v)}%"><svg viewBox="0 0 40 100" aria-hidden="true"><path class="st" d="M20 100V22"/><path d="M20 6c5 6 5 14 0 20-5-6-5-14 0-20z"/><path d="M19 34C11 33 6 27 5 19c8 1 13 6 14 15zM21 34c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 50C11 49 6 43 5 35c8 1 13 6 14 15zM21 50c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 66C11 65 6 59 5 51c8 1 13 6 14 15zM21 66c8-1 13-7 14-15-8 1-13 6-14 15z"/></svg></span><b>${v}</b></div>`).join('');
-    $('land-sub').textContent = (s.note ? s.note + '. ' : '') + (s.planted.length ? `${s.planted.length} campos plantados neste ano.` : 'Plantar todo ano cansa a terra; campos em descanso se recuperam.');
+    const restOn = (s.rest || []), canRest = own && !auto && !lock;
+    $('fields').innerHTML = s.fields.map((v, i) => `<div class="f${s.planted.includes(i) ? ' p' : ''}${restOn[i] && !s.planted.includes(i) ? ' r' : ''}${canRest && !s.planted.includes(i) ? ' tap' : ''}" data-i="${i}" ${canRest && !s.planted.includes(i) ? `role="button" tabindex="0" aria-pressed="${!!restOn[i]}"` : ''} title="Campo ${i + 1}: fertilidade ${v}%${restOn[i] ? ' · descansando' : ''}"><span class="ear" style="height:${Math.max(18, v)}%"><svg viewBox="0 0 40 100" aria-hidden="true"><path class="st" d="M20 100V22"/><path d="M20 6c5 6 5 14 0 20-5-6-5-14 0-20z"/><path d="M19 34C11 33 6 27 5 19c8 1 13 6 14 15zM21 34c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 50C11 49 6 43 5 35c8 1 13 6 14 15zM21 50c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 66C11 65 6 59 5 51c8 1 13 6 14 15zM21 66c8-1 13-7 14-15-8 1-13 6-14 15z"/></svg></span><b>${v}${restOn[i] && !s.planted.includes(i) ? '<small>desc.</small>' : ''}</b></div>`).join('');
+    const nRest = restOn.filter(Boolean).length;
+    $('land-sub').textContent = (s.note ? s.note + '. ' : '') + (s.planted.length ? `${s.planted.length} campos plantados neste ano. ` : '')
+      + (auto ? 'O administrador escolhe quais campos descansam.' : `Toque num campo para deixá-lo descansar ou voltar a plantar${nRest ? ` (${nRest} ${nRest === 1 ? 'descansa' : 'descansam'})` : ''}. Plantar cansa a terra (−12 por colheita); descansando, ela se recupera.`);
     [['forest', s.forest], ['fish', s.fish], ['hunt', s.hunt == null ? 70 : s.hunt]].forEach(([k, v]) => {
       const p = Math.max(0, Math.min(100, Math.round(v)));
       $(k).setAttribute('stroke-dasharray', p + ' 100');
@@ -2130,6 +2144,17 @@ li .who { font-weight: 700; margin-right: 4px; }
   }
   $('map').addEventListener('click', e => { const g = e.target.closest && e.target.closest('.cty'); if (g) pick(g.dataset.id); });
   $('map').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset && e.target.dataset.id) { e.preventDefault(); pick(e.target.dataset.id); } });
+
+  // ===== Descanso da terra: você escolhe =====
+  function toggleRest(i) {
+    if (playing || world.lost || !mine(sel) || isAuto()) return;
+    H.migrate(game);
+    if (game.planted.includes(i)) return;
+    game.rest[i] = !game.rest[i];
+    save(); render();
+  }
+  $('fields').addEventListener('click', e => { const f = e.target.closest && e.target.closest('.f.tap'); if (f) toggleRest(Number(f.dataset.i)); });
+  $('fields').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset && e.target.dataset.i != null) { e.preventDefault(); toggleRest(Number(e.target.dataset.i)); } });
 
   // ===== Exército do condado aberto =====
   let battleFrame = null, marchShare = 1;
@@ -2629,7 +2654,7 @@ li .who { font-weight: 700; margin-right: 4px; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261101123004';
+  var BUILD = '20261101142135';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
