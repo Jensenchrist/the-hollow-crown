@@ -59,7 +59,7 @@ body {
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 0 32px;
 }
-.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 16px; }
+.wrap { max-width: 640px; margin: 0 auto; display: grid; gap: 16px; }
 .sky {
   background: linear-gradient(180deg, var(--sky-a), var(--sky-b));
   color: var(--sky-ink); transition: background .8s ease;
@@ -173,7 +173,7 @@ li.event { border-left-color: var(--accent); font-weight: 500; } li.sum { color:
 /* ===== Pele de vidro ===== */
 body { background-color: var(--bg); background-image: radial-gradient(120% 60% at 50% -10%, var(--bg-hi), var(--bg) 70%); background-attachment: fixed; transition: background-color 1s ease; }
 .sky {
-  margin: 12px auto 0; max-width: 980px; border-radius: 26px; padding: 22px 20px 18px;
+  margin: 12px auto 0; max-width: 640px; border-radius: 26px; padding: 22px 20px 18px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .18);
   position: relative; overflow: hidden;
 }
@@ -388,58 +388,14 @@ body.modal-open { overflow: hidden; }
   <div class="stats" id="stats"></div>
   <button class="go" id="go" type="button"></button>
 
-  <section class="card" aria-labelledby="h-res">
-    <h2 id="h-res">Reservas de Kent</h2>
-    <p class="sub">O que a terra oferece. Em outros condados, essas reservas serão diferentes.</p>
-    <div class="reserves" id="reserves"></div>
-  </section>
-
-  <div class="cols">
-    <div class="col">
-      <section class="card" aria-labelledby="h-tasks">
-        <h2 id="h-tasks">Obrigações</h2>
-        <p class="sub">Distribua o povo de Kent entre as tarefas desta estação. Toque para mudar de 1 em 1; segure para ir mais rápido.</p>
-        <div id="tasks"></div>
-        <div class="idle"><span>Sem tarefa (descansando)</span><b id="idle"></b></div>
-      </section>
-
-      <section class="card" aria-labelledby="h-decrees">
-        <h2 id="h-decrees">Decretos</h2>
-        <div class="lbl" id="l-rations">Rações</div>
-        <div class="seg" role="group" aria-labelledby="l-rations" id="rations"></div>
-        <div class="taxhead"><label class="lbl" for="tax" id="l-taxes">Impostos</label><b id="tax-v"></b></div>
-        <div class="taxrow">
-          <button type="button" id="tax-m" aria-label="Menos 1% de imposto">−</button>
-          <div class="rng"><output class="bubble" id="tax-b" aria-hidden="true"></output><input type="range" id="tax" min="0" max="100" step="1" aria-labelledby="l-taxes"><div class="ticks" aria-hidden="true"><span style="--k:0">0</span><span style="--k:.25">25</span><span style="--k:.5">50</span><span style="--k:.75">75</span><span style="--k:1">100</span></div></div>
-          <button type="button" id="tax-p" aria-label="Mais 1% de imposto">+</button>
-        </div>
-        <p class="taxinfo" id="tax-info"></p>
-        <div class="acts">
-          <button id="buy" type="button">Comprar comida<small id="buy-s"></small></button>
-          <button id="feast" type="button">Dar uma festa<small id="feast-s"></small></button>
-        </div>
-      </section>
-      <section class="card" aria-labelledby="h-snd">
-        <h2 id="h-snd">Música</h2>
-        <div class="swrow">
-          <span class="lbl" id="l-snd">Som</span>
-          <span class="sw-wrap"><button type="button" role="switch" id="snd" class="switch" aria-checked="true" aria-labelledby="l-snd"><span class="on">ON</span><i></i></button><span class="offlbl" id="snd-off">OFF</span></span>
-        </div>
-        <div class="lbl" id="l-vol">Volume</div>
-        <div class="rng"><output class="bubble" id="vol-b" aria-hidden="true"></output><input type="range" id="vol" min="0" max="100" step="1" aria-labelledby="l-vol"><div class="ticks" aria-hidden="true"><span style="--k:0">0</span><span style="--k:.25">25</span><span style="--k:.5">50</span><span style="--k:.75">75</span><span style="--k:1">100</span></div></div>
-      </section>
-    </div>
-
-    <div class="col">
-      <section class="card" aria-labelledby="h-fc">
+  <section class="card" aria-labelledby="h-fc">
         <h2 id="h-fc">Previsão para o fim da estação</h2>
         <p class="sub">Estimativa sem imprevistos. Muda conforme você decide.</p>
         <div class="fc" id="fc"></div>
         <ul class="notes" id="warn"></ul>
       </section>
 
-
-      <section class="card" aria-labelledby="h-land">
+  <section class="card" aria-labelledby="h-land">
         <h2 id="h-land">A terra</h2>
         <p class="sub" id="land-sub"></p>
         <div class="fields" id="fields" aria-label="Fertilidade dos 10 campos"></div>
@@ -463,12 +419,53 @@ body.modal-open { overflow: hidden; }
         </div>
       </section>
 
-      <section class="card" aria-labelledby="h-log">
+  <section class="card" aria-labelledby="h-res">
+    <h2 id="h-res">Reservas de Kent</h2>
+    <p class="sub">O que a terra oferece. Em outros condados, essas reservas serão diferentes.</p>
+    <div class="reserves" id="reserves"></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-tasks">
+        <h2 id="h-tasks">Obrigações</h2>
+        <p class="sub">Distribua o povo de Kent entre as tarefas desta estação. Toque para mudar de 1 em 1; segure para ir mais rápido.</p>
+        <div id="tasks"></div>
+        <div class="idle"><span>Sem tarefa (descansando)</span><b id="idle"></b></div>
+      </section>
+
+  <section class="card" aria-labelledby="h-decrees">
+        <h2 id="h-decrees">Decretos</h2>
+        <div class="lbl" id="l-rations">Rações</div>
+        <div class="seg" role="group" aria-labelledby="l-rations" id="rations"></div>
+        <div class="taxhead"><label class="lbl" for="tax" id="l-taxes">Impostos</label><b id="tax-v"></b></div>
+        <div class="taxrow">
+          <button type="button" id="tax-m" aria-label="Menos 1% de imposto">−</button>
+          <div class="rng"><output class="bubble" id="tax-b" aria-hidden="true"></output><input type="range" id="tax" min="0" max="100" step="1" aria-labelledby="l-taxes"><div class="ticks" aria-hidden="true"><span style="--k:0">0</span><span style="--k:.25">25</span><span style="--k:.5">50</span><span style="--k:.75">75</span><span style="--k:1">100</span></div></div>
+          <button type="button" id="tax-p" aria-label="Mais 1% de imposto">+</button>
+        </div>
+        <p class="taxinfo" id="tax-info"></p>
+        <div class="acts">
+          <button id="buy" type="button">Comprar comida<small id="buy-s"></small></button>
+          <button id="feast" type="button">Dar uma festa<small id="feast-s"></small></button>
+        </div>
+      </section>
+
+  <section class="card" aria-labelledby="h-snd">
+        <h2 id="h-snd">Música</h2>
+        <div class="swrow">
+          <span class="lbl" id="l-snd">Som</span>
+          <span class="sw-wrap"><button type="button" role="switch" id="snd" class="switch" aria-checked="true" aria-labelledby="l-snd"><span class="on">ON</span><i></i></button><span class="offlbl" id="snd-off">OFF</span></span>
+        </div>
+        <div class="lbl" id="l-vol">Volume</div>
+        <div class="rng"><output class="bubble" id="vol-b" aria-hidden="true"></output><input type="range" id="vol" min="0" max="100" step="1" aria-labelledby="l-vol"><div class="ticks" aria-hidden="true"><span style="--k:0">0</span><span style="--k:.25">25</span><span style="--k:.5">50</span><span style="--k:.75">75</span><span style="--k:1">100</span></div></div>
+      </section>
+
+  <section class="card" aria-labelledby="h-log">
         <h2 id="h-log">Crônica</h2>
         <div class="log" id="log"><p class="ok">A crônica de Kent começa em março.</p></div>
       </section>
-    </div>
-  </div>
+
+
+
 
   <div class="foot">
     <span id="goal"></span>
@@ -1283,7 +1280,7 @@ body.modal-open { overflow: hidden; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031210532';
+  var BUILD = '20261031211341';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
