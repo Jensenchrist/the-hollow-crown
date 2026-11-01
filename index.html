@@ -419,12 +419,6 @@ body.modal-open { overflow: hidden; }
         </div>
       </section>
 
-  <section class="card" aria-labelledby="h-res">
-    <h2 id="h-res">Reservas de Kent</h2>
-    <p class="sub">O que a terra oferece. Em outros condados, essas reservas serão diferentes.</p>
-    <div class="reserves" id="reserves"></div>
-  </section>
-
   <section class="card" aria-labelledby="h-tasks">
         <h2 id="h-tasks">Obrigações</h2>
         <p class="sub">Distribua o povo de Kent entre as tarefas desta estação. Toque para mudar de 1 em 1; segure para ir mais rápido.</p>
@@ -448,6 +442,12 @@ body.modal-open { overflow: hidden; }
           <button id="feast" type="button">Dar uma festa<small id="feast-s"></small></button>
         </div>
       </section>
+
+  <section class="card" aria-labelledby="h-res">
+    <h2 id="h-res">Reservas de Kent</h2>
+    <p class="sub">O que a terra oferece. Em outros condados, essas reservas serão diferentes.</p>
+    <div class="reserves" id="reserves"></div>
+  </section>
 
   <section class="card" aria-labelledby="h-snd">
         <h2 id="h-snd">Música</h2>
@@ -1280,7 +1280,7 @@ body.modal-open { overflow: hidden; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031211341';
+  var BUILD = '20261031211510';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
