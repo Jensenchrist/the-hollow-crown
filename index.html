@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); } body { margin: 0; } [hidden] { display: none !important; } img { max-width: 100%; }</style>
-<title>The Hollow Crown · Fase 2</title>
+<title>The Hollow Crown · Fase 3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@600;700&family=Uncial+Antiqua&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700&display=swap">
@@ -423,7 +423,7 @@ body.modal-open { overflow: hidden; }
 .dip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .dip button { text-align: left; padding: 10px 14px; border-radius: 18px; }
 .dip button small { display: block; color: var(--muted); font-size: 12.5px; }
-.dip button.on { border-color: var(--accent); background: rgba(255, 255, 255, .12); }
+.dip button.on { border-color: var(--accent); background: rgba(255, 255, 255, .14); box-shadow: inset 0 0 0 1px var(--accent); }
 .why { color: var(--muted); font-size: 13.5px; margin: 10px 0 0; }
 .focus-seg { grid-template-columns: repeat(4, 1fr); }
 .focus-seg button { padding: 8px 4px; font-size: 14px; }
@@ -438,6 +438,24 @@ body.modal-open { overflow: hidden; }
 .log h3 small { font-family: var(--body); color: var(--muted); font-size: 12.5px; margin-left: 6px; }
 li .who { font-weight: 700; margin-right: 4px; }
 .old-phase { color: var(--muted); font-size: 13.5px; }
+/* ===== Fase 3: guerra ===== */
+.units { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 4px 0 10px; }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px 12px; min-width: 0; }
+.unit b { font-size: 20px; font-variant-numeric: tabular-nums; display: block; }
+.unit span { font-size: 13.5px; } .unit small { display: block; color: var(--muted); font-size: 12px; }
+.unit.zero { opacity: .45; }
+.chief { font-family: var(--heading); font-size: 16px; margin: 0 0 6px; }
+.chief small { font-family: var(--body); color: var(--muted); font-size: 13px; margin-left: 6px; }
+.force { color: var(--muted); font-size: 13.5px; margin: 0 0 10px; }
+.order { border-left: 3px solid var(--accent); padding: 6px 0 6px 10px; margin: 8px 0; font-size: 14px; display: flex; gap: 10px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.order button { padding: 6px 12px; border-radius: 999px; font-size: 13.5px; }
+.threat { border-left-color: var(--bad); }
+.map .badge rect { fill: rgba(20, 16, 12, .78); stroke: rgba(255, 246, 214, .6); stroke-width: 1; }
+.map .badge text { font-family: var(--body); font-size: 11px; stroke: none; fill: #fff6d6; font-weight: 700; }
+.map .arrow { fill: none; stroke-width: 3; stroke-dasharray: 6 4; stroke-linecap: round; pointer-events: none; }
+.map .fight text { font-family: var(--body); font-size: 11.5px; font-weight: 700; fill: #fff; stroke: rgba(0, 0, 0, .7); stroke-width: 3px; }
+.map .fight circle { fill: #b2302a; stroke: #fff6d6; stroke-width: 1.5; }
+
 </style>
 
 </head>
@@ -452,7 +470,7 @@ li .who { font-weight: 700; margin-right: 4px; }
   </div>
   <div class="sky-in">
     <div class="brand">
-      <div class="phase">Fase 2 · o sul da Inglaterra</div>
+      <div class="phase">Fase 3 · a guerra pelo sul</div>
       <h1>The Hollow Crown</h1>
     </div>
     <div class="when" id="when"></div>
@@ -525,6 +543,11 @@ li .who { font-weight: 700; margin-right: 4px; }
         <div id="tasks"></div>
         <div class="idle"><span>Sem tarefa (descansando)</span><b id="idle"></b></div>
       </section>
+
+  <section class="card" id="c-army" aria-labelledby="h-army">
+    <h2 id="h-army">Exército</h2>
+    <div id="army"></div>
+  </section>
 
   <section class="card" id="c-prod" aria-labelledby="h-prod">
     <h2 id="h-prod">Produção</h2>
@@ -601,7 +624,7 @@ li .who { font-weight: 700; margin-right: 4px; }
 
   <div class="foot">
     <span id="goal"></span>
-    <a class="old-phase" href="fase1/" id="old-phase" hidden>Jogar a Fase 1 (só Kent)</a>
+    <span class="old-phase" id="old-phase" hidden>Fases anteriores: <a href="fase1/">Fase 1 (só Kent)</a> · <a href="fase2/">Fase 2 (sem guerra)</a></span>
     <span class="confirm" id="reset-area"><button type="button" id="reset">Recomeçar</button></span>
   </div>
 </main>
@@ -622,7 +645,7 @@ li .who { font-weight: 700; margin-right: 4px; }
   'use strict';
 
   const SEASONS = ['Primavera', 'Verão', 'Outono', 'Inverno'];
-  const TASKS = ['campos', 'gado', 'pesca', 'caca', 'madeira'];
+  const TASKS = ['campos', 'gado', 'pesca', 'caca', 'madeira', 'exercito']; // exercito = recrutas em treino (Fase 3)
   const HUNT_YIELD = [1.8, 1.5, 2.6, 3.0];  // comida por caçador por estação (outono e inverno rendem mais)
   // Ração de 50% a 150%: comer menos irrita rápido, comer mais agrada aos poucos
   const rationPctOf = s => clamp(Math.round(s.rationPct != null ? s.rationPct : [50, 100, 150][s.rations != null ? s.rations : 1]), 50, 150);
@@ -669,7 +692,7 @@ li .who { font-weight: 700; margin-right: 4px; }
       forest: 80, fish: 80, hunt: 70,
       // Reservas minerais do condado: ainda não exploradas na Fase 1
       county: { name: 'Kent', stone: 6000, iron: 2500, coastKm: 18 },
-      alloc: { campos: 80, gado: 5, pesca: 15, caca: 0, madeira: 10 },
+      alloc: { campos: 80, gado: 5, pesca: 15, caca: 0, madeira: 10, exercito: 0 },
       rationPct: 100, taxRate: 30,
       won: false, lost: false, lowHappyStreak: 0,
       history: []
@@ -711,6 +734,7 @@ li .who { font-weight: 700; margin-right: 4px; }
   }
   function migrate(s) {
     if (s.alloc && s.alloc.caca == null) s.alloc.caca = 0;
+    if (s.alloc && s.alloc.exercito == null) s.alloc.exercito = 0;
     if (s.hunt == null) s.hunt = 70;
     if (!s.foodBy) s.foodBy = { trigo: s.food * 0.6, gado: s.food * 0.2, peixe: s.food * 0.2, caca: 0, compra: 0, pao: 0 };
     if (s.foodBy.pao == null) s.foodBy.pao = 0;
@@ -1037,7 +1061,7 @@ li .who { font-weight: 700; margin-right: 4px; }
 
 </script>
 <script>
-// The Hollow Crown — Fase 2: o sul da Inglaterra (6 condados, 2 rivais)
+// The Hollow Crown — Fases 2 e 3: o sul da Inglaterra (6 condados, 2 rivais), diplomacia e guerra
 // Usa a simulação de condado da Fase 1 (HC) para cada condado; aqui ficam o tesouro dos lordes,
 // a diplomacia, o padre, o espião, a IA dos rivais e a troca de donos.
 (function (root) {
@@ -1094,13 +1118,59 @@ li .who { font-weight: 700; margin-right: 4px; }
   const PRIEST_LOYAL = 6, PRIEST_OWNER_DROP = 4;
   const SPY = { espiar: { name: 'Espiar', risk: 0.25 }, boatos: { name: 'Espalhar boatos', risk: 0.35 }, sabotar: { name: 'Incendiar o celeiro', risk: 0.45 } };
   const SPY_COOLDOWN = 2, INTEL_SEASONS = 4;
-  const JOIN_AT = 75, JOIN_LEAD = 15, REVOLT_OWNER = 25, REVOLT_OTHER = 60;
+  const JOIN_AT = 75, JOIN_LEAD = 15, REVOLT_OWNER = 25, REVOLT_OTHER = 60, REVOLT_LEAD = 40;
   const FOCUS = { manual: 'À mão', equilibrado: 'Equilibrado', celeiro: 'Celeiro', madeira: 'Madeira' };
 
   const buyPrice = c => 120 + c.pop;
+  // uma guarnição grande segura o condado contra revoltas
+  const garrisonHolds = c => armySize(c.army) >= Math.max(12, c.pop * 0.2);
   const who = l => l === PLAYER ? 'você' : LORDS[l].title;
-  // sedes dos lordes só mudam de mãos pela guerra (Fase 3)
+  // as sedes têm castelo: só mudam de mãos pela guerra
   const isSeat = id => Object.keys(LORDS).some(l => LORDS[l].seat === id);
+
+  // ===== Guerra (Fase 3): tropas da época de Eduardo I =====
+  const UNITS = {
+    lanca: { name: 'Lanceiros', one: 'lanceiro', atk: 1, def: 1.2, wood: 1, gold: 0, note: 'camponeses com lança e escudo' },
+    arco: { name: 'Arqueiros', one: 'arqueiro', atk: 1.2, def: 1.8, wood: 2, gold: 0, note: 'arco longo; fortes na defesa' },
+    besta: { name: 'Besteiros', one: 'besteiro', atk: 1.6, def: 2.2, wood: 1, gold: 4, note: 'besta com virotes de ferro' },
+    armas: { name: 'Homens de armas', one: 'homem de armas', atk: 3, def: 3, wood: 0, gold: 10, note: 'cota de malha e espada' },
+    cav: { name: 'Cavaleiros', one: 'cavaleiro', atk: 7, def: 4, wood: 0, gold: 30, note: 'cavalo de guerra; a carga decide batalhas' },
+    merc: { name: 'Mercenários', one: 'mercenário', atk: 2.5, def: 2.5, wood: 0, gold: 0, note: 'lutam por ouro, não por você' }
+  };
+  const UNIT_KEYS = ['lanca', 'arco', 'besta', 'armas', 'cav', 'merc'];
+  const TRAINABLE = ['lanca', 'arco', 'besta', 'armas', 'cav'];
+  const RANKS = [{ name: 'Sargento', wins: 0, bonus: 1 }, { name: 'Capitão', wins: 2, bonus: 1.08 }, { name: 'Comandante', wins: 4, bonus: 1.15 }, { name: 'Marechal', wins: 7, bonus: 1.25 }];
+  const BUILD = { torre: { name: 'Torre de vigia', wood: 40, gold: 30, note: 'avisa uma estação antes de um ataque · +10% na defesa' },
+    fortim: { name: 'Fortim', wood: 80, gold: 120, note: 'muralha de madeira e pedra · defesa ×1,6' } };
+  const CASTLE = 2.5, MERC_UPKEEP = 2;
+  const FIRST = ['Walter', 'Hugh', 'Roger', 'Geoffrey', 'Ralph', 'Simon', 'Gilbert', 'Robert', 'Thomas', 'Henry', 'Richard', 'Baldwin', 'Osbert', 'Reginald', 'William', 'John', 'Nicholas', 'Bartholomew', 'Alan', 'Godfrey'];
+  const TOWNS = { kent: ['Rochester', 'Dover', 'Canterbury', 'Maidstone'], sussex: ['Lewes', 'Hastings', 'Chichester'], surrey: ['Guildford', 'Reigate'],
+    middlesex: ['Westminster', 'Enfield'], hampshire: ['Winchester', 'Southampton', 'Portsmouth'], essex: ['Colchester', 'Chelmsford', 'Maldon'] };
+  const MERC_BANDS = ['Companhia Branca', 'Lanças de Brabante', 'Besteiros genoveses', 'Irmãos de Flandres', 'Companhia do Javali'];
+  const emptyArmy = () => ({ lanca: 0, arco: 0, besta: 0, armas: 0, cav: 0, merc: 0 });
+  const armySize = a => a ? UNIT_KEYS.reduce((x, k) => x + (a[k] || 0), 0) : 0;
+  const rankOf = ch => { let r = 0; RANKS.forEach((k, i) => { if (ch && ch.wins >= k.wins) r = i; }); return r; };
+  const rankName = ch => RANKS[rankOf(ch)].name;
+  const power = (a, role) => UNIT_KEYS.reduce((x, k) => x + (a[k] || 0) * UNITS[k][role], 0);
+  const fortOf = (w, id, siege) => {
+    const c = w.counties[id], b = c.build || {};
+    if (isSeat(id)) return Math.max(1.2, CASTLE - 0.35 * (siege || 0));
+    if (b.fortim) return Math.max(1.1, 1.6 - 0.2 * (siege || 0));
+    return b.torre ? 1.1 : 1;
+  };
+  const moraleOf = c => 0.85 + clamp(c.happy, 0, 100) / 333;
+  function newChief(w, id) {
+    w.chiefN = (w.chiefN || 0) + 1;
+    const n = (w.seed * 13 + w.chiefN * 7) % FIRST.length, t = TOWNS[id] || ['Kent'];
+    return { name: `${FIRST[n]} de ${t[(w.chiefN + w.seed) % t.length]}`, wins: 0 };
+  }
+  // quem vê o exército de um condado: o dono, quem espiou o dono, ou quem tem torre de vigia ao lado
+  function canSee(w, lord, id) {
+    const c = w.counties[id];
+    if (c.owner === lord || !c.owner) return true;
+    if (lord === PLAYER && w.intel[c.owner]) return true;
+    return ADJ[id].some(n => w.counties[n].owner === lord && (w.counties[n].build || {}).torre);
+  }
 
   function makeCounty(id, seed) {
     const cfg = COUNTY_SETUP[id];
@@ -1113,6 +1183,9 @@ li .who { font-weight: 700; margin-right: 4px; }
     c.focus = id === 'kent' ? 'manual' : 'equilibrado';
     c.noGoal = true; c.noMarket = true; c.growthNeedsFood = true; c.gold = 0;
     c.gifted = false; c.married = false;
+    c.army = emptyArmy(); c.build = { torre: false, fortim: false }; c.trainAs = 'lanca'; c.chief = null;
+    const start = { kent: { lanca: 14, arco: 6 }, hampshire: { lanca: 22, arco: 10, armas: 4 }, essex: { lanca: 18, arco: 12, besta: 4 } }[id];
+    if (start) Object.assign(c.army, start); else c.army.lanca = Math.round(c.pop * 0.12); // milícia local
     if (id !== 'kent') autoManage(c, c.owner || 'local');
     return c;
   }
@@ -1126,6 +1199,24 @@ li .who { font-weight: 700; margin-right: 4px; }
     });
     ORDER.forEach((id, i) => { w.counties[id] = makeCounty(id, seed * 17 + i * 101); });
     w.market = HC.rollMarket({ seed, year: 1, season: 0 }, HC.rng(seed * 97 + 5));
+    w.v = 3; w.marches = []; w.battles = []; w.mercOffer = null; w.chiefN = 0;
+    ['kent', 'hampshire', 'essex'].forEach(id => { w.counties[id].chief = newChief(w, id); });
+    return w;
+  }
+  // jogo salvo da Fase 2 ganha exércitos e construções
+  function migrateWorld(w) {
+    if (!w.marches) w.marches = [];
+    if (!w.battles) w.battles = [];
+    if (w.mercOffer === undefined) w.mercOffer = null;
+    ORDER.forEach(id => {
+      const c = w.counties[id];
+      HC.migrate(c);
+      if (!c.army) { c.army = emptyArmy(); c.army.lanca = Math.round(c.pop * (c.owner ? 0.15 : 0.12)); }
+      if (!c.build) c.build = { torre: false, fortim: false };
+      if (!c.trainAs) c.trainAs = 'lanca';
+      if (c.chief === undefined) c.chief = c.owner ? newChief(w, id) : null;
+    });
+    w.v = 3;
     return w;
   }
 
@@ -1136,7 +1227,8 @@ li .who { font-weight: 700; margin-right: 4px; }
   function autoManage(c, who) {
     HC.migrate(c);
     const p = c.pop, season = c.season, focus = c.focus || 'equilibrado';
-    HC.TASKS.forEach(t => { c.alloc[t] = 0; });
+    HC.TASKS.forEach(t => { if (t !== 'exercito') c.alloc[t] = 0; });
+    c.alloc.exercito = Math.min(c.alloc.exercito || 0, Math.floor(c.pop * 0.3));
     const set = (t, v) => HC.setAlloc(c, t, Math.max(0, Math.min(HC.idle(c), Math.floor(v))));
     set('gado', Math.ceil(c.herd / 4));
     const good = c.fields.filter(f => f >= 58).length;
@@ -1155,7 +1247,7 @@ li .who { font-weight: 700; margin-right: 4px; }
     set('pesca', c.fish > 60 ? 40 : c.fish > 40 ? 26 : 12);
     // o administrador cuida das rações; o rival também cuida dos impostos
     // folga = quantas estações sobram depois de chegar à próxima colheita
-    const surplus = c.food / Math.max(1, p) - [2, 1, 0.3, 3][season];
+    const surplus = c.food / Math.max(1, p + armySize(c.army)) - [2, 1, 0.3, 3][season];
     // quanta gente a terra sustenta, pelo que entrou de comida no último ano
     const yearIn = (c.yearIn || []).length >= 4 ? c.yearIn.reduce((x, y) => x + y, 0) : null;
     const cap = yearIn ? yearIn / 4 : p * 1.3;
@@ -1304,13 +1396,265 @@ li .who { font-weight: 700; margin-right: 4px; }
     if (c.owner && c.owner !== lord) addLoyal(c, c.owner, -PRIEST_OWNER_DROP);
   }
 
+  // ===== Guerra: ordens =====
+  // Atacar um condado vizinho com parte (ou todo) o exército de um condado seu. A batalha acontece na próxima estação vivida.
+  function canMarch(w, lord, from, to) {
+    const a = w.counties[from], b = w.counties[to];
+    return !!a && !!b && a.owner === lord && b.owner !== lord && ADJ[from].includes(to) && armySize(a.army) > 0
+      && !w.marches.some(m => m.lord === lord && m.from === from);
+  }
+  function orderMarch(w, lord, from, to, share) {
+    if (!canMarch(w, lord, from, to)) return false;
+    const a = w.counties[from], units = emptyArmy();
+    share = share == null ? 1 : share;
+    UNIT_KEYS.forEach(k => { const n = share >= 1 ? a.army[k] : Math.floor(a.army[k] * share); units[k] = n; a.army[k] -= n; });
+    if (!armySize(units)) { UNIT_KEYS.forEach(k => { a.army[k] += units[k]; }); return false; }
+    const chief = a.chief || newChief(w, from);
+    a.chief = armySize(a.army) ? newChief(w, from) : null;
+    w.marches.push({ lord, from, to, units, chief, siege: 0, due: lord === PLAYER ? w.turn : w.turn + 1,
+      revealed: lord === PLAYER || !!(w.counties[to].build || {}).torre, morale: moraleOf(a) });
+    return true;
+  }
+  function cancelMarch(w, lord, from) {
+    const i = w.marches.findIndex(m => m.lord === lord && m.from === from);
+    if (i < 0) return false;
+    const m = w.marches[i], home = w.counties[m.from];
+    if (home.owner !== lord) return false;
+    UNIT_KEYS.forEach(k => { home.army[k] = (home.army[k] || 0) + m.units[k]; });
+    if (!home.chief || rankOf(m.chief) >= rankOf(home.chief)) home.chief = m.chief;
+    w.marches.splice(i, 1);
+    return true;
+  }
+  // Reforçar: levar tropas para um condado seu vizinho (na hora)
+  function moveTroops(w, lord, from, to, share) {
+    const a = w.counties[from], b = w.counties[to];
+    if (!a || !b || a.owner !== lord || b.owner !== lord || !ADJ[from].includes(to) || !armySize(a.army)) return false;
+    share = share == null ? 1 : share;
+    UNIT_KEYS.forEach(k => { const n = share >= 1 ? a.army[k] : Math.floor(a.army[k] * share); a.army[k] -= n; b.army[k] = (b.army[k] || 0) + n; });
+    if (!b.chief || (a.chief && rankOf(a.chief) > rankOf(b.chief))) b.chief = a.chief || newChief(w, to);
+    if (!armySize(a.army)) a.chief = null; else if (a.chief === b.chief) a.chief = newChief(w, from);
+    return true;
+  }
+  function canBuild(w, lord, id, kind) {
+    const c = w.counties[id], B = BUILD[kind];
+    return !!B && c.owner === lord && !(c.build || {})[kind] && c.wood >= B.wood && w.lords[lord].gold >= B.gold && !(kind === 'fortim' && isSeat(id));
+  }
+  function build(w, lord, id, kind) {
+    if (!canBuild(w, lord, id, kind)) return false;
+    const c = w.counties[id], B = BUILD[kind];
+    c.wood -= B.wood; w.lords[lord].gold -= B.gold; c.build[kind] = true;
+    return true;
+  }
+  function hireMercs(w, lord, id) {
+    const o = w.mercOffer, c = w.counties[id];
+    if (!o || c.owner !== lord || w.lords[lord].gold < o.price) return false;
+    w.lords[lord].gold -= o.price; c.army.merc = (c.army.merc || 0) + o.n;
+    if (!c.chief) c.chief = newChief(w, id);
+    w.mercOffer = null;
+    return true;
+  }
+  // Custo de treinar n recrutas do tipo t (madeira sai do condado, ouro do tesouro)
+  const trainCost = (t, n) => ({ wood: UNITS[t].wood * n, gold: UNITS[t].gold * n });
+
+  // ===== Guerra: batalha mês a mês =====
+  function takeLosses(a, frac, rand) {
+    let lost = 0;
+    UNIT_KEYS.forEach(k => { const n = a[k] || 0; if (!n) return; const d = Math.min(n, Math.floor(n * frac + rand())); a[k] = n - d; lost += d; });
+    return lost;
+  }
+  function battle(w, m, rand, news) {
+    const c = w.counties[m.to], defLord = c.owner;
+    const rec = { at: m.to, from: m.from, att: m.lord, def: defLord, months: [], result: '', siege: m.siege };
+    const a0 = armySize(m.units), d0 = Math.max(1, armySize(c.army) + (m.defStart ? 0 : 0));
+    m.attStart = m.attStart || a0; m.defStart = m.defStart || d0;
+    let result = '';
+    for (let i = 0; i < 3 && !result; i++) {
+      const fort = fortOf(w, m.to, m.siege);
+      const A = power(m.units, 'atk') * RANKS[rankOf(m.chief)].bonus * (m.morale || 1) * (0.9 + 0.2 * rand());
+      const dSize = armySize(c.army);
+      if (!dSize) { result = 'tomado'; rec.months.push({ a: armySize(m.units), d: 0, fort }); break; }
+      const D = power(c.army, 'def') * fort * RANKS[rankOf(c.chief)].bonus * moraleOf(c) * (0.9 + 0.2 * rand());
+      let la, ld, mode;
+      if (fort > 1.15 && A < D * 1.1) {
+        // cerco: ninguém ataca a muralha; os de dentro passam fome, os de fora adoecem
+        mode = 'cerco'; m.siege++;
+        la = takeLosses(m.units, 0.03, rand);
+        ld = takeLosses(c.army, c.food < armySize(c.army) * 3 ? 0.12 : 0.06, rand);
+        c.food = Math.max(0, Math.round(c.food * 0.85)); HC.normalizeFood(c);
+      } else {
+        mode = fort > 1.15 ? 'assalto' : 'batalha';
+        la = takeLosses(m.units, clamp(0.13 * D / Math.max(1, A), 0.02, 0.45), rand);
+        ld = takeLosses(c.army, clamp(0.13 * A / Math.max(1, D), 0.02, 0.6), rand);
+      }
+      rec.months.push({ a: armySize(m.units), d: armySize(c.army), la, ld, fort, mode });
+      if (armySize(c.army) <= m.defStart * 0.2) result = 'tomado';
+      else if (armySize(m.units) < m.attStart * 0.45) result = 'recuou';
+    }
+    const mineA = m.lord === PLAYER, mineD = defLord === PLAYER;
+    const attName = who(m.lord), defName = mineD ? 'sua guarnição' : defLord ? 'a guarnição de ' + who(defLord) : `a milícia de ${c.name}`;
+    const kind = r => (r ? (mineA ? 'good' : mineD ? 'bad' : 'event') : (mineA ? 'bad' : mineD ? 'good' : 'event'));
+    if (!result) {
+      if (fortOf(w, m.to, m.siege) > 1.15) result = 'cerco';
+      else result = power(m.units, 'atk') > power(c.army, 'def') * fortOf(w, m.to, m.siege) ? 'tomado' : 'recuou';
+    }
+    relate(w, m.lord, defLord, -30);
+    if (result === 'tomado') {
+      const prevChief = c.chief;
+      m.chief.wins++;
+      const lostPop = Math.round(c.pop * 0.05), lostFood = Math.round(c.food * 0.15);
+      c.pop -= lostPop; c.food -= lostFood; HC.normalizeFood(c); c.happy = clamp(c.happy - 10, 0, 100);
+      transfer(w, m.to, m.lord, news, `${c.name} caiu! ${mineA ? 'Seu exército' : 'O exército de ' + attName} venceu ${mineD ? 'a sua guarnição' : defLord ? 'a guarnição de ' + who(defLord) : 'a milícia local'}.`);
+      news[news.length - 1].kind = kind(true);
+      c.loyal[m.lord] = Math.max(c.loyal[m.lord] || 0, 55);
+      if (defLord) c.loyal[defLord] = Math.min(c.loyal[defLord] || 0, 25);
+      c.army = m.units; c.chief = m.chief;
+      if (prevChief && defLord) news.push({ kind: kind(true), county: m.to, text: `${rankName(prevChief)} ${prevChief.name} ${rand() < 0.5 ? 'morreu defendendo' : 'fugiu de'} ${c.name}.` });
+      news.push({ kind: kind(true), county: m.to, text: `O saque levou ${lostFood} de comida e ${lostPop} pessoas fugiram.` });
+      if (c.owner === PLAYER) c.focus = 'equilibrado';
+      rec.result = 'tomado';
+      return { rec, done: true };
+    }
+    if (result === 'recuou') {
+      if (c.chief) c.chief.wins++;
+      // os sobreviventes voltam para casa (ou para o condado vizinho mais próximo que ainda for do lorde)
+      const home = w.counties[m.from].owner === m.lord ? m.from : ADJ[m.to].find(n => w.counties[n].owner === m.lord);
+      const dead = rand() < 0.3;
+      if (home) {
+        UNIT_KEYS.forEach(k => { w.counties[home].army[k] = (w.counties[home].army[k] || 0) + m.units[k]; });
+        if (!dead && (!w.counties[home].chief || rankOf(m.chief) >= rankOf(w.counties[home].chief))) w.counties[home].chief = m.chief;
+      }
+      news.push({ kind: kind(false), county: m.to, text: `Batalha em ${c.name}: ${defName} resistiu e ${mineA ? 'seu exército' : 'o exército de ' + attName} recuou com ${armySize(m.units)} homens.` });
+      if (dead) news.push({ kind: kind(false), county: m.to, text: `${rankName(m.chief)} ${m.chief.name} morreu na batalha.` });
+      rec.result = 'recuou';
+      return { rec, done: true };
+    }
+    news.push({ kind: mineA || mineD ? 'event' : 'event', county: m.to, text: `Cerco de ${c.name}: ${armySize(m.units)} homens ${mineA ? 'seus ' : ''}cercam o castelo; restam ${armySize(c.army)} defensores. O cerco continua.` });
+    rec.result = 'cerco';
+    return { rec, done: false };
+  }
+  function resolveMarches(w, rand, news) {
+    const keep = [];
+    w.battles = [];
+    w.marches.forEach(m => {
+      if (m.due > w.turn) { keep.push(m); return; }
+      const c = w.counties[m.to];
+      if (c.owner === m.lord) { // já é dele (revolta ou compra): as tropas viram guarnição
+        UNIT_KEYS.forEach(k => { c.army[k] = (c.army[k] || 0) + m.units[k]; });
+        if (!c.chief) c.chief = m.chief;
+        return;
+      }
+      if (!m.revealed && c.owner === PLAYER) news.push({ kind: 'bad', county: m.to, text: `Ataque sem aviso! O exército de ${who(m.lord)} invadiu ${c.name}.` });
+      const r = battle(w, m, rand, news);
+      w.battles.push(r.rec);
+      if (!r.done) keep.push(m);
+    });
+    w.marches = keep;
+  }
+
+  // ===== Guerra: recrutas, comida dos soldados e mercenários (fim da estação) =====
+  function trainAndUpkeep(w, id, news) {
+    const c = w.counties[id], lord = c.owner;
+    const n = c.alloc.exercito || 0, t = TRAINABLE.includes(c.trainAs) ? c.trainAs : 'lanca';
+    if (n > 0) {
+      const purse = lord ? w.lords[lord] : null;
+      const U = UNITS[t];
+      let k = n;
+      if (U.wood) k = Math.min(k, Math.floor(c.wood / U.wood));
+      if (U.gold) k = Math.min(k, purse ? Math.floor(purse.gold / U.gold) : 0);
+      k = Math.max(0, Math.min(k, c.pop - 15));
+      if (k > 0) {
+        c.wood -= U.wood * k; if (purse) purse.gold -= U.gold * k;
+        c.pop -= k; c.army[t] = (c.army[t] || 0) + k;
+        if (!c.chief) c.chief = newChief(w, id);
+      }
+      c.alloc.exercito = 0;
+      if (lord === PLAYER) news.push({ kind: 'event', county: id, text: k === n ? `${k} ${k === 1 ? U.one : U.name.toLowerCase()} ${k === 1 ? 'pronto' : 'prontos'} em ${c.name}.`
+        : `Só ${k} de ${n} recrutas viraram ${U.name.toLowerCase()} em ${c.name}: faltou ${U.wood && c.wood < U.wood ? 'madeira' : 'ouro'}. Os outros voltaram ao trabalho.` });
+    }
+    // soldados comem do celeiro do condado onde estão
+    const eat = armySize(c.army);
+    if (eat > 0) {
+      if (c.food >= eat) { c.food -= eat; HC.normalizeFood(c); }
+      else {
+        c.food = 0; HC.normalizeFood(c);
+        const lost = takeLosses(c.army, 0.15, () => 0.5);
+        if (lord === PLAYER && lost) news.push({ kind: 'bad', county: id, text: `Sem comida, ${lost} soldados desertaram em ${c.name}.` });
+      }
+    }
+    // mercenários cobram toda estação
+    if (c.army.merc > 0 && lord) {
+      const pay = c.army.merc * MERC_UPKEEP, L = w.lords[lord];
+      if (L.gold >= pay) L.gold -= pay;
+      else {
+        const lostFood = Math.round(c.food * 0.2); c.food -= lostFood; HC.normalizeFood(c);
+        if (lord === PLAYER) news.push({ kind: 'bad', county: id, text: `Sem pagamento, os mercenários foram embora de ${c.name} e saquearam ${lostFood} de comida.` });
+        c.army.merc = 0;
+      }
+    }
+    if (!armySize(c.army) && c.owner) c.chief = null;
+  }
+
+  // ===== Guerra: decisões dos rivais =====
+  function aiWar(w, lord, rand, news) {
+    const L = w.lords[lord], style = LORDS[lord].style;
+    const hostile = (L.relation[PLAYER] || 0) < -20;
+    const mineIds = owned(w, lord);
+    mineIds.forEach(id => {
+      const c = w.counties[id];
+      const want = c.pop * (isSeat(id) ? (style === 'agressivo' ? 0.35 : 0.25) : (style === 'agressivo' ? 0.2 : 0.14));
+      const have = armySize(c.army);
+      const rate = w.turn < 4 ? 0.02 : style === 'agressivo' ? 0.06 : 0.04;
+      c.alloc.exercito = have < want ? Math.max(0, Math.floor(Math.min(c.pop * rate, want - have))) : 0;
+      c.trainAs = L.gold > 320 ? 'armas' : L.gold > 160 && rand() < 0.5 ? 'besta' : c.wood > 60 && rand() < 0.5 ? 'arco' : 'lanca';
+      // torres na fronteira com você; fortim quando sobra ouro
+      const border = ADJ[id].some(n => w.counties[n].owner === PLAYER);
+      if (border && !c.build.torre && L.gold > 150) build(w, lord, id, 'torre');
+      if (border && !c.build.fortim && L.gold > 520) build(w, lord, id, 'fortim');
+    });
+    if (w.mercOffer && style === 'agressivo' && L.gold > w.mercOffer.price + 150 && mineIds.length) hireMercs(w, lord, mineIds[0]);
+    // ataque: só depois de dois anos, com folga de força, e não toda estação
+    if (w.turn < 8 || (L.warCooldown || 0) > 0) { L.warCooldown = Math.max(0, (L.warCooldown || 0) - 1); return; }
+    if (w.marches.some(m => m.lord === lord)) return;
+    let best = null;
+    mineIds.forEach(from => {
+      const a = w.counties[from];
+      ADJ[from].forEach(to => {
+        const b = w.counties[to];
+        if (b.owner === lord) return;
+        const vsPlayer = b.owner === PLAYER;
+        if (b.owner && !vsPlayer) return; // rivais não brigam entre si (ainda)
+        if (vsPlayer && style === 'ardilosa' && !hostile) return;
+        if (!b.owner && style !== 'agressivo') return;
+        const keep = isSeat(from) ? 0.3 : 0.15;
+        const A = power(a.army, 'atk') * (1 - keep) * RANKS[rankOf(a.chief)].bonus;
+        const D = power(b.army, 'def') * fortOf(w, to, 0) * RANKS[rankOf(b.chief)].bonus * moraleOf(b);
+        if (!b.owner && w.turn < 12) return; // neutros: só depois do terceiro ano
+        const need = !b.owner ? 2.5 : style === 'agressivo' ? 1.5 : 1.9;
+        const ratio = A / Math.max(1, D);
+        if (ratio >= need && (!best || ratio > best.ratio)) best = { from, to, ratio, share: 1 - keep };
+      });
+    });
+    if (best && rand() < (style === 'agressivo' ? 0.6 : 0.35)) {
+      orderMarch(w, lord, best.from, best.to, best.share);
+      L.warCooldown = 3;
+      const m = w.marches[w.marches.length - 1], b = w.counties[best.to];
+      if (m && m.revealed && b.owner === PLAYER)
+        news.push({ kind: 'bad', county: best.to, text: `Os vigias de ${b.name} avistam ${armySize(m.units)} homens de ${who(lord)} reunidos em ${w.counties[best.from].name}. O ataque vem na próxima estação!` });
+    }
+  }
+
   // ===== A estação inteira, no sul todo =====
   function step(input, rand) {
     const w = clone(input);
     const news = [];
-    if (w.lost) return { world: w, months: {}, news };
-    // 1. Rivais decidem
+    if (w.lost) return { world: w, months: {}, reports: {}, news };
+    migrateWorld(w);
+    const R = rand || (() => 0.5);
+    // 1. Rivais decidem (diplomacia e guerra)
     Object.keys(LORDS).forEach(l => { if (l !== PLAYER) aiTurn(w, l, rand || (() => 0.99), news); });
+    // 1b. Batalhas e cercos desta estação (as ordens da estação anterior chegam agora)
+    resolveMarches(w, R, news);
+    Object.keys(LORDS).forEach(l => { if (l !== PLAYER && !w.lords[l].out) aiWar(w, l, R, news); });
     // 2. Cada condado vive 3 meses
     const months = {}, income = {}, reports = {};
     ORDER.forEach(id => {
@@ -1322,7 +1666,7 @@ li .who { font-weight: 700; margin-right: 4px; }
         const purse = c.owner ? w.lords[c.owner] : c;
         const fund = c.owner ? 'gold' : 'purse';
         let n = 0;
-        while (n < 8 && (purse[fund] || 0) >= HC.BUY_COST && c.food / Math.max(1, c.pop) < [2, 1, 0.3, 3][c.season] + 0.3) {
+        while (n < 8 && (purse[fund] || 0) >= HC.BUY_COST && c.food / Math.max(1, c.pop + armySize(c.army)) < [2, 1, 0.3, 3][c.season] + 0.3) {
           purse[fund] -= HC.BUY_COST; c.food += HC.BUY_FOOD; c.foodBy.compra += HC.BUY_FOOD; n++;
         }
         if (n && c.owner === PLAYER) news.push({ kind: 'event', county: id, text: `O administrador de ${c.name} comprou ${n} ${n > 1 ? 'sacos' : 'saco'} de grão (−${n * HC.BUY_COST} ouro).` });
@@ -1334,10 +1678,11 @@ li .who { font-weight: 700; margin-right: 4px; }
       nc.gold = 0;
       if (!c.owner) nc.purse = Math.min(400, (c.purse || 0) + tax);
       nc.yearIn = (c.yearIn || []).concat(out.totals ? out.totals.foodIn : 0).slice(-4);
-      w.counties[id] = Object.assign(nc, { id: c.id, name: c.name, owner: c.owner, loyal: c.loyal, note: c.note, taxMult: c.taxMult, focus: c.focus, married: c.married, gifted: false });
+      w.counties[id] = Object.assign(nc, { id: c.id, name: c.name, owner: c.owner, loyal: c.loyal, note: c.note, taxMult: c.taxMult, focus: c.focus, married: c.married, gifted: false, army: c.army, build: c.build, chief: c.chief, trainAs: c.trainAs });
       months[id] = out.months; reports[id] = out.report;
       if (c.owner) income[c.owner] = (income[c.owner] || 0) + tax;
       if (out.report.some(r => /Revolta!/.test(r.text))) news.push({ kind: c.owner === PLAYER ? 'bad' : 'event', county: id, text: `Revolta em ${c.name}!` });
+      trainAndUpkeep(w, id, news);
     });
     // 3. Tesouro: impostos menos o dízimo de quem tem padre
     Object.keys(w.lords).forEach(l => {
@@ -1365,11 +1710,17 @@ li .who { font-weight: 700; margin-right: 4px; }
       if (!c.owner) {
         if (top && c.loyal[top] >= JOIN_AT && c.loyal[top] - (c.loyal[second] || 0) >= JOIN_LEAD)
           transfer(w, id, top, news, `${c.name} jurou lealdade a ${who(top)}.`);
-      } else if (!isSeat(id) && (c.loyal[c.owner] || 0) < REVOLT_OWNER && top && (c.loyal[top] || 0) >= REVOLT_OTHER) {
+      } else if (!isSeat(id) && top && (c.loyal[top] || 0) >= REVOLT_OTHER && (c.loyal[top] || 0) - (c.loyal[c.owner] || 0) >= REVOLT_LEAD && !garrisonHolds(c)) {
         transfer(w, id, top, news, `${c.name} se revoltou contra ${who(c.owner)} e passou para ${who(top)}.`);
       }
     });
-    // 7. Mercador e informações
+    // 7. Mercenários de passagem, mercador e informações
+    if (w.mercOffer) { w.mercOffer.left--; if (w.mercOffer.left <= 0) w.mercOffer = null; }
+    if (!w.mercOffer && w.turn >= 3 && R() < 0.3) {
+      const n = 12 + Math.floor(R() * 16);
+      w.mercOffer = { name: MERC_BANDS[Math.floor(R() * MERC_BANDS.length)], n, price: n * 14, left: 2 };
+      news.push({ kind: 'event', county: 'kent', text: `${w.mercOffer.name} oferece ${n} mercenários por ${w.mercOffer.price} ouro (e ${n * MERC_UPKEEP} por estação).` });
+    }
     Object.keys(w.intel).forEach(k => { w.intel[k]--; if (w.intel[k] <= 0) delete w.intel[k]; });
     const k = w.counties.kent;
     w.turn = (w.turn || 0) + 1; w.year = k.year; w.season = k.season; w.month = k.month;
@@ -1380,8 +1731,11 @@ li .who { font-weight: 700; margin-right: 4px; }
     }
     // 8. Fim do Ato I
     const mine = owned(w, PLAYER);
-    if (w.counties.kent.owner !== PLAYER || w.counties.kent.lost) { w.lost = true; news.push({ kind: 'bad', county: 'kent', text: 'Você perdeu Kent. O Ato I terminou em derrota.' }); }
-    else if (!w.won && mine.length >= 4 && mine.includes('middlesex')) { w.won = true; news.push({ kind: 'good', county: 'middlesex', text: 'Você domina o sul e Londres. O Ato I está vencido!' }); }
+    if (!mine.length) { w.lost = true; news.push({ kind: 'bad', county: 'kent', text: 'Você perdeu suas últimas terras. O Ato I terminou em derrota.' }); }
+    else {
+      if (!w.won && mine.length >= 4 && mine.includes('middlesex')) { w.won = true; news.push({ kind: 'good', county: 'middlesex', text: 'Você domina o sul e Londres. O Ato I está vencido!' }); }
+      if (!w.king && mine.length === ORDER.length) { w.king = true; news.push({ kind: 'good', county: 'kent', text: 'Os seis condados são seus. Você é o senhor de todo o sul da Inglaterra!' }); }
+    }
     return { world: w, months, reports, news };
   }
 
@@ -1395,7 +1749,9 @@ li .who { font-weight: 700; margin-right: 4px; }
   }
 
   const api = { PLAYER, LORDS, ADJ, ORDER, FOCUS, SPY, GIFT_COST, GIFT_LOYAL, MARRY_COST, MARRY_LOYAL, MARRY_MIN, BUY_MIN,
-    PRIEST_LOYAL, JOIN_AT, JOIN_LEAD, REVOLT_OWNER, REVOLT_OTHER, buyPrice, isSeat,
+    PRIEST_LOYAL, JOIN_AT, JOIN_LEAD, REVOLT_OWNER, REVOLT_OTHER, REVOLT_LEAD, buyPrice, isSeat,
+    UNITS, UNIT_KEYS, TRAINABLE, RANKS, BUILD, CASTLE, MERC_UPKEEP, armySize, power, rankOf, rankName, fortOf, moraleOf, canSee, garrisonHolds,
+    canMarch, orderMarch, cancelMarch, moveTroops, canBuild, build, hireMercs, trainCost, migrateWorld,
     newWorld, step, owned, canReach, autoManage, gift, canGift, marry, canMarry, buy, canBuy, setPriest, setSpy, withTreasury, clone };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.HW = api;
@@ -1406,7 +1762,7 @@ li .who { font-weight: 700; margin-right: 4px; }
 (function () {
   'use strict';
   const H = window.HC, W = window.HW;
-  const KEY = 'hollow-crown-fase2';
+  const KEY = 'hollow-crown-fase3', OLD_KEY = 'hollow-crown-fase2';
   const $ = id => document.getElementById(id);
   const ME = W.PLAYER;
 
@@ -1441,8 +1797,9 @@ li .who { font-weight: 700; margin-right: 4px; }
   }
   function load() {
     try {
-      const raw = localStorage.getItem(KEY);
-      if (raw) { const d = JSON.parse(raw); if (d && d.world && d.world.v === 2 && d.world.counties) { world = d.world; sel = d.sel && world.counties[d.sel] ? d.sel : 'kent'; log = d.log || []; bind(); return; } }
+      // jogo da Fase 2 continua na Fase 3 (o save antigo fica intacto para a página da Fase 2)
+      const raw = localStorage.getItem(KEY) || localStorage.getItem(OLD_KEY);
+      if (raw) { const d = JSON.parse(raw); if (d && d.world && d.world.v >= 2 && d.world.counties) { world = W.migrateWorld(d.world); sel = d.sel && world.counties[d.sel] ? d.sel : 'kent'; log = d.log || []; bind(); return; } }
     } catch (e) {}
     fresh();
   }
@@ -1470,9 +1827,11 @@ li .who { font-weight: 700; margin-right: 4px; }
     gado: { name: 'Gado', hint: s => `${s.herd} cabeças · 1 pessoa cuida de 4 · dá leite e carne` },
     caca: { name: 'Caça', hint: s => ['Primavera: caça moderada', 'Verão: animais espalhados, pouca caça', 'Outono: melhor época de caça', 'Inverno: caça rende bem, falta comida'][s.season] + ' · caçar demais esvazia a floresta' },
     pesca: { name: 'Pesca', hint: s => ['Primavera: boa pesca', 'Verão: pesca farta', 'Outono: a pesca cai', 'Inverno: rio frio, pouco peixe'][s.season] + ' · pescar demais esvazia o rio' },
-    madeira: { name: 'Madeira', hint: s => `O inverno pede ${H.woodNeedWinter(s)} de lenha · cortar demais desmata` }
+    madeira: { name: 'Madeira', hint: s => `O inverno pede ${H.woodNeedWinter(s)} de lenha · cortar demais desmata` },
+    exercito: { name: 'Recrutas', hint: s => { const U = W.UNITS[s.trainAs || 'lanca']; return `viram ${U.name.toLowerCase()} no fim da estação · treinando, não trabalham · cada um custa ${costTxt(s.trainAs || 'lanca', 1)}`; } }
   };
 
+  const costTxt = (t, n) => { const c = W.trainCost(t, n); return [c.wood ? `${c.wood} de madeira` : '', c.gold ? `${c.gold} de ouro` : ''].filter(Boolean).join(' + ') || 'nada'; };
   function el(tag, attrs, html) { const e = document.createElement(tag); Object.assign(e, attrs || {}); if (html != null) e.innerHTML = html; return e; }
 
   function buildTasks() {
@@ -1603,11 +1962,15 @@ li .who { font-weight: 700; margin-right: 4px; }
     }).join('');
     $('when').innerHTML = `${s.name} · Ano ${s.year} · <b>${playing ? H.MONTHS[liveMonth] : H.SEASONS[s.season]}</b><div class="months">${trio}</div>`;
 
-    ['c-fc', 'c-tasks', 'c-prod', 'c-dec', 'c-mkt'].forEach(id => { $(id).hidden = !own; });
+    ['c-fc', 'c-tasks', 'c-army', 'c-prod', 'c-dec', 'c-mkt'].forEach(id => { $(id).hidden = !own; });
     $('c-nb').hidden = own;
     $('c-focus').hidden = !own || sel === 'kent';
 
-    const f = playing && seasonFc ? seasonFc : H.forecast(s);
+    const f0 = playing && seasonFc ? seasonFc : H.forecast(s);
+    // os soldados também comem do celeiro (a previsão do condado não conta com eles)
+    const armyEat = W.armySize(game.army || {});
+    const f = Object.assign({}, f0, { food: Math.max(0, f0.food - armyEat), seasonsOfFood: Math.round(s.food / Math.max(1, H.eatPerSeason(s) + armyEat) * 10) / 10,
+      warnings: f0.warnings.concat(armyEat && f0.food < armyEat ? [`Os ${armyEat} soldados comem ${armyEat} por estação: vai faltar comida para eles e alguns vão desertar.`] : []) });
     const happyWord = s.happy >= 70 ? 'contente' : s.happy >= 50 ? 'tranquilo' : s.happy >= 30 ? 'insatisfeito' : 'à beira da revolta';
     const L = world.lords[ME];
     const q = '<span class="q">?</span>';
@@ -1624,7 +1987,7 @@ li .who { font-weight: 700; margin-right: 4px; }
       : `<div class="stat"><div class="k">${k}</div><div class="v"><span>${v}</span>${icon(ic)}</div><div class="s">${sub}</div>${m != null ? `<div class="meter"><i style="width:${m}%"></i></div>` : ''}</div>`).join('');
     lastView = s;
     renderMap();
-    if (!own) renderNeighbor(s); else if (sel !== 'kent') renderFocus();
+    if (!own) renderNeighbor(s); else { if (sel !== 'kent') renderFocus(); renderArmy(); }
     renderCourt();
     if (own) renderMarket(s, lock);
     if (!$('celeiro').hidden) renderCeleiro();
@@ -1690,11 +2053,15 @@ li .who { font-weight: 700; margin-right: 4px; }
     });
 
     const mineList = W.owned(world, ME);
-    $('goal').textContent = `Ato I: tenha 4 condados do sul, incluindo Middlesex (Londres). Hoje: ${mineList.length} de 4${mineList.includes('middlesex') ? ', com Londres' : ', sem Londres'}.`;
+    $('goal').textContent = world.won ? `Ato I vencido. Agora tome os castelos de Hampshire e Essex para dominar o sul: ${mineList.length} de 6 condados.`
+      : `Ato I: tenha 4 condados do sul, incluindo Middlesex (Londres). Hoje: ${mineList.length} de 4${mineList.includes('middlesex') ? ', com Londres' : ', sem Londres'}.`;
 
     if (playing || autoRun) { $('banner').innerHTML = ''; return; }
     if (autoMsg && !world.lost) { $('banner').innerHTML = `<div class="banner info"><span>${autoMsg}</span><button type="button" id="ok-auto">Entendi</button></div>`; const ok = $('ok-auto'); if (ok) ok.addEventListener('click', () => { autoMsg = ''; render(); }); return; }
-    if (world.lost) $('banner').innerHTML = `<div class="banner lose"><span>Você perdeu Kent no ano ${world.year}. O Ato I terminou.</span><button type="button" id="again">Jogar de novo</button></div>`;
+    const threats = world.marches.filter(m => m.lord !== ME && m.revealed && ownerOf(m.to) === ME);
+    if (world.lost) $('banner').innerHTML = `<div class="banner lose"><span>Você perdeu suas últimas terras no ano ${world.year}. O Ato I terminou.</span><button type="button" id="again">Jogar de novo</button></div>`;
+    else if (threats.length) $('banner').innerHTML = `<div class="banner lose"><span>${threats.map(m => `${W.LORDS[m.lord].name} marcha para ${world.counties[m.to].name} com ${W.armySize(m.units)} homens. O ataque vem nesta estação.`).join(' ')}</span></div>`;
+    else if (world.king) $('banner').innerHTML = `<div class="banner win"><span>Os seis condados são seus. Você é o senhor de todo o sul!</span></div>`;
     else if (world.won) $('banner').innerHTML = `<div class="banner win"><span>Ato I vencido! O sul e Londres são seus. Você pode continuar jogando; a guerra vem na Fase 3.</span></div>`;
     else $('banner').innerHTML = '';
     const again = $('again'); if (again) again.addEventListener('click', () => { fresh(); save(); render(); renderLog(); });
@@ -1730,17 +2097,31 @@ li .who { font-weight: 700; margin-right: 4px; }
       const priest = L.priest === id ? `<path class="mark" d="M${m.x + 34} ${my - 16}v15M${m.x + 28.5} ${my - 11}h11" stroke="#fffaf0" stroke-width="2.6" stroke-linecap="round"/>` : '';
       const spy = L.spy.mission && L.spy.mission.id === id ? `<circle class="mark" cx="${m.x - 32}" cy="${my - 6}" r="5" fill="#1a1410" stroke="#fffaf0" stroke-width="1.5"/>` : '';
       const Y = v => Math.round(v * SY);
-      return `<g class="cty${id === sel ? ' sel' : ''}${far ? ' far' : ''}" data-id="${id}" role="button" tabindex="0" aria-label="${c.name}, ${o === ME ? 'seu' : o ? 'de ' + W.LORDS[o].name : 'neutro'}">
-        <path d="${m.d}" transform="scale(1 ${SY})" vector-effect="non-scaling-stroke" fill="${colorOf(id)}" fill-opacity=".86"/>${seat}${priest}${spy}
+      const seen = W.canSee(world, ME, id), n = W.armySize(c.army);
+      const bt = `${seen ? n : '?'}`, bw = 12 + bt.length * 7;
+      const by = id === 'middlesex' ? my - 34 : my + 22;
+      const badge = `<g class="badge mark"><rect x="${m.x - bw / 2 - 8}" y="${by}" width="${bw + 16}" height="16" rx="5"/><path d="M${m.x - bw / 2 - 3} ${by + 4}h7v4c0 2.6-1.6 4-3.5 4.6C${m.x - bw / 2 - 1.4} ${by + 12} ${m.x - bw / 2 - 3} ${by + 10.6} ${m.x - bw / 2 - 3} ${by + 8}z" fill="#fff6d6"/><text x="${m.x + 5}" y="${by + 12}" text-anchor="middle">${bt}</text></g>`;
+      return `<g class="cty${id === sel ? ' sel' : ''}${far ? ' far' : ''}" data-id="${id}" role="button" tabindex="0" aria-label="${c.name}, ${o === ME ? 'seu' : o ? 'de ' + W.LORDS[o].name : 'neutro'}, ${seen ? n + ' soldados' : 'exército desconhecido'}">
+        <path d="${m.d}" transform="scale(1 ${SY})" vector-effect="non-scaling-stroke" fill="${colorOf(id)}" fill-opacity=".86"/>${seat}${priest}${spy}${badge}
         <text x="${m.x}" y="${Y(m.y)}" text-anchor="middle">${c.name}</text>
         ${id === 'middlesex' ? `<text class="own" x="${m.x}" y="${Y(m.y) + 14}" text-anchor="middle" style="font-style:italic">Londres</text>` : ''}
         <text class="own" x="${m.x}" y="${Y(m.y) + (id === 'middlesex' ? 28 : 15)}" text-anchor="middle">${sub}</text></g>`;
     }).join('');
-    const london = '';
+    const arrows = world.marches.filter(mm => mm.lord === ME || mm.revealed).map(mm => {
+      const a = MAP[mm.from], b = MAP[mm.to], ax = a.x, ay = a.y * SY, bx = b.x, by = b.y * SY;
+      const ex = ax + (bx - ax) * 0.78, ey = ay + (by - ay) * 0.78;
+      return `<path class="arrow" stroke="${W.LORDS[mm.lord].color}" d="M${ax} ${ay} L${ex} ${ey}"/><circle class="mark" cx="${ex}" cy="${ey}" r="4" fill="${W.LORDS[mm.lord].color}"/>`;
+    }).join('');
+    const fights = (world.battles || []).map(r => {
+      const b = MAP[r.at], k = battleFrame == null ? r.months.length - 1 : Math.min(battleFrame, r.months.length - 1), mo = r.months[k] || { a: 0, d: 0 };
+      const label = battleFrame == null ? (r.result === 'tomado' ? 'caiu' : r.result === 'recuou' ? 'resistiu' : 'cerco') : `${mo.a} × ${mo.d}`;
+      return `<g class="fight mark"><circle cx="${b.x + 40}" cy="${b.y * SY - 22}" r="9"/><path d="M${b.x + 35} ${b.y * SY - 27}l10 10M${b.x + 45} ${b.y * SY - 27}l-10 10" stroke="#fff6d6" stroke-width="2"/><text x="${b.x + 40}" y="${b.y * SY - 36}" text-anchor="middle">${label}</text></g>`;
+    }).join('');
+    const london = arrows + fights;
     $('map').innerHTML = `<svg class="map" viewBox="0 0 360 ${Math.round(206 * SY)}" role="group" aria-label="Mapa dos seis condados do sul">
       <rect class="sea" x="0" y="0" width="360" height="${Math.round(206 * SY)}" rx="14"/>${cty}
       <path class="river" transform="scale(1 ${SY})" vector-effect="non-scaling-stroke" d="M100 66 C140 64 168 66 192 62 S 290 57 356 49"/>${london}</svg>`;
-    $('map-legend').innerHTML = [[ME, 'Você'], ['aldric', W.LORDS.aldric.title], ['matilda', W.LORDS.matilda.title]].map(([l, n]) => `<span><i style="--c:${W.LORDS[l].color}"></i>${n} · ${W.owned(world, l).length}</span>`).join('') + `<span><i style="--c:${NEUTRAL}"></i>Neutro</span>`;
+    $('map-legend').innerHTML = `<span>Escudo = soldados no condado (? = desconhecido)</span>` + [[ME, 'Você'], ['aldric', W.LORDS.aldric.title], ['matilda', W.LORDS.matilda.title]].map(([l, n]) => `<span><i style="--c:${W.LORDS[l].color}"></i>${n} · ${W.owned(world, l).length}</span>`).join('') + `<span><i style="--c:${NEUTRAL}"></i>Neutro</span>`;
     $('map-sub').textContent = playing ? 'O tempo está passando…' : `Aberto: ${world.counties[sel].name}. Toque em outro condado para ver de perto.`;
   }
   function pick(id) {
@@ -1749,6 +2130,76 @@ li .who { font-weight: 700; margin-right: 4px; }
   }
   $('map').addEventListener('click', e => { const g = e.target.closest && e.target.closest('.cty'); if (g) pick(g.dataset.id); });
   $('map').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset && e.target.dataset.id) { e.preventDefault(); pick(e.target.dataset.id); } });
+
+  // ===== Exército do condado aberto =====
+  let battleFrame = null, marchShare = 1;
+  const nf = v => v.toLocaleString('pt-BR');
+  const unitList = a => W.UNIT_KEYS.filter(k => a[k] > 0).map(k => `${a[k]} ${a[k] === 1 ? W.UNITS[k].one : W.UNITS[k].name.toLowerCase()}`).join(', ');
+  function oddsWord(from, to, share) {
+    if (!W.canSee(world, ME, to)) return 'desconhecida';
+    const a = world.counties[from], b = world.counties[to];
+    const A = W.power(a.army, 'atk') * share * W.RANKS[W.rankOf(a.chief)].bonus * W.moraleOf(a);
+    const D = W.power(b.army, 'def') * W.fortOf(world, to, 0) * W.RANKS[W.rankOf(b.chief)].bonus * W.moraleOf(b);
+    const r = A / Math.max(1, D);
+    if (!W.armySize(b.army)) return 'certa (sem defensores)';
+    if (W.isSeat(to) || (b.build || {}).fortim) return r >= 1.3 ? 'boa (assalto)' : r >= 0.6 ? 'cerco longo' : 'ruim';
+    return r >= 1.6 ? 'muito boa' : r >= 1.2 ? 'boa' : r >= 0.9 ? 'equilibrada' : 'ruim';
+  }
+  function renderArmy() {
+    const c = game, L = world.lords[ME], lock = playing || world.lost;
+    const n = W.armySize(c.army), fort = W.fortOf(world, sel, 0);
+    const chief = c.chief ? `<p class="chief">${W.rankName(c.chief)} ${c.chief.name}<small>${c.chief.wins} ${c.chief.wins === 1 ? 'vitória' : 'vitórias'}${W.rankOf(c.chief) < 3 ? ' · sobe de posto com ' + W.RANKS[W.rankOf(c.chief) + 1].wins : ''}</small></p>` : '<p class="chief">Sem comandante<small>chega com os primeiros soldados</small></p>';
+    const units = n === 0 ? '<p class="sub" style="grid-column:1/-1;margin:0">Nenhum soldado aqui.</p>' : W.UNIT_KEYS.filter(k => c.army[k] > 0).map(k => `<div class="unit${c.army[k] ? '' : ' zero'}"><b>${c.army[k] || 0}</b><span>${W.UNITS[k].name}</span><small>${W.UNITS[k].note}</small></div>`).join('');
+    const atk = Math.round(W.power(c.army, 'atk')), def = Math.round(W.power(c.army, 'def') * fort);
+    const fortTxt = W.isSeat(sel) ? `castelo ×${String(fort).replace('.', ',')}` : c.build.fortim ? 'fortim ×1,6' : c.build.torre ? 'torre ×1,1' : 'sem muralhas';
+    const train = W.TRAINABLE.map(t => `<button type="button" data-train="${t}" class="${(c.trainAs || 'lanca') === t ? 'on' : ''}" aria-pressed="${(c.trainAs || 'lanca') === t}" ${lock ? 'disabled' : ''}>${W.UNITS[t].name}<small>${costTxt(t, 1)} cada · ataque ${nf(W.UNITS[t].atk)} · defesa ${nf(W.UNITS[t].def)}</small></button>`).join('');
+    const rec = c.alloc.exercito || 0;
+    const builds = Object.keys(W.BUILD).filter(k => !(k === 'fortim' && W.isSeat(sel))).map(k => {
+      const B = W.BUILD[k];
+      return c.build[k] ? `<button type="button" disabled>${B.name} ✓<small>${B.note}</small></button>`
+        : `<button type="button" data-build="${k}" ${!lock && W.canBuild(world, ME, sel, k) ? '' : 'disabled'}>${B.name}<small>${B.wood} madeira + ${B.gold} ouro · ${B.note}</small></button>`;
+    }).join('');
+    const pend = world.marches.find(m => m.lord === ME && m.from === sel);
+    const sieges = world.marches.filter(m => m.lord === ME && m.from === sel && m.siege > 0);
+    const orderTxt = pend ? `<div class="order"><span>${pend.siege ? `Cercando ${world.counties[pend.to].name} há ${pend.siege} meses com ${W.armySize(pend.units)} homens.` : `Ordem: atacar ${world.counties[pend.to].name} com ${W.armySize(pend.units)} homens nesta estação.`}</span><button type="button" data-cancel="1" ${lock ? 'disabled' : ''}>${pend.siege ? 'Levantar o cerco' : 'Cancelar'}</button></div>` : '';
+    const threats = world.marches.filter(m => m.lord !== ME && m.revealed && m.to === sel).map(m => `<div class="order threat"><span>${W.LORDS[m.lord].title} vem de ${world.counties[m.from].name} com ${W.armySize(m.units)} homens. Reforce ou contrate mercenários.</span></div>`).join('');
+    const moves = n && !pend ? W.ADJ[sel].map(to => {
+      const b = world.counties[to];
+      if (b.owner === ME) return `<button type="button" data-move="${to}" ${lock ? 'disabled' : ''}>Reforçar ${b.name}<small>leva as tropas na hora</small></button>`;
+      return `<button type="button" data-attack="${to}" ${!lock && W.canMarch(world, ME, sel, to) ? '' : 'disabled'}>Atacar ${b.name}<small>${b.owner ? W.LORDS[b.owner].name : 'neutro'} · chance ${oddsWord(sel, to, marchShare)}</small></button>`;
+    }).join('') : '';
+    const o = world.mercOffer;
+    const merc = o ? `<h3 class="court-h">Mercenários</h3><p class="sub" style="margin:0 0 8px">${o.name} oferece ${o.n} mercenários por ${o.price} ouro, mais ${o.n * W.MERC_UPKEEP} por estação. Se faltar pagamento, vão embora saqueando. A oferta vale por ${o.left} ${o.left === 1 ? 'estação' : 'estações'}.</p>
+      <div class="dip"><button type="button" data-merc="1" ${!lock && L.gold >= o.price ? '' : 'disabled'}>Contratar para ${c.name}<small>${o.price} ouro · seu tesouro: ${L.gold}</small></button></div>` : '';
+    $('army').innerHTML = `${chief}
+      <div class="units">${units}</div>
+      <p class="force">${n} soldados · ataque ${atk} · defesa ${def} (${fortTxt}) · comem ${n} de comida por estação</p>
+      ${threats}${orderTxt}
+      <h3 class="court-h">Treinar recrutas como</h3>
+      <div class="dip" id="train">${train}</div>
+      <p class="sub" style="margin:4px 0 0">${rec ? `${rec} recrutas nesta estação · custo ${costTxt(c.trainAs || 'lanca', rec)}` : 'Ponha gente em Recrutas, nas Obrigações, para treinar soldados.'}</p>
+      <h3 class="court-h">Construções</h3>
+      <div class="dip">${builds}</div>
+      ${moves ? `<h3 class="court-h">Marchar</h3>
+      <div class="court-row"><button type="button" data-share="1" aria-pressed="${marchShare === 1}" ${lock ? 'disabled' : ''}>Todo o exército</button><button type="button" data-share="0.5" aria-pressed="${marchShare !== 1}" ${lock ? 'disabled' : ''}>Metade</button></div>
+      <div class="dip" style="margin-top:8px">${moves}</div>` : ''}
+      ${merc}`;
+  }
+  $('army').addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('button'); if (!b || b.disabled || playing) return;
+    const d = b.dataset;
+    let ok = true;
+    if (d.train) { game.trainAs = d.train; }
+    else if (d.build) ok = W.build(world, ME, sel, d.build);
+    else if (d.share) { marchShare = Number(d.share); }
+    else if (d.move) ok = W.moveTroops(world, ME, sel, d.move, marchShare);
+    else if (d.attack) ok = W.orderMarch(world, ME, sel, d.attack, marchShare);
+    else if (d.cancel) ok = W.cancelMarch(world, ME, sel);
+    else if (d.merc) ok = W.hireMercs(world, ME, sel);
+    else return;
+    if (!ok) return;
+    bind(); save(); render();
+  });
 
   // ===== Condado vizinho: lealdade e diplomacia =====
   function renderNeighbor(s) {
@@ -1768,6 +2219,13 @@ li .who { font-weight: 700; margin-right: 4px; }
       L.priest === sel ? btn('priest-off', 'Recolher o padre', `ele prega aqui: +${W.PRIEST_LOYAL} por estação`, true)
         : btn('priest', 'Enviar o padre', `+${W.PRIEST_LOYAL} de lealdade por estação${o ? ', −4 para o dono' : ''}`, reach)
     ];
+    // ataque a partir de um condado seu vizinho
+    const seenD = W.canSee(world, ME, sel);
+    W.ADJ[sel].filter(f => mine(f) && W.armySize(world.counties[f].army) > 0).forEach(f => {
+      const pend = world.marches.find(m => m.lord === ME && m.from === f);
+      if (pend && pend.to === sel) acts.push(btn('cancel-' + f, 'Cancelar o ataque', `de ${world.counties[f].name} · ${W.armySize(pend.units)} homens`, true));
+      else acts.push(btn('attack-' + f, `Atacar de ${world.counties[f].name}`, `${W.armySize(world.counties[f].army)} homens · chance ${oddsWord(f, sel, 1)}`, W.canMarch(world, ME, f, sel)));
+    });
     if (!o) {
       acts.push(btn('marry', 'Casamento', c.married ? 'já houve um casamento aqui' : `${W.MARRY_COST} ouro · +${W.MARRY_LOYAL} · pede lealdade ${W.MARRY_MIN}`, W.canMarry(world, ME, sel)));
       acts.push(btn('buy', 'Comprar a lealdade', `${W.buyPrice(c)} ouro · pede lealdade ${W.BUY_MIN} · o condado vira seu na hora`, W.canBuy(world, ME, sel)));
@@ -1775,12 +2233,18 @@ li .who { font-weight: 700; margin-right: 4px; }
       ['espiar', 'boatos', 'sabotar'].forEach(k => acts.push(btn('spy-' + k, W.SPY[k].name, spyTxt(k), !spyBusy)));
     }
     $('nb-acts').innerHTML = acts.join('');
+    const dArmy = c.army, fort = W.fortOf(world, sel, 0);
+    const fortTxt = W.isSeat(sel) ? `castelo (defesa ×${String(fort).replace('.', ',')})` : c.build.fortim ? 'fortim (defesa ×1,6)' : c.build.torre ? 'torre de vigia' : 'sem muralhas';
+    $('nb-sub').textContent += seenD
+      ? ` Defesa: ${W.armySize(dArmy)} soldados${unitList(dArmy) ? ' (' + unitList(dArmy) + ')' : ''} · ${fortTxt}${c.chief && o ? ` · ${W.rankName(c.chief)} ${c.chief.name}` : ''}.`
+      : ` Defesa: desconhecida · ${fortTxt}. Mande o espião espiar ${W.LORDS[o].name} ou construa uma torre de vigia num condado seu vizinho.`;
     let why = '';
     if (!reach) why = 'Longe demais: presentes, casamento e o padre só alcançam condados vizinhos às suas terras.';
-    else if (seat) why = `${c.name} é a sede de ${W.LORDS[o].title}: só a guerra toma uma sede (Fase 3). Mas o padre e o espião ainda enfraquecem o rival.`;
+    else if (seat && o) why = `${c.name} tem o castelo de ${W.LORDS[o].title}: não se revolta, só cai pela guerra. Um castelo pede cerco: seus homens cercam, os de dentro passam fome e o assalto vem quando a muralha cede.`;
     else if (o) {
-      const lo = Math.round(c.loyal[o] || 0), lm = Math.round(c.loyal[ME] || 0);
-      why = `Para ${c.name} se revoltar e passar para você, duas coisas: a sua lealdade em ${W.REVOLT_OTHER} ou mais (hoje ${lm}${lm >= W.REVOLT_OTHER ? ', ok' : ''}) e a lealdade a ${W.LORDS[o].name} abaixo de ${W.REVOLT_OWNER} (hoje ${lo}${lo < W.REVOLT_OWNER ? ', ok' : ''}). Povo feliz sustenta o dono; boatos e o seu padre derrubam.`;
+      const lo = Math.round(c.loyal[o] || 0), lm = Math.round(c.loyal[ME] || 0), lead = lm - lo;
+      why = `Para ${c.name} se revoltar e passar para você: sua lealdade em ${W.REVOLT_OTHER} ou mais (hoje ${lm}${lm >= W.REVOLT_OTHER ? ', ok' : ''}) e ${W.REVOLT_LEAD} pontos à frente de ${W.LORDS[o].name} (hoje ${lead >= 0 ? lead + ' à frente' : -lead + ' atrás'}${lead >= W.REVOLT_LEAD ? ', ok' : ''}).`
+        + (W.garrisonHolds(c) ? ` Mas a guarnição de ${W.armySize(c.army)} soldados segura o povo: enquanto ela estiver lá, não há revolta. Só a guerra resolve.` : ' Boatos e o seu padre ajudam.');
     }
     else why = `Um condado neutro jura lealdade a quem chegar a ${W.JOIN_AT} com ${W.JOIN_LEAD} pontos à frente do segundo (a marca na barra).`;
     if (o && L.spy.cooldown > 0) why += ` Seu espião está escondido por mais ${L.spy.cooldown} ${L.spy.cooldown === 1 ? 'estação' : 'estações'}.`;
@@ -1797,6 +2261,8 @@ li .who { font-weight: 700; margin-right: 4px; }
     else if (a === 'priest') ok = W.setPriest(world, ME, sel);
     else if (a === 'priest-off') ok = W.setPriest(world, ME, null);
     else if (a.indexOf('spy-') === 0) ok = W.setSpy(world, ME, sel, a.slice(4));
+    else if (a.indexOf('attack-') === 0) ok = W.orderMarch(world, ME, a.slice(7), sel, 1);
+    else if (a.indexOf('cancel-') === 0) ok = W.cancelMarch(world, ME, a.slice(7));
     if (!ok) return;
     if (news.length) { log.push({ title: `${H.SEASONS[game.season]} do ano ${game.year}`, items: news }); renderLog(); }
     bind(); save(); render();
@@ -1863,7 +2329,7 @@ li .who { font-weight: 700; margin-right: 4px; }
   let seasonStart = null, autoRun = false, autoMsg = '', autoSeasons = 0, autoBase = null;
   function finish() {
     timers.forEach(clearTimeout); timers = [];
-    playing = false; seasonFc = null; seasonStart = null;
+    playing = false; seasonFc = null; seasonStart = null; battleFrame = null;
     render(); renderLog();
   }
   // Vive uma estação no sul inteiro, mostrando os meses do condado aberto
@@ -1886,6 +2352,7 @@ li .who { font-weight: 700; margin-right: 4px; }
     log.push({ title: `${H.SEASONS[start.season]} do ano ${start.year}`, items: items.length ? items : [{ kind: 'sum', text: 'Uma estação tranquila.' }] });
     while (log.length > 40) log.shift();
     world = out.world; bind();
+    battleFrame = world.battles && world.battles.length ? 0 : null;
     save();
     seasonStart = start; seasonFc = H.forecast(start); playing = true;
     const firstMonth = start.season * 3;
@@ -1894,6 +2361,7 @@ li .who { font-weight: 700; margin-right: 4px; }
     renderLog(log.length - 1);
     months.forEach((m, i) => {
       timers.push(setTimeout(() => {
+        if (battleFrame != null) battleFrame = i;
         const v = m.state; v.name = start.name; v.note = start.note;
         render(v, i < 2 ? firstMonth + i + 1 : firstMonth + 2);
       }, gap * (i + 1)));
@@ -2161,7 +2629,7 @@ li .who { font-weight: 700; margin-right: 4px; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261101095848';
+  var BUILD = '20261101123004';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
