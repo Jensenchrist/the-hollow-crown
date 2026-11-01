@@ -1778,7 +1778,10 @@ li .who { font-weight: 700; margin-right: 4px; }
     let why = '';
     if (!reach) why = 'Longe demais: presentes, casamento e o padre só alcançam condados vizinhos às suas terras.';
     else if (seat) why = `${c.name} é a sede de ${W.LORDS[o].title}: só a guerra toma uma sede (Fase 3). Mas o padre e o espião ainda enfraquecem o rival.`;
-    else if (o) why = `Um condado rival passa para você se a lealdade ao dono cair abaixo de ${W.REVOLT_OWNER} e a sua passar de ${W.REVOLT_OTHER}. Boatos e o padre ajudam.`;
+    else if (o) {
+      const lo = Math.round(c.loyal[o] || 0), lm = Math.round(c.loyal[ME] || 0);
+      why = `Para ${c.name} se revoltar e passar para você, duas coisas: a sua lealdade em ${W.REVOLT_OTHER} ou mais (hoje ${lm}${lm >= W.REVOLT_OTHER ? ', ok' : ''}) e a lealdade a ${W.LORDS[o].name} abaixo de ${W.REVOLT_OWNER} (hoje ${lo}${lo < W.REVOLT_OWNER ? ', ok' : ''}). Povo feliz sustenta o dono; boatos e o seu padre derrubam.`;
+    }
     else why = `Um condado neutro jura lealdade a quem chegar a ${W.JOIN_AT} com ${W.JOIN_LEAD} pontos à frente do segundo (a marca na barra).`;
     if (o && L.spy.cooldown > 0) why += ` Seu espião está escondido por mais ${L.spy.cooldown} ${L.spy.cooldown === 1 ? 'estação' : 'estações'}.`;
     if (o && world.intel[o]) why += ` Você conhece os segredos de ${W.LORDS[o].name} por mais ${world.intel[o]} ${world.intel[o] === 1 ? 'estação' : 'estações'}.`;
@@ -2158,7 +2161,7 @@ li .who { font-weight: 700; margin-right: 4px; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031235014';
+  var BUILD = '20261101095848';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
