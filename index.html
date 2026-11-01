@@ -366,6 +366,24 @@ body.modal-open { overflow: hidden; }
 .prod-row { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; align-items: center; margin-bottom: 10px; }
 .prod-txt b { display: block; font-size: 16px; }
 .prod-txt small { display: block; font-family: var(--text); font-size: 13px; color: var(--muted); line-height: 1.35; }
+
+/* ===== Mercado ===== */
+.acts.one { grid-template-columns: 1fr; }
+.mkt { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (min-width: 560px) { .mkt { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.mk { display: grid; grid-template-columns: 34px minmax(0, 1fr); grid-template-rows: auto auto auto; gap: 2px 10px; align-items: center; text-align: left;
+  min-height: 0; padding: 10px 12px; border-radius: 18px; background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .12); }
+.mk .chip { grid-row: span 2; width: 34px; height: 34px; }
+.mk .nm { font-weight: 700; font-size: 14.5px; line-height: 1.2; }
+.mk .ef { font-family: var(--text); font-size: 12.5px; color: var(--muted); line-height: 1.25; }
+.mk .ft { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.mk .ft b { color: var(--accent); }
+.mk .ft span { color: var(--muted); }
+.mk.off { opacity: .38; filter: grayscale(.9); }
+.mk.off .ft b { color: var(--muted); }
+.mk:disabled { cursor: not-allowed; }
+.mk:not(:disabled):active { transform: scale(.97); }
+.mk.poor:not(.off) { opacity: .7; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -463,11 +481,16 @@ body.modal-open { overflow: hidden; }
           <button type="button" id="tax-p" aria-label="Mais 1% de imposto">+</button>
         </div>
         <p class="taxinfo" id="tax-info"></p>
-        <div class="acts">
-          <button id="buy" type="button">Comprar comida<small id="buy-s"></small></button>
+        <div class="acts one">
           <button id="feast" type="button">Dar uma festa<small id="feast-s"></small></button>
         </div>
       </section>
+
+  <section class="card" aria-labelledby="h-mkt">
+    <h2 id="h-mkt">Mercado</h2>
+    <p class="sub" id="mkt-sub">O mercador fica em Kent até o fim da estação. Na próxima, volta com outros produtos.</p>
+    <div class="mkt" id="mkt"></div>
+  </section>
 
   <section class="card" aria-labelledby="h-res">
     <h2 id="h-res">Reservas de Kent</h2>
@@ -551,7 +574,7 @@ body.modal-open { overflow: hidden; }
   }
 
   function newGame(seed) {
-    return {
+    const g = {
       seed: seed || 1, rngCalls: 0,
       year: 1, season: 0, month: 0, popFrac: 0,
       pop: 120, food: 260, herd: 20, gold: 60, wood: 30, happy: 55,
@@ -567,6 +590,8 @@ body.modal-open { overflow: hidden; }
       won: false, lost: false, lowHappyStreak: 0,
       history: []
     };
+    g.market = rollMarket(g, rng((seed || 1) * 97 + 5));
+    return g;
   }
 
   const clone = s => JSON.parse(JSON.stringify(s));
@@ -606,6 +631,7 @@ body.modal-open { overflow: hidden; }
     if (!s.foodBy) s.foodBy = { trigo: s.food * 0.6, gado: s.food * 0.2, peixe: s.food * 0.2, caca: 0, compra: 0, pao: 0 };
     if (s.foodBy.pao == null) s.foodBy.pao = 0;
     if (s.bakePct == null) s.bakePct = 0;
+    if (!s.market || s.market.season !== s.season || s.market.year !== s.year) s.market = rollMarket(s, null);
     return s;
   }
   // Mantém a divisão por origem somando exatamente o total do celeiro (o consumo e as perdas saem proporcionalmente)
@@ -633,6 +659,39 @@ body.modal-open { overflow: hidden; }
     const others = assigned(s) - s.alloc[task];
     s.alloc[task] = clamp(Math.floor(value), 0, s.pop - others);
     return s;
+  }
+
+
+  // ===== Mercado: o mercador passa a cada estação com uma seleção diferente =====
+  const MARKET = [
+    { id: 'graos', name: 'Sacos de grão', food: 50, happy: 0, price: 40, chance: 0.9, lots: [1, 4], seasonal: [1.2, 1.0, 0.75, 1.4] },
+    { id: 'peixe_salgado', name: 'Peixe salgado', food: 35, happy: 0, price: 26, chance: 0.5, lots: [1, 3] },
+    { id: 'queijo', name: 'Queijo', food: 20, happy: 2, price: 28, chance: 0.5, lots: [1, 3] },
+    { id: 'mel', name: 'Mel', food: 10, happy: 3, price: 30, chance: 0.4, lots: [1, 2] },
+    { id: 'cerveja', name: 'Barris de cerveja', food: 0, happy: 5, price: 35, chance: 0.6, lots: [1, 3] },
+    { id: 'vinho', name: 'Vinho da Gasconha', food: 0, happy: 9, price: 70, chance: 0.35, lots: [1, 2] },
+    { id: 'especiarias', name: 'Especiarias do Oriente', food: 0, happy: 12, price: 110, chance: 0.2, lots: [1, 1] }
+  ];
+  const marketItem = id => MARKET.find(m => m.id === id);
+  const priceOf = (s, it) => Math.round(it.price * (it.seasonal ? it.seasonal[s.season] : 1));
+  function rollMarket(s, rand) {
+    const stock = {};
+    MARKET.forEach(it => {
+      const r = rand ? rand() : (((s.seed || 1) * 31 + s.year * 7 + s.season * 13 + it.price) % 100) / 100;
+      if (r < it.chance) { const r2 = rand ? rand() : 0.5; stock[it.id] = it.lots[0] + Math.floor(r2 * (it.lots[1] - it.lots[0] + 1)); }
+    });
+    if (!stock.graos && (rand ? rand() : 0) < 0.5) stock.graos = 1;
+    return { year: s.year, season: s.season, stock };
+  }
+  function buyMarket(s, id) {
+    migrate(s);
+    const it = marketItem(id); if (!it || s.lost) return false;
+    const left = s.market && s.market.stock[id] || 0, price = priceOf(s, it);
+    if (left <= 0 || s.gold < price) return false;
+    s.gold -= price; s.market.stock[id] = left - 1;
+    if (it.food) { s.food += it.food; s.foodBy.compra += it.food; }
+    if (it.happy) s.happy = clamp(r1(s.happy + it.happy), 0, 100);
+    return true;
   }
 
   function buyFood(s) {
@@ -839,6 +898,11 @@ body.modal-open { overflow: hidden; }
       rep.forEach(r => report.push(Object.assign({ month: name }, r)));
     }
     s.feastThisSeason = false;
+    if (rand) {
+      s.market = rollMarket(s, rand);
+      const names = Object.keys(s.market.stock).map(k => marketItem(k).name.toLowerCase());
+      if (names.length && months.length) months[months.length - 1].report.push({ kind: 'event', text: `O mercador chegou com ${names.length > 1 ? names.slice(0, -1).join(', ') + ' e ' + names.slice(-1) : names[0]}.` });
+    }
     months.forEach(m => { m.state.feastThisSeason = false; });
     s.history.push({ year: s.year, season: s.season, pop: s.pop, food: s.food, happy: s.happy });
     if (s.history.length > 80) s.history.shift();
@@ -879,7 +943,7 @@ body.modal-open { overflow: hidden; }
 
   const api = { SEASONS, MONTHS, TASKS, BUY_FOOD, BUY_COST, GOAL_POP, GOAL_HAPPY, WORKERS_PER_FIELD_PLANT,
     FEAST_GOLD, FEAST_FOOD, FEAST_HAPPY, taxRateOf, taxGoldPer, taxHappy,
-    FOOD_SRC, HARVEST_MONTH, WHEAT_PER_BREAD, WOOD_PER_BREAD, BREAD_HAPPY, bakePctOf, bakePlan, rationPctOf, rationHappy, rng, newGame, migrate, normalizeFood, yieldPerWorker, eatPerSeason, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
+    FOOD_SRC, HARVEST_MONTH, MARKET, marketItem, priceOf, rollMarket, buyMarket, WHEAT_PER_BREAD, WOOD_PER_BREAD, BREAD_HAPPY, bakePctOf, bakePlan, rationPctOf, rationHappy, rng, newGame, migrate, normalizeFood, yieldPerWorker, eatPerSeason, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.HC = api;
 })(this);
@@ -1007,6 +1071,11 @@ body.modal-open { overflow: hidden; }
     campos: '<path d="M12 21V8"/><path d="M12 12c-2.5 0-4-1.6-4-4 2.5 0 4 1.6 4 4zM12 12c2.5 0 4-1.6 4-4-2.5 0-4 1.6-4 4zM12 16c-2.5 0-4-1.6-4-4 2.5 0 4 1.6 4 4zM12 16c2.5 0 4-1.6 4-4-2.5 0-4 1.6-4 4z"/><path d="M12 8c-1-1.2-1-3 0-5 1 2 1 3.8 0 5z"/>',
     floresta: '<path d="M12 3l5 7h-3l4 6H6l4-6H7z"/><path d="M12 16v5"/>',
     peixe: '<path d="M3 12c3-4.5 9-5.5 13-2l4-3v10l-4-3c-4 3.5-10 2.5-13-2z"/><circle cx="8" cy="11" r=".6" fill="currentColor"/>',
+    queijo: '<path d="M3 17v-4L14 6l7 4v7z"/><path d="M3 13h18"/><circle cx="8" cy="15.5" r="1"/><circle cx="15" cy="15" r="1.2"/><circle cx="13" cy="10.6" r=".8"/>',
+    mel: '<path d="M7 9h10l-1 10H8z"/><path d="M6 9h12"/><path d="M9 6h6v3H9z"/><path d="M12 12c-1 1.3-1 2.7 0 3.5 1-.8 1-2.2 0-3.5z"/>',
+    cerveja: '<path d="M5 8h10v12H5z"/><path d="M15 11h2.5a2 2 0 0 1 2 2v2.5a2 2 0 0 1-2 2H15"/><path d="M5 8c0-2 1.4-3 2.8-3 .9-1.2 3.5-1.2 4.4 0 1.4 0 2.8 1 2.8 3"/><path d="M8.5 11.5v5.5M11.5 11.5v5.5"/>',
+    vinho: '<path d="M7 3h10c0 5-2 8-5 8s-5-3-5-8z"/><path d="M7.4 7h9.2"/><path d="M12 11v7M8 21h8"/>',
+    especiarias: '<path d="M8 4h8v3H8z"/><path d="M7 7h10l-1 13H8z"/><circle cx="10.5" cy="12" r=".9"/><circle cx="13.5" cy="14" r=".9"/><circle cx="11" cy="16.6" r=".9"/>',
     pao: '<path d="M4 13.5C4 9.4 7.6 7 12 7s8 2.4 8 6.5c0 1.2-.8 2-2 2V19H6v-3.5c-1.2 0-2-.8-2-2z"/><path d="M9 10.5l1 2.2M12 10v2.6M15 10.5l-1 2.2"/>',
     caca: '<path d="M12 21c-2.4 0-4-1.9-4-4.6V13h8v3.4c0 2.7-1.6 4.6-4 4.6z"/><path d="M8 13c-2.6 0-4.6-2-4.6-4.8M5 9.6V5.5M3.4 7.2 5 8.6M16 13c2.6 0 4.6-2 4.6-4.8M19 9.6V5.5M20.6 7.2 19 8.6"/><path d="M10.3 17h.01M13.7 17h.01"/>',
     gado: '<path d="M5 6c0 2 1.5 3 3 3M19 6c0 2-1.5 3-3 3"/><path d="M8 8h8l1 7c0 3-2.2 5-5 5s-5-2-5-5z"/><path d="M10 16.5h.01M14 16.5h.01"/><path d="M8 11h.01M16 11h.01"/>',
@@ -1077,6 +1146,7 @@ body.modal-open { overflow: hidden; }
       ? `<button type="button" class="stat stat-btn" id="open-cel" aria-haspopup="dialog"><div class="k">${k} <span class="more" aria-hidden="true">›</span></div><div class="v"><span>${v}</span>${icon(ic)}</div><div class="s">${sub}</div></button>`
       : `<div class="stat"><div class="k">${k}</div><div class="v"><span>${v}</span>${icon(ic)}</div><div class="s">${sub}</div>${m != null ? `<div class="meter"><i style="width:${m}%"></i></div>` : ''}</div>`).join('');
     lastView = s;
+    renderMarket(s, lock);
     if (!$('celeiro').hidden) renderCeleiro();
 
     H.TASKS.forEach(t => {
@@ -1104,9 +1174,7 @@ body.modal-open { overflow: hidden; }
     $('tax').setAttribute('aria-valuetext', rate + '%');
     $('tax-info').textContent = `+${gp} de ouro por estação · felicidade ${hp > 0 ? '+' + hp : hp === 0 ? 'não muda' : '−' + Math.abs(hp)}`;
     $('tax').disabled = $('tax-m').disabled = $('tax-p').disabled = lock;
-    $('buy-s').textContent = `${H.BUY_COST} ouro → ${H.BUY_FOOD} comida`;
     $('feast-s').textContent = s.feastThisSeason ? 'Já houve festa nesta estação' : `${H.FEAST_GOLD} ouro + ${H.FEAST_FOOD} comida → +${H.FEAST_HAPPY} felicidade`;
-    $('buy').disabled = lock || s.gold < H.BUY_COST;
     $('feast').disabled = lock || s.feastThisSeason || s.gold < H.FEAST_GOLD || s.food < H.FEAST_FOOD;
 
     $('fc').innerHTML = `<div><div class="k">Comida</div><div class="v">${delta(playing ? seasonStart.food : s.food, f.food)}</div></div>
@@ -1182,7 +1250,6 @@ body.modal-open { overflow: hidden; }
     });
     timers.push(setTimeout(finish, gap * out.months.length + 700));
   });
-  $('buy').addEventListener('click', () => { if (H.buyFood(game)) { save(); render(); } });
   $('feast').addEventListener('click', () => { if (H.feast(game)) { save(); render(); } });
 
   // Recomeçar com confirmação na própria página
@@ -1196,6 +1263,32 @@ body.modal-open { overflow: hidden; }
   function restoreReset() { $('reset-area').innerHTML = '<button type="button" id="reset">Recomeçar</button>'; bindReset(); }
 
 
+
+
+  // ===== Mercado =====
+  const MK_LOOK = { graos: ['comida', '#e6c063'], peixe_salgado: ['peixe', '#7fb8d9'], queijo: ['queijo', '#f0d27a'], mel: ['mel', '#e7a83e'],
+    cerveja: ['cerveja', '#d4a24a'], vinho: ['vinho', '#c45a78'], especiarias: ['especiarias', '#d27b4b'] };
+  function renderMarket(s, lock) {
+    H.migrate(s);
+    const stock = (s.market && s.market.stock) || {};
+    $('mkt').innerHTML = H.MARKET.map(it => {
+      const left = stock[it.id] || 0, price = H.priceOf(s, it), came = it.id in stock;
+      const [ic, color] = MK_LOOK[it.id];
+      const fx = [it.food ? `+${it.food} comida` : '', it.happy ? `+${it.happy} felicidade` : ''].filter(Boolean).join(' · ');
+      const status = !came ? 'não veio' : left <= 0 ? 'esgotado' : `${left} ${left === 1 ? 'lote' : 'lotes'}`;
+      const can = came && left > 0 && s.gold >= price && !lock;
+      const cls = 'mk' + (!came || left <= 0 ? ' off' : '') + (came && left > 0 && s.gold < price ? ' poor' : '');
+      return `<button type="button" class="${cls}" data-id="${it.id}" ${can ? '' : 'disabled'} aria-label="Comprar ${it.name} por ${price} de ouro, ${status}">
+        <span class="chip" style="--c:${color}">${icon(ic)}</span><span class="nm">${it.name}</span><span class="ef">${fx}</span>
+        <span class="ft"><b>${came ? price + ' ouro' : '—'}</b><span>${status}</span></span></button>`;
+    }).join('');
+    const sub = $('mkt-sub');
+    sub.textContent = `Seu ouro: ${s.gold}. O mercador fica em Kent até o fim da estação; na próxima, volta com outros produtos.`;
+  }
+  $('mkt').addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('.mk'); if (!b || b.disabled) return;
+    if (H.buyMarket(game, b.dataset.id)) { save(); render(); }
+  });
 
   // ===== Celeiro: a comida dividida por origem =====
   let lastView = null, lastFocus = null;
@@ -1356,7 +1449,7 @@ body.modal-open { overflow: hidden; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031213419';
+  var BUILD = '20261031214203';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
