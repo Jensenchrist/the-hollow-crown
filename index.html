@@ -315,6 +315,52 @@ h2 { font-size: 22px; line-height: 1.15; }
 .gauge .disc b { font-size: clamp(16px, 4.6vw, 22px); font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1; }
 .gauge .ico { width: 22px; height: 22px; fill: none; stroke: var(--accent); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .gauge figcaption { text-align: center; }
+
+/* ===== Celeiro: pop-up em vidro líquido ===== */
+.stat-btn { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; min-height: 0; border-radius: 18px; }
+.stat-btn .more { float: right; font-size: 16px; line-height: 12px; color: var(--accent); letter-spacing: 0; }
+.stat-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+  padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  background: rgba(6, 6, 10, .28); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
+  opacity: 0; transition: opacity .22s ease; }
+.modal[hidden] { display: none !important; }
+.modal.show { opacity: 1; }
+body.modal-open { overflow: hidden; }
+.glass { position: relative; width: 100%; max-width: 440px; max-height: calc(100% - 8px); overflow-y: auto; -webkit-overflow-scrolling: touch;
+  border-radius: 32px; padding: 20px 20px 18px; color: var(--ink);
+  background: linear-gradient(160deg, rgba(255, 255, 255, .20), rgba(255, 255, 255, .06) 40%, rgba(255, 255, 255, .10));
+  -webkit-backdrop-filter: blur(28px) saturate(1.8); backdrop-filter: blur(28px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, .28);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, .55), inset 0 -1px 1px rgba(255, 255, 255, .12), inset 0 0 30px rgba(255, 255, 255, .06), 0 24px 60px rgba(0, 0, 0, .45);
+  transform: scale(.94) translateY(8px); transition: transform .28s cubic-bezier(.2, .9, .3, 1.2); }
+.modal.show .glass { transform: none; }
+.glass::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: radial-gradient(120% 60% at 15% 0%, rgba(255, 255, 255, .22), transparent 55%), radial-gradient(80% 50% at 100% 100%, rgba(255, 255, 255, .08), transparent 60%); }
+.cel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; position: relative; }
+.cel-head h2 { margin: 0; }
+.glass .x { width: 38px; height: 38px; min-height: 38px; padding: 0; border-radius: 50%; font-size: 24px; line-height: 1;
+  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .25); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .4); }
+.cel-total { display: flex; align-items: center; gap: 12px; margin: 6px 0 12px; position: relative; }
+.cel-total b { font-size: 40px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.cel-total span { font-size: 13.5px; color: var(--muted); line-height: 1.35; }
+.cel-bar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; gap: 2px; background: rgba(255, 255, 255, .1); box-shadow: inset 0 1px 2px rgba(0, 0, 0, .3); }
+.cel-bar i { display: block; min-width: 4px; }
+.cel-bar i.empty { flex: 1; background: transparent; }
+.cel-list { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 4px; position: relative; }
+.cel-list li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto auto; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 14px;
+  background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .08); }
+.cel-list.prod li { grid-template-columns: 32px minmax(0, 1fr) auto; }
+.cel-list li.eat, .cel-list li.end { grid-template-columns: minmax(0, 1fr) auto; }
+.cel-list li.end { background: rgba(255, 255, 255, .14); font-weight: 700; }
+.chip { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: rgba(255, 255, 255, .1); box-shadow: inset 0 0 0 2px var(--c); }
+.chip svg { width: 20px; height: 20px; fill: none; stroke: var(--c); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.cel-list .nm { font-size: 15px; min-width: 0; }
+.cel-list .nm small { display: block; font-family: var(--text); font-size: 12.5px; color: var(--muted); line-height: 1.3; }
+.cel-list b { font-variant-numeric: tabular-nums; font-size: 16px; }
+.cel-list em { font-style: normal; font-size: 12.5px; color: var(--muted); min-width: 3.2ch; text-align: right; font-variant-numeric: tabular-nums; }
+.cel-h { font-family: var(--heading); font-weight: 400; font-size: 17px; margin: 18px 0 0; position: relative; }
+.cel-tip { font-family: var(--text); font-size: 14.5px; margin: 12px 2px 0; color: var(--ink); position: relative; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -430,6 +476,16 @@ h2 { font-size: 22px; line-height: 1.15; }
   </div>
 </main>
 
+<div class="modal" id="celeiro" hidden>
+  <div class="glass" role="dialog" aria-modal="true" aria-labelledby="cel-t">
+    <div class="cel-head">
+      <h2 id="cel-t">Celeiro de Kent</h2>
+      <button type="button" class="x" id="cel-x" aria-label="Fechar">×</button>
+    </div>
+    <div id="cel-body"></div>
+  </div>
+</div>
+
 <script>
 // The Hollow Crown — Fase 1, versão 12 meses: simulação de um condado (sem interface)
 (function (root) {
@@ -475,6 +531,7 @@ h2 { font-size: 22px; line-height: 1.15; }
       seed: seed || 1, rngCalls: 0,
       year: 1, season: 0, month: 0, popFrac: 0,
       pop: 120, food: 260, herd: 20, gold: 60, wood: 30, happy: 55,
+      foodBy: { trigo: 180, gado: 40, peixe: 40, caca: 0, compra: 0 },
       fields: [90, 85, 80, 80, 75, 70, 65, 60, 55, 50],
       planted: [], lastPlanted: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], cropHealth: 1,
       forest: 80, fish: 80, hunt: 70,
@@ -506,7 +563,31 @@ h2 { font-size: 22px; line-height: 1.15; }
   }
 
   // Jogos salvos antes da caça
-  function migrate(s) { if (s.alloc && s.alloc.caca == null) s.alloc.caca = 0; if (s.hunt == null) s.hunt = 70; return s; }
+  const FOOD_SRC = ['trigo', 'gado', 'peixe', 'caca', 'compra'];
+  function migrate(s) {
+    if (s.alloc && s.alloc.caca == null) s.alloc.caca = 0;
+    if (s.hunt == null) s.hunt = 70;
+    if (!s.foodBy) s.foodBy = { trigo: s.food * 0.6, gado: s.food * 0.2, peixe: s.food * 0.2, caca: 0, compra: 0 };
+    return s;
+  }
+  // Mantém a divisão por origem somando exatamente o total do celeiro (o consumo e as perdas saem proporcionalmente)
+  function normalizeFood(s) {
+    if (!s.foodBy) migrate(s);
+    const sum = FOOD_SRC.reduce((a, k) => a + (s.foodBy[k] || 0), 0);
+    if (s.food <= 0) { FOOD_SRC.forEach(k => { s.foodBy[k] = 0; }); return; }
+    if (sum <= 0) { FOOD_SRC.forEach(k => { s.foodBy[k] = 0; }); s.foodBy.trigo = s.food; return; }
+    const f = s.food / sum;
+    FOOD_SRC.forEach(k => { s.foodBy[k] = (s.foodBy[k] || 0) * f; });
+  }
+  // Quanto cada trabalhador rende de comida numa estação inteira, do jeito que o condado está agora
+  function yieldPerWorker(s) {
+    const mult = productivity(s), season = s.season;
+    return {
+      pesca: FISH_YIELD[season] * s.fish / 100 * mult,
+      caca: HUNT_YIELD[season] * (s.hunt == null ? 70 : s.hunt) / 100 * mult,
+      gado: COWS_PER_WORKER * 0.9 * mult * (season === 3 ? 0.5 : 1)
+    };
+  }
 
   function setAlloc(s, task, value) {
     migrate(s);
@@ -517,15 +598,16 @@ h2 { font-size: 22px; line-height: 1.15; }
   }
 
   function buyFood(s) {
+    migrate(s);
     if (s.gold < BUY_COST || s.lost) return false;
-    s.gold -= BUY_COST; s.food += BUY_FOOD;
+    s.gold -= BUY_COST; s.food += BUY_FOOD; s.foodBy.compra += BUY_FOOD;
     return true;
   }
 
   const FEAST_GOLD = 60, FEAST_FOOD = 40, FEAST_HAPPY = 12;
   function feast(s) {
     if (s.gold < FEAST_GOLD || s.food < FEAST_FOOD || s.lost || s.feastThisSeason) return false;
-    s.gold -= FEAST_GOLD; s.food -= FEAST_FOOD; s.happy = clamp(s.happy + FEAST_HAPPY, 0, 100);
+    s.gold -= FEAST_GOLD; s.food -= FEAST_FOOD; s.happy = clamp(s.happy + FEAST_HAPPY, 0, 100); normalizeFood(s);
     s.feastThisSeason = true;
     return true;
   }
@@ -561,6 +643,7 @@ h2 { font-size: 22px; line-height: 1.15; }
     const a = s.alloc;
     const winter = s.season === 3;
     let foodIn = 0;
+    const src = { trigo: 0, gado: 0, peixe: 0, caca: 0 };
 
     // Campos
     if (s.month === 0) {
@@ -577,7 +660,7 @@ h2 { font-size: 22px; line-height: 1.15; }
       const ratio = Math.min(1, a.campos / (s.planted.length * WORKERS_PER_FIELD_HARVEST));
       const base = s.planted.reduce((acc, i) => acc + s.fields[i] / 100 * FIELD_YIELD, 0);
       const harvest = Math.round(base * s.cropHealth * ratio * mult * (ev && ev.id === 'colheita' ? 1.3 : 1));
-      foodIn += harvest;
+      foodIn += harvest; src.trigo += harvest;
       s.planted.forEach(i => { s.fields[i] = clamp(s.fields[i] - 12, 10, 100); });
       rep.push({ kind: 'good', text: `Colheita: ${harvest} de comida.` });
       if (ratio < 1) rep.push({ kind: 'warn', text: 'Faltou gente na colheita; trigo ficou no campo.' });
@@ -588,18 +671,18 @@ h2 { font-size: 22px; line-height: 1.15; }
     // Gado
     if (evNow && evNow.id === 'praga') s.herd = Math.floor(s.herd * 0.75);
     const care = s.herd ? Math.min(1, a.gado / (s.herd / COWS_PER_WORKER)) : 1;
-    foodIn += Math.round(s.herd * 0.3 * care * mult * (winter ? 0.5 : 1));
+    { const v = Math.round(s.herd * 0.3 * care * mult * (winter ? 0.5 : 1)); foodIn += v; src.gado += v; }
     if (s.season <= 1) s.herd += Math.round(s.herd * 0.04 * care);
     if (care < 0.6) s.herd -= Math.ceil(s.herd * 0.035);
     s.herd = clamp(s.herd, 0, HERD_MAX);
 
     // Pesca
-    foodIn += Math.round(a.pesca * FISH_YIELD[s.season] / 3 * s.fish / 100 * mult);
+    { const v = Math.round(a.pesca * FISH_YIELD[s.season] / 3 * s.fish / 100 * mult); foodIn += v; src.peixe += v; }
     s.fish = clamp(s.fish + (12 - a.pesca * 0.6) / 3, 0, 100);
 
     // Caça: depende dos animais da floresta; a floresta sustenta a reprodução deles
     const caca = a.caca || 0;
-    foodIn += Math.round(caca * HUNT_YIELD[s.season] / 3 * s.hunt / 100 * mult);
+    { const v = Math.round(caca * HUNT_YIELD[s.season] / 3 * s.hunt / 100 * mult); foodIn += v; src.caca += v; }
     s.hunt = clamp(s.hunt + (8 * s.forest / 100 - caca * 0.7) / 3, 0, 100);
 
     // Madeira
@@ -608,6 +691,7 @@ h2 { font-size: 22px; line-height: 1.15; }
     s.forest = clamp(s.forest + (1.5 - a.madeira * 0.25) / 3, 0, 100);
 
     s.food += foodIn;
+    Object.keys(src).forEach(k => { s.foodBy[k] = (s.foodBy[k] || 0) + src[k]; });
     if (evNow && evNow.id === 'ratos') s.food -= Math.round(s.food * 0.12);
 
     // Consumo do mês
@@ -661,6 +745,8 @@ h2 { font-size: 22px; line-height: 1.15; }
     if (deaths > 0) rep.push({ kind: 'bad', text: `${deaths} pessoas morreram.` });
     s.pop = Math.max(0, s.pop);
 
+    Object.keys(src).forEach(k => { totals.src[k] += src[k]; });
+    normalizeFood(s);
     totals.foodIn += foodIn; totals.eaten += Math.min(eat, before); totals.woodIn += woodIn; totals.tax += tax;
     return rep;
   }
@@ -673,7 +759,7 @@ h2 { font-size: 22px; line-height: 1.15; }
     fitAlloc(s);
     const ev = pickEvent(s, rand);
     const evMonth = ev ? Math.floor(rand() * 3) : -1;
-    const totals = { foodIn: 0, eaten: 0, woodIn: 0, tax: 0 };
+    const totals = { foodIn: 0, eaten: 0, woodIn: 0, tax: 0, src: { trigo: 0, gado: 0, peixe: 0, caca: 0 } };
     const months = [];
     const report = [];
     for (let i = 0; i < 3 && !s.lost; i++) {
@@ -681,7 +767,7 @@ h2 { font-size: 22px; line-height: 1.15; }
       const rep = stepMonth(s, ev, evMonth, totals);
       if (i === 2) {
         if (s.happy < 15) {
-          s.gold = Math.round(s.gold * 0.8); s.food = Math.round(s.food * 0.8);
+          s.gold = Math.round(s.gold * 0.8); s.food = Math.round(s.food * 0.8); normalizeFood(s);
           s.happy = clamp(s.happy + 10, 0, 100);
           rep.push({ kind: 'bad', text: 'Revolta! O povo saqueou celeiro e tesouro.' });
         }
@@ -702,12 +788,12 @@ h2 { font-size: 22px; line-height: 1.15; }
     s.history.push({ year: s.year, season: s.season, pop: s.pop, food: s.food, happy: s.happy });
     if (s.history.length > 80) s.history.shift();
     report.unshift({ kind: 'sum', text: `Comida +${totals.foodIn} −${totals.eaten} · Madeira +${totals.woodIn} · Ouro +${totals.tax}` });
-    return { state: s, report, months };
+    return { state: s, report, months, totals };
   }
 
   // Previsão: estimativa sem eventos
   function forecast(s) {
-    const next = step(s, null).state;
+    const sim = step(s, null), next = sim.state;
     const warnings = [];
     const a = s.alloc;
     if (s.season === 0) {
@@ -730,13 +816,14 @@ h2 { font-size: 22px; line-height: 1.15; }
     return {
       food: next.food, pop: next.pop, happy: next.happy, wood: next.wood, gold: next.gold,
       seasonsOfFood: r1(s.food / Math.max(1, eatPerSeason(s))),
+      income: sim.totals ? sim.totals.src : { trigo: 0, gado: 0, peixe: 0, caca: 0 }, eaten: sim.totals ? sim.totals.eaten : 0,
       warnings
     };
   }
 
   const api = { SEASONS, MONTHS, TASKS, BUY_FOOD, BUY_COST, GOAL_POP, GOAL_HAPPY, WORKERS_PER_FIELD_PLANT,
     FEAST_GOLD, FEAST_FOOD, FEAST_HAPPY, taxRateOf, taxGoldPer, taxHappy,
-    rng, newGame, migrate, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
+    FOOD_SRC, HARVEST_MONTH, rng, newGame, migrate, normalizeFood, yieldPerWorker, eatPerSeason, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.HC = api;
 })(this);
@@ -929,7 +1016,11 @@ h2 { font-size: 22px; line-height: 1.15; }
       ['Ouro', s.gold, `impostos a ${H.taxRateOf(s)}%`, null, 'ouro'],
       ['Lenha', s.wood, `inverno pede ${H.woodNeedWinter(s)}`, null, 'lenha'],
       ['Gado', s.herd, 'cabeças', null, 'gado']
-    ].map(([k, v, sub, m, ic]) => `<div class="stat"><div class="k">${k}</div><div class="v"><span>${v}</span>${icon(ic)}</div><div class="s">${sub}</div>${m != null ? `<div class="meter"><i style="width:${m}%"></i></div>` : ''}</div>`).join('');
+    ].map(([k, v, sub, m, ic]) => ic === 'comida'
+      ? `<button type="button" class="stat stat-btn" id="open-cel" aria-haspopup="dialog"><div class="k">${k} <span class="more" aria-hidden="true">›</span></div><div class="v"><span>${v}</span>${icon(ic)}</div><div class="s">${sub}</div></button>`
+      : `<div class="stat"><div class="k">${k}</div><div class="v"><span>${v}</span>${icon(ic)}</div><div class="s">${sub}</div>${m != null ? `<div class="meter"><i style="width:${m}%"></i></div>` : ''}</div>`).join('');
+    lastView = s;
+    if (!$('celeiro').hidden) renderCeleiro();
 
     H.TASKS.forEach(t => {
       $('v-' + t).textContent = s.alloc[t];
@@ -1041,6 +1132,72 @@ h2 { font-size: 22px; line-height: 1.15; }
   function restoreReset() { $('reset-area').innerHTML = '<button type="button" id="reset">Recomeçar</button>'; bindReset(); }
 
 
+
+  // ===== Celeiro: a comida dividida por origem =====
+  let lastView = null, lastFocus = null;
+  const SRC = [
+    ['trigo', 'Trigo', '#e6c063', 'campos'],
+    ['gado', 'Leite e carne', '#ead9bd', 'gado'],
+    ['peixe', 'Peixe', '#7fb8d9', 'peixe'],
+    ['caca', 'Caça', '#cf8e5c', 'caca'],
+    ['compra', 'Comprada', '#bba8de', 'ouro']
+  ];
+  const n0 = v => Math.round(v).toLocaleString('pt-BR');
+  const n1 = v => (Math.round(v * 10) / 10).toLocaleString('pt-BR');
+  function renderCeleiro() {
+    const s = H.migrate(H.clone(lastView || game));
+    const f = H.forecast(s), y = H.yieldPerWorker(s);
+    const total = Math.max(0, s.food), perMonth = H.eatPerSeason(s) / 3;
+    const parts = SRC.map(([k, name, color, ic]) => ({ k, name, color, ic, v: Math.max(0, s.foodBy[k] || 0) }));
+    const bar = total > 0 ? parts.filter(p => p.v > 0.5).map(p => `<i style="flex:${p.v};background:${p.color}"></i>`).join('') : '<i class="empty"></i>';
+    const rows = parts.map(p => `<li><span class="chip" style="--c:${p.color}">${icon(p.ic)}</span><span class="nm">${p.name}</span><b>${n0(p.v)}</b><em>${total > 0 ? Math.round(p.v / total * 100) : 0}%</em></li>`).join('');
+    const trigoNote = s.season === 0 ? 'Plantio em março; a colheita só vem em setembro'
+      : s.season === 1 ? (s.planted.length ? `${s.planted.length} campos crescendo; colheita em setembro` : 'Nada plantado este ano')
+      : s.season === 2 ? (s.planted.length ? 'Colheita em setembro' : 'Nada para colher') : 'A terra descansa no inverno';
+    const inc = f.income || {};
+    const prod = [
+      ['trigo', 'Trigo', inc.trigo, trigoNote],
+      ['gado', 'Leite e carne', inc.gado, `cerca de ${n1(y.gado)} por cuidador · 1 cuida de 4 cabeças`],
+      ['peixe', 'Peixe', inc.peixe, `cerca de ${n1(y.pesca)} por pescador${s.fish < 30 ? ' · rio se esgotando' : ''}`],
+      ['caca', 'Caça', inc.caca, `cerca de ${n1(y.caca)} por caçador${(s.hunt == null ? 70 : s.hunt) < 30 ? ' · caça escassa' : ''}`]
+    ].map(([k, name, v, note]) => {
+      const c = SRC.find(x => x[0] === k);
+      return `<li><span class="chip" style="--c:${c[2]}">${icon(c[3])}</span><span class="nm">${name}<small>${note}</small></span><b class="${v > 0 ? 'up' : ''}">${v > 0 ? '+' : ''}${n0(v || 0)}</b></li>`;
+    }).join('');
+    const best = y.pesca >= y.caca
+      ? `Nesta estação, cada pescador traz mais comida (${n1(y.pesca)}) que cada caçador (${n1(y.caca)}).`
+      : `Nesta estação, cada caçador traz mais comida (${n1(y.caca)}) que cada pescador (${n1(y.pesca)}).`;
+    const after = Math.max(0, f.food);
+    $('cel-body').innerHTML = `
+      <div class="cel-total"><b>${n0(total)}</b><span>de comida no celeiro<br>dura ${n1(f.seasonsOfFood)} ${f.seasonsOfFood === 1 ? 'estação' : 'estações'} · o povo come ${n0(perMonth)} por mês</span></div>
+      <div class="cel-bar" aria-hidden="true">${bar}</div>
+      <ul class="cel-list">${rows}</ul>
+      <h3 class="cel-h">Nesta estação, se nada mudar</h3>
+      <ul class="cel-list prod">${prod}
+        <li class="eat"><span class="nm">O povo come</span><b class="down">−${n0(f.eaten || 0)}</b></li>
+        <li class="end"><span class="nm">No fim da estação</span><b>${n0(after)}</b></li>
+      </ul>
+      <p class="cel-tip">${best}</p>`;
+  }
+  function openCeleiro() {
+    lastFocus = document.activeElement;
+    renderCeleiro();
+    const m = $('celeiro'); m.hidden = false;
+    requestAnimationFrame(() => m.classList.add('show'));
+    document.body.classList.add('modal-open');
+    $('cel-x').focus();
+  }
+  function closeCeleiro() {
+    const m = $('celeiro'); m.classList.remove('show');
+    document.body.classList.remove('modal-open');
+    setTimeout(() => { m.hidden = true; }, 220);
+    if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) {} }
+  }
+  $('stats').addEventListener('click', e => { if (e.target.closest && e.target.closest('#open-cel')) openCeleiro(); });
+  $('cel-x').addEventListener('click', closeCeleiro);
+  $('celeiro').addEventListener('click', e => { if (e.target === $('celeiro')) closeCeleiro(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('celeiro').hidden) closeCeleiro(); });
+
   // ===== Música: uma faixa por estação, tema no começo e no fim; troca com fade =====
   const MUSIC = { tema: 'musica-tema.mp3', s: ['musica-primavera.mp3', 'musica-verao.mp3', 'musica-outono.mp3', 'musica-inverno.mp3'] };
   const VOL = 0.8, FADE = 2.5;
@@ -1126,7 +1283,7 @@ h2 { font-size: 22px; line-height: 1.15; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031205812';
+  var BUILD = '20261031210532';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
