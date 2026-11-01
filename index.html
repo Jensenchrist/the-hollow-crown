@@ -461,6 +461,18 @@ li .who { font-weight: 700; margin-right: 4px; }
 .map .fight text { font-family: var(--body); font-size: 11.5px; font-weight: 700; fill: #fff; stroke: rgba(0, 0, 0, .7); stroke-width: 3px; }
 .map .fight circle { fill: #b2302a; stroke: #fff6d6; stroke-width: 1.5; }
 
+/* ===== Duas telas: arraste para o lado ===== */
+.pg-tabs { display: flex; align-items: center; gap: 6px; }
+.pg-tabs button { padding: 6px 14px; border-radius: 999px; font-size: 14px; }
+.pg-tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+.pg-dots { margin-left: auto; display: flex; gap: 6px; }
+.pg-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); transition: background .3s, transform .3s; }
+.pg-dots i.on { background: var(--accent); transform: scale(1.2); }
+.pager { display: flex; align-items: flex-start; overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin: 0 -16px; overscroll-behavior-x: contain; transition: height .25s ease; }
+.pager::-webkit-scrollbar { display: none; }
+.page { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; scroll-snap-stop: always; display: grid; gap: 16px; align-content: start; padding: 0 16px; box-sizing: border-box; }
+.pg-hint { text-align: center; color: var(--muted); font-size: 13px; margin: 0; }
+input[type=range] { touch-action: none; }
 </style>
 
 </head>
@@ -484,6 +496,13 @@ li .who { font-weight: 700; margin-right: 4px; }
 
 <main class="wrap">
   <div id="banner"></div>
+  <div class="pg-tabs" role="tablist" aria-label="Telas">
+    <button type="button" role="tab" id="tab-0" data-pg="0" aria-selected="true">Condado</button>
+    <button type="button" role="tab" id="tab-1" data-pg="1" aria-selected="false">A terra</button>
+    <span class="pg-dots" aria-hidden="true"><i class="on"></i><i></i></span>
+  </div>
+  <div class="pager" id="pager">
+  <div class="page" id="page-0" role="tabpanel" aria-labelledby="tab-0">
   <section class="card" aria-labelledby="h-map">
     <h2 id="h-map">O Sul da Inglaterra</h2>
     <p class="sub" id="map-sub">Toque num condado para ver de perto.</p>
@@ -517,29 +536,6 @@ li .who { font-weight: 700; margin-right: 4px; }
         <ul class="notes" id="warn"></ul>
       </section>
 
-  <section class="card" id="c-land" aria-labelledby="h-land">
-        <h2 id="h-land">A terra</h2>
-        <p class="sub" id="land-sub"></p>
-        <div class="fields" id="fields" aria-label="Fertilidade dos 10 campos"></div>
-        <div class="legend"><span style="--c: #e6c063">plantado</span><span style="--c: rgba(185, 164, 99, .55)">sem plantar</span><span style="--c: rgba(185, 164, 99, .2)">desc. = descansa por sua ordem</span><span>altura da espiga = fertilidade (%)</span></div>
-        <div class="res">
-          <figure class="gauge" id="g-forest" aria-label="Floresta">
-            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="50"/><circle class="arc" id="forest" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/></svg>
-            <div class="disc"><b id="forest-v"></b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l5 7h-3l4 6H6l4-6H7z"/><path d="M12 16v5"/></svg></div>
-            <figcaption class="lbl">Floresta</figcaption>
-          </figure>
-          <figure class="gauge" id="g-fish" aria-label="Peixe no rio">
-            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="50"/><circle class="arc" id="fish" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/></svg>
-            <div class="disc"><b id="fish-v"></b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c3-4.5 9-5.5 13-2l4-3v10l-4-3c-4 3.5-10 2.5-13-2z"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg></div>
-            <figcaption class="lbl">Peixe</figcaption>
-          </figure>
-          <figure class="gauge" id="g-hunt" aria-label="Caça">
-            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="50"/><circle class="arc" id="hunt" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/></svg>
-            <div class="disc"><b id="hunt-v"></b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-2.4 0-4-1.9-4-4.6V13h8v3.4c0 2.7-1.6 4.6-4 4.6z"/><path d="M8 13c-2.6 0-4.6-2-4.6-4.8M5 9.6V5.5M3.4 7.2 5 8.6M16 13c2.6 0 4.6-2 4.6-4.8M19 9.6V5.5M20.6 7.2 19 8.6"/><path d="M10.3 17h.01M13.7 17h.01"/></svg></div>
-            <figcaption class="lbl">Caça</figcaption>
-          </figure>
-        </div>
-      </section>
 
   <section class="card" id="c-tasks" aria-labelledby="h-tasks">
         <h2 id="h-tasks">Obrigações</h2>
@@ -627,6 +623,34 @@ li .who { font-weight: 700; margin-right: 4px; }
 
 
 
+  </div>
+  <div class="page" id="page-1" role="tabpanel" aria-labelledby="tab-1">
+  <section class="card" id="c-land" aria-labelledby="h-land">
+        <h2 id="h-land">A terra</h2>
+        <p class="sub" id="land-sub"></p>
+        <div class="fields" id="fields" aria-label="Fertilidade dos 10 campos"></div>
+        <div class="legend"><span style="--c: #e6c063">plantado</span><span style="--c: rgba(185, 164, 99, .55)">sem plantar</span><span style="--c: rgba(185, 164, 99, .2)">desc. = descansa por sua ordem</span><span>altura da espiga = fertilidade (%)</span></div>
+        <div class="res">
+          <figure class="gauge" id="g-forest" aria-label="Floresta">
+            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="50"/><circle class="arc" id="forest" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/></svg>
+            <div class="disc"><b id="forest-v"></b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l5 7h-3l4 6H6l4-6H7z"/><path d="M12 16v5"/></svg></div>
+            <figcaption class="lbl">Floresta</figcaption>
+          </figure>
+          <figure class="gauge" id="g-fish" aria-label="Peixe no rio">
+            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="50"/><circle class="arc" id="fish" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/></svg>
+            <div class="disc"><b id="fish-v"></b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c3-4.5 9-5.5 13-2l4-3v10l-4-3c-4 3.5-10 2.5-13-2z"/><circle cx="8" cy="11" r=".6" fill="currentColor"/></svg></div>
+            <figcaption class="lbl">Peixe</figcaption>
+          </figure>
+          <figure class="gauge" id="g-hunt" aria-label="Caça">
+            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="50"/><circle class="arc" id="hunt" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="0 100" transform="rotate(-90 60 60)"/></svg>
+            <div class="disc"><b id="hunt-v"></b><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21c-2.4 0-4-1.9-4-4.6V13h8v3.4c0 2.7-1.6 4.6-4 4.6z"/><path d="M8 13c-2.6 0-4.6-2-4.6-4.8M5 9.6V5.5M3.4 7.2 5 8.6M16 13c2.6 0 4.6-2 4.6-4.8M19 9.6V5.5M20.6 7.2 19 8.6"/><path d="M10.3 17h.01M13.7 17h.01"/></svg></div>
+            <figcaption class="lbl">Caça</figcaption>
+          </figure>
+        </div>
+      </section>
+    <p class="pg-hint">Arraste para o lado para voltar ao condado.</p>
+  </div>
+  </div>
   <div class="foot">
     <span id="goal"></span>
     <span class="old-phase" id="old-phase" hidden>Fases anteriores: <a href="fase1/">Fase 1 (só Kent)</a> · <a href="fase2/">Fase 2 (sem guerra)</a></span>
@@ -2629,6 +2653,36 @@ li .who { font-weight: 700; margin-right: 4px; }
     try { if (document.visibilityState === 'hidden') ac.suspend(); else if (soundOn) ac.resume(); } catch (e) {}
   });
 
+  // ===== Duas telas (Condado e A terra): arrastar para o lado ou tocar nas abas =====
+  let page = 0;
+  function fitPager() {
+    const pg = $('page-' + page); if (!pg) return;
+    $('pager').style.height = pg.offsetHeight + 'px';
+  }
+  function showPage(i, smooth) {
+    const px = $('pager');
+    px.scrollTo ? px.scrollTo({ left: i * px.clientWidth, behavior: smooth ? 'smooth' : 'auto' }) : (px.scrollLeft = i * px.clientWidth);
+  }
+  function setPage(i) {
+    if (i === page) return;
+    page = i;
+    [0, 1].forEach(k => { $('tab-' + k).setAttribute('aria-selected', String(k === i)); });
+    document.querySelectorAll('.pg-dots i').forEach((d, k) => d.classList.toggle('on', k === i));
+    fitPager();
+    const top = $('pager').getBoundingClientRect().top + window.pageYOffset - 70;
+    if (window.pageYOffset > top) window.scrollTo(0, Math.max(0, top));
+  }
+  let pgTimer = null;
+  $('pager').addEventListener('scroll', () => {
+    const px = $('pager'), i = Math.round(px.scrollLeft / Math.max(1, px.clientWidth));
+    if (i !== page) { $('pager').style.height = ''; }
+    clearTimeout(pgTimer);
+    pgTimer = setTimeout(() => setPage(Math.round(px.scrollLeft / Math.max(1, px.clientWidth))), 80);
+  }, { passive: true });
+  document.querySelector('.pg-tabs').addEventListener('click', e => { const b = e.target.closest && e.target.closest('button[data-pg]'); if (b) showPage(Number(b.dataset.pg), true); });
+  if (window.ResizeObserver) { const ro = new ResizeObserver(() => fitPager()); ro.observe($('page-0')); ro.observe($('page-1')); }
+  window.addEventListener('resize', () => { showPage(page, false); fitPager(); });
+
   load(); save();
   if (/github\.io$/.test(location.hostname)) $('old-phase').hidden = false;
   buildTasks();
@@ -2647,14 +2701,14 @@ li .who { font-weight: 700; margin-right: 4px; }
   hold($('tax-p'), () => setTax(H.taxRateOf(game) + 1));
   bindReset();
   showSound();
-  render(); renderLog();
+  render(); renderLog(); fitPager();
 })();
 </script>
 
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261101142135';
+  var BUILD = '20261101144516';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
