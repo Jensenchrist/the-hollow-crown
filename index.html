@@ -361,6 +361,11 @@ body.modal-open { overflow: hidden; }
 .cel-list em { font-style: normal; font-size: 12.5px; color: var(--muted); min-width: 3.2ch; text-align: right; font-variant-numeric: tabular-nums; }
 .cel-h { font-family: var(--heading); font-weight: 400; font-size: 17px; margin: 18px 0 0; position: relative; }
 .cel-tip { font-family: var(--text); font-size: 14.5px; margin: 12px 2px 0; color: var(--ink); position: relative; }
+
+/* ===== Produção ===== */
+.prod-row { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; align-items: center; margin-bottom: 10px; }
+.prod-txt b { display: block; font-size: 16px; }
+.prod-txt small { display: block; font-family: var(--text); font-size: 13px; color: var(--muted); line-height: 1.35; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -425,6 +430,22 @@ body.modal-open { overflow: hidden; }
         <div id="tasks"></div>
         <div class="idle"><span>Sem tarefa (descansando)</span><b id="idle"></b></div>
       </section>
+
+  <section class="card" aria-labelledby="h-prod">
+    <h2 id="h-prod">Produção</h2>
+    <p class="sub">O que o condado transforma com o que colhe.</p>
+    <div class="prod-row">
+      <span class="chip" style="--c: #d9a05b"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13.5C4 9.4 7.6 7 12 7s8 2.4 8 6.5c0 1.2-.8 2-2 2V19H6v-3.5c-1.2 0-2-.8-2-2z"/><path d="M9 10.5l1 2.2M12 10v2.6M15 10.5l-1 2.2"/></svg></span>
+      <div class="prod-txt"><b id="l-bake">Padaria</b><small>3 de trigo viram 1 pão · o pão não estraga e alegra o povo · o forno queima lenha</small></div>
+    </div>
+    <div class="taxhead"><label class="lbl" for="bake">Trigo para o forno, por mês</label></div>
+    <div class="taxrow">
+      <button type="button" id="bake-m" aria-label="Menos 1% de trigo para a padaria">−</button>
+      <div class="rng"><output class="bubble" id="bake-b" aria-hidden="true"></output><input type="range" id="bake" min="0" max="100" step="1" aria-labelledby="l-bake"><div class="ticks" aria-hidden="true"><span style="--k:0">0</span><span style="--k:.25">25</span><span style="--k:.5">50</span><span style="--k:.75">75</span><span style="--k:1">100</span></div></div>
+      <button type="button" id="bake-p" aria-label="Mais 1% de trigo para a padaria">+</button>
+    </div>
+    <p class="taxinfo" id="bake-info"></p>
+  </section>
 
   <section class="card" aria-labelledby="h-decrees">
         <h2 id="h-decrees">Decretos</h2>
@@ -534,7 +555,8 @@ body.modal-open { overflow: hidden; }
       seed: seed || 1, rngCalls: 0,
       year: 1, season: 0, month: 0, popFrac: 0,
       pop: 120, food: 260, herd: 20, gold: 60, wood: 30, happy: 55,
-      foodBy: { trigo: 180, gado: 40, peixe: 40, caca: 0, compra: 0 },
+      foodBy: { trigo: 180, gado: 40, peixe: 40, caca: 0, compra: 0, pao: 0 },
+      bakePct: 0,
       fields: [90, 85, 80, 80, 75, 70, 65, 60, 55, 50],
       planted: [], lastPlanted: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], cropHealth: 1,
       forest: 80, fish: 80, hunt: 70,
@@ -566,11 +588,24 @@ body.modal-open { overflow: hidden; }
   }
 
   // Jogos salvos antes da caça
-  const FOOD_SRC = ['trigo', 'gado', 'peixe', 'caca', 'compra'];
+  const FOOD_SRC = ['trigo', 'gado', 'peixe', 'caca', 'compra', 'pao'];
+  // Padaria: 3 de trigo viram 1 pão; 1 pão alimenta como 3. O forno queima lenha.
+  const WHEAT_PER_BREAD = 3, WOOD_PER_BREAD = 0.2, BREAD_HAPPY = 4;
+  const bakePctOf = s => clamp(Math.round(s.bakePct || 0), 0, 100);
+  // Quantos pães a padaria assa num mês com o trigo e a lenha que existem
+  function bakePlan(s, wood) {
+    const pct = bakePctOf(s); if (!pct || !s.foodBy) return { loaves: 0, wood: 0 };
+    let loaves = Math.floor((s.foodBy.trigo || 0) * pct / 100 / WHEAT_PER_BREAD);
+    const w = wood == null ? s.wood : wood;
+    if (loaves * WOOD_PER_BREAD > w) loaves = Math.floor(w / WOOD_PER_BREAD);
+    return { loaves: Math.max(0, loaves), wood: Math.ceil(Math.max(0, loaves) * WOOD_PER_BREAD) };
+  }
   function migrate(s) {
     if (s.alloc && s.alloc.caca == null) s.alloc.caca = 0;
     if (s.hunt == null) s.hunt = 70;
-    if (!s.foodBy) s.foodBy = { trigo: s.food * 0.6, gado: s.food * 0.2, peixe: s.food * 0.2, caca: 0, compra: 0 };
+    if (!s.foodBy) s.foodBy = { trigo: s.food * 0.6, gado: s.food * 0.2, peixe: s.food * 0.2, caca: 0, compra: 0, pao: 0 };
+    if (s.foodBy.pao == null) s.foodBy.pao = 0;
+    if (s.bakePct == null) s.bakePct = 0;
     return s;
   }
   // Mantém a divisão por origem somando exatamente o total do celeiro (o consumo e as perdas saem proporcionalmente)
@@ -695,12 +730,27 @@ body.modal-open { overflow: hidden; }
 
     s.food += foodIn;
     Object.keys(src).forEach(k => { s.foodBy[k] = (s.foodBy[k] || 0) + src[k]; });
-    if (evNow && evNow.id === 'ratos') s.food -= Math.round(s.food * 0.12);
+    // Padaria
+    const bake = bakePlan(s);
+    if (bake.loaves > 0) {
+      s.foodBy.trigo -= bake.loaves * WHEAT_PER_BREAD; s.foodBy.pao += bake.loaves * WHEAT_PER_BREAD; s.wood -= bake.wood;
+      rep.push({ kind: 'info', text: `Padaria assou ${bake.loaves} pães (−${bake.loaves * WHEAT_PER_BREAD} trigo, −${bake.wood} lenha).` });
+    } else if (bakePctOf(s) > 0 && (s.foodBy.trigo || 0) >= WHEAT_PER_BREAD && s.wood < WOOD_PER_BREAD) {
+      rep.push({ kind: 'warn', text: 'Padaria parada: faltou lenha para o forno.' });
+    }
+    // Ratos comem o grão, não o pão
+    if (evNow && evNow.id === 'ratos') {
+      const sumOther = FOOD_SRC.filter(k => k !== 'pao').reduce((x, k) => x + (s.foodBy[k] || 0), 0);
+      const lost = Math.round(sumOther * 0.12);
+      if (sumOther > 0) FOOD_SRC.filter(k => k !== 'pao').forEach(k => { s.foodBy[k] -= (s.foodBy[k] || 0) / sumOther * lost; });
+      s.food -= lost;
+    }
 
     // Consumo do mês
     s.taxRate = taxRateOf(s); delete s.taxes;
     s.rationPct = rationPctOf(s); delete s.rations;
-    let happyDelta = (rationHappy(s.rationPct) + taxHappy(s.taxRate)) / 3;
+    const breadShare = s.food > 0 ? (s.foodBy.pao || 0) / s.food : 0;
+    let happyDelta = (rationHappy(s.rationPct) + taxHappy(s.taxRate) + BREAD_HAPPY * breadShare) / 3;
     const eat = Math.round(eatPerSeason(s) / 3 * (ev && ev.id === 'rigoroso' ? 1.25 : 1));
     let starving = false, deaths = 0;
     const before = s.food;
@@ -751,6 +801,7 @@ body.modal-open { overflow: hidden; }
 
     Object.keys(src).forEach(k => { totals.src[k] += src[k]; });
     normalizeFood(s);
+    totals.loaves += bake.loaves; totals.bakeWood += bake.wood;
     totals.foodIn += foodIn; totals.eaten += Math.min(eat, before); totals.woodIn += woodIn; totals.tax += tax;
     return rep;
   }
@@ -763,7 +814,7 @@ body.modal-open { overflow: hidden; }
     fitAlloc(s);
     const ev = pickEvent(s, rand);
     const evMonth = ev ? Math.floor(rand() * 3) : -1;
-    const totals = { foodIn: 0, eaten: 0, woodIn: 0, tax: 0, src: { trigo: 0, gado: 0, peixe: 0, caca: 0 } };
+    const totals = { foodIn: 0, eaten: 0, woodIn: 0, tax: 0, loaves: 0, bakeWood: 0, src: { trigo: 0, gado: 0, peixe: 0, caca: 0 } };
     const months = [];
     const report = [];
     for (let i = 0; i < 3 && !s.lost; i++) {
@@ -821,13 +872,14 @@ body.modal-open { overflow: hidden; }
       food: next.food, pop: next.pop, happy: next.happy, wood: next.wood, gold: next.gold,
       seasonsOfFood: r1(s.food / Math.max(1, eatPerSeason(s))),
       income: sim.totals ? sim.totals.src : { trigo: 0, gado: 0, peixe: 0, caca: 0 }, eaten: sim.totals ? sim.totals.eaten : 0,
+      loaves: sim.totals ? sim.totals.loaves : 0, bakeWood: sim.totals ? sim.totals.bakeWood : 0,
       warnings
     };
   }
 
   const api = { SEASONS, MONTHS, TASKS, BUY_FOOD, BUY_COST, GOAL_POP, GOAL_HAPPY, WORKERS_PER_FIELD_PLANT,
     FEAST_GOLD, FEAST_FOOD, FEAST_HAPPY, taxRateOf, taxGoldPer, taxHappy,
-    FOOD_SRC, HARVEST_MONTH, rationPctOf, rationHappy, rng, newGame, migrate, normalizeFood, yieldPerWorker, eatPerSeason, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
+    FOOD_SRC, HARVEST_MONTH, WHEAT_PER_BREAD, WOOD_PER_BREAD, BREAD_HAPPY, bakePctOf, bakePlan, rationPctOf, rationHappy, rng, newGame, migrate, normalizeFood, yieldPerWorker, eatPerSeason, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.HC = api;
 })(this);
@@ -955,6 +1007,7 @@ body.modal-open { overflow: hidden; }
     campos: '<path d="M12 21V8"/><path d="M12 12c-2.5 0-4-1.6-4-4 2.5 0 4 1.6 4 4zM12 12c2.5 0 4-1.6 4-4-2.5 0-4 1.6-4 4zM12 16c-2.5 0-4-1.6-4-4 2.5 0 4 1.6 4 4zM12 16c2.5 0 4-1.6 4-4-2.5 0-4 1.6-4 4z"/><path d="M12 8c-1-1.2-1-3 0-5 1 2 1 3.8 0 5z"/>',
     floresta: '<path d="M12 3l5 7h-3l4 6H6l4-6H7z"/><path d="M12 16v5"/>',
     peixe: '<path d="M3 12c3-4.5 9-5.5 13-2l4-3v10l-4-3c-4 3.5-10 2.5-13-2z"/><circle cx="8" cy="11" r=".6" fill="currentColor"/>',
+    pao: '<path d="M4 13.5C4 9.4 7.6 7 12 7s8 2.4 8 6.5c0 1.2-.8 2-2 2V19H6v-3.5c-1.2 0-2-.8-2-2z"/><path d="M9 10.5l1 2.2M12 10v2.6M15 10.5l-1 2.2"/>',
     caca: '<path d="M12 21c-2.4 0-4-1.9-4-4.6V13h8v3.4c0 2.7-1.6 4.6-4 4.6z"/><path d="M8 13c-2.6 0-4.6-2-4.6-4.8M5 9.6V5.5M3.4 7.2 5 8.6M16 13c2.6 0 4.6-2 4.6-4.8M19 9.6V5.5M20.6 7.2 19 8.6"/><path d="M10.3 17h.01M13.7 17h.01"/>',
     gado: '<path d="M5 6c0 2 1.5 3 3 3M19 6c0 2-1.5 3-3 3"/><path d="M8 8h8l1 7c0 3-2.2 5-5 5s-5-2-5-5z"/><path d="M10 16.5h.01M14 16.5h.01"/><path d="M8 11h.01M16 11h.01"/>',
     pedra: '<path d="M4 18l2.5-7 5-4 5.5 2 3 9z"/><path d="M11.5 7l-1 5 4.5 2M10.5 12L6.5 11"/>',
@@ -1040,6 +1093,12 @@ body.modal-open { overflow: hidden; }
     const rword = rp < 75 ? 'meia ração' : rp < 95 ? 'ração curta' : rp <= 105 ? 'ração normal' : rp < 130 ? 'ração farta' : 'ração dupla';
     $('rat-info').textContent = `${rword} · o povo come ${Math.round(H.eatPerSeason(s) / 3)} por mês · felicidade ${rh > 0 ? '+' + rh.toLocaleString('pt-BR') : rh === 0 ? 'não muda' : '−' + Math.abs(rh).toLocaleString('pt-BR')}`;
     $('rat').disabled = $('rat-m').disabled = $('rat-p').disabled = lock;
+    const bp = H.bakePctOf(s), plan = H.bakePlan(s), loavesNow = Math.round((s.foodBy ? s.foodBy.pao || 0 : 0) / H.WHEAT_PER_BREAD);
+    $('bake').value = bp; paintRange($('bake'), $('bake-b')); $('bake').setAttribute('aria-valuetext', bp + '%');
+    $('bake-info').textContent = bp === 0
+      ? `Padaria parada · ${loavesNow} pães no celeiro`
+      : `assa cerca de ${plan.loaves} pães no próximo mês · gasta ${plan.wood} de lenha · ${loavesNow} pães no celeiro` + (plan.loaves === 0 && s.wood < H.WOOD_PER_BREAD ? ' · sem lenha para o forno' : plan.loaves === 0 ? ' · sem trigo para assar' : '');
+    $('bake').disabled = $('bake-m').disabled = $('bake-p').disabled = lock;
     const rate = H.taxRateOf(s), hp = H.taxHappy(rate), gp = Math.round(s.pop * H.taxGoldPer(rate));
     $('tax').value = rate; $('tax-v').textContent = rate + '%'; paintRange($('tax'), $('tax-b'));
     $('tax').setAttribute('aria-valuetext', rate + '%');
@@ -1145,6 +1204,7 @@ body.modal-open { overflow: hidden; }
     ['gado', 'Leite e carne', '#ead9bd', 'gado'],
     ['peixe', 'Peixe', '#7fb8d9', 'peixe'],
     ['caca', 'Caça', '#cf8e5c', 'caca'],
+    ['pao', 'Pão', '#d9a05b', 'pao'],
     ['compra', 'Comprada', '#bba8de', 'ouro']
   ];
   const n0 = v => Math.round(v).toLocaleString('pt-BR');
@@ -1155,7 +1215,7 @@ body.modal-open { overflow: hidden; }
     const total = Math.max(0, s.food), perMonth = H.eatPerSeason(s) / 3;
     const parts = SRC.map(([k, name, color, ic]) => ({ k, name, color, ic, v: Math.max(0, s.foodBy[k] || 0) }));
     const bar = total > 0 ? parts.filter(p => p.v > 0.5).map(p => `<i style="flex:${p.v};background:${p.color}"></i>`).join('') : '<i class="empty"></i>';
-    const rows = parts.map(p => `<li><span class="chip" style="--c:${p.color}">${icon(p.ic)}</span><span class="nm">${p.name}</span><b>${n0(p.v)}</b><em>${total > 0 ? Math.round(p.v / total * 100) : 0}%</em></li>`).join('');
+    const rows = parts.map(p => `<li><span class="chip" style="--c:${p.color}">${icon(p.ic)}</span><span class="nm">${p.name}${p.k === 'pao' ? `<small>${n0(p.v / H.WHEAT_PER_BREAD)} pães · não estraga</small>` : ''}</span><b>${n0(p.v)}</b><em>${total > 0 ? Math.round(p.v / total * 100) : 0}%</em></li>`).join('');
     const trigoNote = s.season === 0 ? 'Plantio em março; a colheita só vem em setembro'
       : s.season === 1 ? (s.planted.length ? `${s.planted.length} campos crescendo; colheita em setembro` : 'Nada plantado este ano')
       : s.season === 2 ? (s.planted.length ? 'Colheita em setembro' : 'Nada para colher') : 'A terra descansa no inverno';
@@ -1179,6 +1239,7 @@ body.modal-open { overflow: hidden; }
       <ul class="cel-list">${rows}</ul>
       <h3 class="cel-h">Nesta estação, se nada mudar</h3>
       <ul class="cel-list prod">${prod}
+        ${f.loaves ? `<li class="eat"><span class="nm">Padaria assa<small>${n0(f.loaves)} pães com ${n0(f.loaves * H.WHEAT_PER_BREAD)} de trigo · −${n0(f.bakeWood)} lenha</small></span><b>${n0(f.loaves)} pães</b></li>` : ''}
         <li class="eat"><span class="nm">O povo come</span><b class="down">−${n0(f.eaten || 0)}</b></li>
         <li class="end"><span class="nm">No fim da estação</span><b>${n0(after)}</b></li>
       </ul>
@@ -1274,6 +1335,10 @@ body.modal-open { overflow: hidden; }
 
   load();
   buildTasks();
+  const setBake = v => { if (game.lost) return; H.migrate(game); game.bakePct = Math.max(0, Math.min(100, Math.round(v))); save(); render(); };
+  $('bake').addEventListener('input', e => setBake(Number(e.target.value)));
+  hold($('bake-m'), () => setBake(H.bakePctOf(game) - 1));
+  hold($('bake-p'), () => setBake(H.bakePctOf(game) + 1));
   const setRation = v => { if (game.lost) return; game.rationPct = Math.max(50, Math.min(150, Math.round(v))); delete game.rations; save(); render(); };
   $('rat').addEventListener('input', e => setRation(Number(e.target.value)));
   hold($('rat-m'), () => setRation(H.rationPctOf(game) - 1));
@@ -1291,7 +1356,7 @@ body.modal-open { overflow: hidden; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031212254';
+  var BUILD = '20261031213419';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
