@@ -384,6 +384,13 @@ body.modal-open { overflow: hidden; }
 .mk:disabled { cursor: not-allowed; }
 .mk:not(:disabled):active { transform: scale(.97); }
 .mk.poor:not(.off) { opacity: .7; }
+
+/* ===== Viver até algo importante ===== */
+.auto { width: 100%; min-height: 46px; margin-top: -6px; border-radius: 999px; font-weight: 700; font-size: 15px;
+  background: rgba(255, 255, 255, .07); border: 1px solid var(--line); color: var(--accent); }
+.auto.running { color: var(--ink); background: rgba(255, 255, 255, .12); }
+.banner.info { background: rgba(255, 255, 255, .08); border: 1px solid var(--accent); }
+.banner.info button { border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -410,6 +417,7 @@ body.modal-open { overflow: hidden; }
   <div id="banner"></div>
   <div class="stats" id="stats"></div>
   <button class="go" id="go" type="button"></button>
+  <button class="auto" id="auto" type="button">Viver até algo importante ››</button>
 
   <section class="card" aria-labelledby="h-fc">
         <h2 id="h-fc">Previsão para o fim da estação</h2>
@@ -1184,6 +1192,10 @@ body.modal-open { overflow: hidden; }
 
     $('go').textContent = s.lost ? 'Fim de jogo' : playing ? `${H.MONTHS[Math.min(liveMonth, first + 2)]} passando · pular ▸▸` : `Viver ${['a Primavera', 'o Verão', 'o Outono', 'o Inverno'][s.season]} →`;
     $('go').disabled = s.lost && !playing;
+    $('auto').textContent = autoRun ? 'Parar o tempo ■' : 'Viver até algo importante ››';
+    $('auto').disabled = (s.lost && !autoRun) || (playing && !autoRun);
+    $('auto').classList.toggle('running', autoRun);
+    if (autoRun) $('go').textContent = `${H.MONTHS[Math.min(liveMonth == null ? s.season * 3 : liveMonth, (seasonStart ? seasonStart.season : s.season) * 3 + 2)]} passando · vivendo até algo importante`;
     $('go').classList.toggle('skip', playing);
 
     $('fields').innerHTML = s.fields.map((v, i) => `<div class="f${s.planted.includes(i) ? ' p' : ''}" title="Campo ${i + 1}: fertilidade ${v}%"><span class="ear" style="height:${Math.max(18, v)}%"><svg viewBox="0 0 40 100" aria-hidden="true"><path class="st" d="M20 100V22"/><path d="M20 6c5 6 5 14 0 20-5-6-5-14 0-20z"/><path d="M19 34C11 33 6 27 5 19c8 1 13 6 14 15zM21 34c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 50C11 49 6 43 5 35c8 1 13 6 14 15zM21 50c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 66C11 65 6 59 5 51c8 1 13 6 14 15zM21 66c8-1 13-7 14-15-8 1-13 6-14 15z"/></svg></span><b>${v}</b></div>`).join('');
@@ -1198,7 +1210,8 @@ body.modal-open { overflow: hidden; }
 
     $('goal').textContent = `Meta da Fase 1: chegar a ${H.GOAL_POP} pessoas com o povo satisfeito (felicidade ${H.GOAL_HAPPY}+).`;
 
-    if (playing) { $('banner').innerHTML = ''; return; }
+    if (playing || autoRun) { $('banner').innerHTML = ''; return; }
+    if (autoMsg && !s.lost) { $('banner').innerHTML = `<div class="banner info"><span>${autoMsg}</span><button type="button" id="ok-auto">Entendi</button></div>`; const ok = $('ok-auto'); if (ok) ok.addEventListener('click', () => { autoMsg = ''; render(); }); return; }
     if (s.lost) $('banner').innerHTML = `<div class="banner lose"><span>Kent se esvaziou no ano ${s.year}. O condado não resistiu.</span><button type="button" id="again">Jogar de novo</button></div>`;
     else if (s.won) $('banner').innerHTML = `<div class="banner win"><span>Meta alcançada! Kent prospera. Você pode continuar jogando.</span></div>`;
     else $('banner').innerHTML = '';
@@ -1212,15 +1225,14 @@ body.modal-open { overflow: hidden; }
     box.innerHTML = items.slice().reverse().map(e => `<div><h3>${e.title}</h3><ul class="notes">${e.items.map(x => `<li class="${x.kind}">${x.text}</li>`).join('')}</ul></div>`).join('');
   }
 
-  let seasonStart = null;
+  let seasonStart = null, autoRun = false, autoMsg = '', autoSeasons = 0, autoBase = null;
   function finish() {
     timers.forEach(clearTimeout); timers = [];
     playing = false; seasonFc = null; seasonStart = null;
     render(); renderLog();
   }
-  $('go').addEventListener('click', () => {
-    if (playing) { finish(); return; }
-    if (game.lost) return;
+  // Vive uma estação mostrando os meses; gap = tempo de cada mês
+  function playSeason(gap, done) {
     const turn = game.turn || 0;
     const rand = H.rng(game.seed * 7 + turn * 7919 + 13);
     const start = game;
@@ -1234,21 +1246,75 @@ body.modal-open { overflow: hidden; }
     while (log.length > 60) log.shift();
     game = out.state; game.turn = turn + 1;
     save();
-    // Mostra os meses passando
     seasonStart = start; seasonFc = H.forecast(start); playing = true;
     const firstMonth = start.season * 3;
-    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const gap = reduce ? 500 : 1500;
     render(start, firstMonth);
     out.months.forEach((m, i) => {
       timers.push(setTimeout(() => {
-        const next = firstMonth + i + 1;
-        render(m.state, i < 2 ? next : firstMonth + 2);
+        render(m.state, i < 2 ? firstMonth + i + 1 : firstMonth + 2);
         renderLog(log.length - out.months.length + i + 1);
         $('log').scrollTop = 0;
       }, gap * (i + 1)));
     });
-    timers.push(setTimeout(finish, gap * out.months.length + 700));
+    timers.push(setTimeout(() => { finish(); if (done) done(out, start); }, gap * out.months.length + 400));
+  }
+  const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ===== Viver até algo importante =====
+  const RARE = ['vinho', 'especiarias'];
+  function needsAttention(prev, out) {
+    const s = game;
+    if (s.lost) return 'O condado se esvaziou.';
+    if (s.won && !prev.won) return 'Meta alcançada! Kent prospera.';
+    const rep = out ? out.report : [];
+    const bad = rep.find(r => r.kind === 'bad');
+    if (bad) return bad.text;
+    const ev = rep.find(r => r.kind === 'event' && !/^(O mercador chegou|Festa na aldeia|Ano de boa colheita)/.test(r.text));
+    if (ev) return ev.text;
+    if (s.market && RARE.some(k => s.market.stock[k] > 0)) return 'O mercador trouxe produtos raros: vale dar uma olhada no Mercado.';
+    const f = H.forecast(s);
+    if (f.food === 0) return 'A previsão mostra fome nesta estação. Reveja a comida.';
+    const need = H.woodNeedWinter(s);
+    if (s.season === 3 && s.wood < need) return `O inverno chegou e falta lenha: ele pede ${need}.`;
+    if (s.season === 2 && f.wood < need) return `A lenha não vai bastar para o inverno: ele pede ${need}.`;
+    if (s.happy < 30) return 'O povo está muito insatisfeito.';
+    const drop = (k, label) => autoBase && autoBase[k] >= 30 && (s[k] == null ? 70 : s[k]) < 30 ? label : '';
+    const res = drop('fish', 'O rio está ficando sem peixe.') || drop('hunt', 'A caça está ficando escassa.') || drop('forest', 'A floresta está rareando.');
+    if (res) return res;
+    return '';
+  }
+  function stopAuto(msg) {
+    autoRun = false; autoMsg = msg || '';
+    render();
+    if (msg) { const bn = $('banner'); if (bn && bn.scrollIntoView) bn.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+  }
+  function autoStep() {
+    if (!autoRun) return;
+    if (game.lost) return stopAuto('O condado se esvaziou.');
+    const prev = H.clone(game);
+    playSeason(reduceMotion() ? 120 : 420, (out) => {
+      autoSeasons++;
+      if (!autoRun) return;
+      const why = needsAttention(prev, out);
+      if (why) return stopAuto(why);
+      if (autoSeasons >= 8) return stopAuto('Passaram dois anos sem nada urgente. Parei para você conferir o condado.');
+      timers.push(setTimeout(autoStep, 250));
+    });
+  }
+  $('auto').addEventListener('click', () => {
+    if (autoRun) { autoRun = false; finish(); stopAuto('Você parou o tempo.'); return; }
+    if (playing || game.lost) return;
+    autoRun = true; autoMsg = ''; autoSeasons = 0;
+    autoBase = { fish: game.fish, hunt: game.hunt == null ? 70 : game.hunt, forest: game.forest };
+    render();
+    autoStep();
+  });
+  $('go').addEventListener('click', () => {
+    if (autoRun) { autoRun = false; finish(); stopAuto('Você parou o tempo.'); return; }
+    if (playing) { finish(); return; }
+    if (game.lost) return;
+    autoMsg = '';
+    playSeason(reduceMotion() ? 500 : 1500);
   });
   $('feast').addEventListener('click', () => { if (H.feast(game)) { save(); render(); } });
 
@@ -1449,7 +1515,7 @@ body.modal-open { overflow: hidden; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031214203';
+  var BUILD = '20261031215448';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
