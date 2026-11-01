@@ -463,7 +463,7 @@ li .who { font-weight: 700; margin-right: 4px; }
 
 /* ===== Duas telas: arraste para o lado ===== */
 .pg-tabs { display: flex; align-items: center; gap: 6px; }
-.pg-tabs button { padding: 6px 14px; border-radius: 999px; font-size: 14px; }
+.pg-tabs button { padding: 6px 12px; border-radius: 999px; font-size: 14px; }
 .pg-tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
 .pg-dots { margin-left: auto; display: flex; gap: 6px; }
 .pg-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); transition: background .3s, transform .3s; }
@@ -499,7 +499,8 @@ input[type=range] { touch-action: none; }
   <div class="pg-tabs" role="tablist" aria-label="Telas">
     <button type="button" role="tab" id="tab-0" data-pg="0" aria-selected="true">Condado</button>
     <button type="button" role="tab" id="tab-1" data-pg="1" aria-selected="false">A terra</button>
-    <span class="pg-dots" aria-hidden="true"><i class="on"></i><i></i></span>
+    <button type="button" role="tab" id="tab-2" data-pg="2" aria-selected="false">Exército</button>
+    <span class="pg-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></span>
   </div>
   <div class="pager" id="pager">
   <div class="page" id="page-0" role="tabpanel" aria-labelledby="tab-0">
@@ -545,10 +546,6 @@ input[type=range] { touch-action: none; }
         <div class="idle"><span>Sem tarefa (descansando)</span><b id="idle"></b></div>
       </section>
 
-  <section class="card" id="c-army" aria-labelledby="h-army">
-    <h2 id="h-army">Exército</h2>
-    <div id="army"></div>
-  </section>
 
   <section class="card" id="c-prod" aria-labelledby="h-prod">
     <h2 id="h-prod">Produção</h2>
@@ -648,7 +645,15 @@ input[type=range] { touch-action: none; }
           </figure>
         </div>
       </section>
-    <p class="pg-hint">Arraste para o lado para voltar ao condado.</p>
+    <p class="pg-hint">Arraste para o lado para trocar de tela.</p>
+  </div>
+  <div class="page" id="page-2" role="tabpanel" aria-labelledby="tab-2">
+  <section class="card" id="c-army" aria-labelledby="h-army">
+    <h2 id="h-army">Exército</h2>
+    <div id="army"></div>
+  </section>
+    <section class="card" id="c-army-none" hidden><h2>Exército</h2><p class="sub" id="army-none" style="margin:0"></p></section>
+    <p class="pg-hint">Arraste para o lado para trocar de tela.</p>
   </div>
   </div>
   <div class="foot">
@@ -1998,6 +2003,8 @@ input[type=range] { touch-action: none; }
     $('when').innerHTML = `${s.name} · Ano ${s.year} · <b>${playing ? H.MONTHS[liveMonth] : H.SEASONS[s.season]}</b><div class="months">${trio}</div>`;
 
     ['c-fc', 'c-tasks', 'c-army', 'c-prod', 'c-dec', 'c-mkt'].forEach(id => { $(id).hidden = !own; });
+    $('c-army-none').hidden = own;
+    if (!own) $('army-none').textContent = `${s.name} não é seu. Para atacar daqui, use "Atacar de…" na tela Condado; para ver o seu exército, toque num condado seu no mapa.`;
     $('c-nb').hidden = own;
     $('c-focus').hidden = !own || sel === 'kent';
 
@@ -2226,7 +2233,9 @@ input[type=range] { touch-action: none; }
       ${threats}${orderTxt}
       <h3 class="court-h">Treinar recrutas como</h3>
       <div class="dip" id="train">${train}</div>
-      <p class="sub" style="margin:4px 0 0">${rec ? `${rec} recrutas nesta estação · custo ${costTxt(c.trainAs || 'lanca', rec)}` : 'Ponha gente em Recrutas, nas Obrigações, para treinar soldados.'}</p>
+      <div class="task" style="margin-top:10px"><span class="name">Recrutas</span>
+        <span class="stepper" role="group" aria-label="Recrutas nesta estação"><button type="button" data-rec="-1" aria-label="Menos 1 recruta" ${lock || rec <= 0 ? 'disabled' : ''}>−</button><output>${rec}</output><button type="button" data-rec="1" aria-label="Mais 1 recruta" ${lock || H.idle(c) <= 0 ? 'disabled' : ''}>+</button></span>
+        <span class="hint">${rec ? `custo ${costTxt(c.trainAs || 'lanca', rec)} · viram soldados no fim da estação` : `tire gente das outras tarefas para treinar · livres agora: ${H.idle(c)}`}</span></div>
       <h3 class="court-h">Construções</h3>
       <div class="dip">${builds}</div>
       ${moves ? `<h3 class="court-h">Marchar</h3>
@@ -2238,7 +2247,8 @@ input[type=range] { touch-action: none; }
     const b = e.target.closest && e.target.closest('button'); if (!b || b.disabled || playing) return;
     const d = b.dataset;
     let ok = true;
-    if (d.train) { game.trainAs = d.train; }
+    if (d.rec) { const v = Math.max(0, (game.alloc.exercito || 0) + Number(d.rec)); if (Number(d.rec) > 0 && H.idle(game) <= 0) return; H.setAlloc(game, 'exercito', v); }
+    else if (d.train) { game.trainAs = d.train; }
     else if (d.build) ok = W.build(world, ME, sel, d.build);
     else if (d.share) { marchShare = Number(d.share); }
     else if (d.move) ok = W.moveTroops(world, ME, sel, d.move, marchShare);
@@ -2666,7 +2676,7 @@ input[type=range] { touch-action: none; }
   function setPage(i) {
     if (i === page) return;
     page = i;
-    [0, 1].forEach(k => { $('tab-' + k).setAttribute('aria-selected', String(k === i)); });
+    [0, 1, 2].forEach(k => { $('tab-' + k).setAttribute('aria-selected', String(k === i)); });
     document.querySelectorAll('.pg-dots i').forEach((d, k) => d.classList.toggle('on', k === i));
     fitPager();
     const top = $('pager').getBoundingClientRect().top + window.pageYOffset - 70;
@@ -2680,7 +2690,7 @@ input[type=range] { touch-action: none; }
     pgTimer = setTimeout(() => setPage(Math.round(px.scrollLeft / Math.max(1, px.clientWidth))), 80);
   }, { passive: true });
   document.querySelector('.pg-tabs').addEventListener('click', e => { const b = e.target.closest && e.target.closest('button[data-pg]'); if (b) showPage(Number(b.dataset.pg), true); });
-  if (window.ResizeObserver) { const ro = new ResizeObserver(() => fitPager()); ro.observe($('page-0')); ro.observe($('page-1')); }
+  if (window.ResizeObserver) { const ro = new ResizeObserver(() => fitPager()); ro.observe($('page-0')); ro.observe($('page-1')); ro.observe($('page-2')); }
   window.addEventListener('resize', () => { showPage(page, false); fitPager(); });
 
   load(); save();
@@ -2708,7 +2718,7 @@ input[type=range] { touch-action: none; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261101144516';
+  var BUILD = '20261101144711';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
