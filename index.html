@@ -65,7 +65,7 @@ body {
   color: var(--sky-ink); transition: background .8s ease;
 }
 .sky-in { max-width: 980px; margin: 0 auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 8px 16px; }
-h1 { font-family: var(--display); font-weight: 400; font-size: 40px; font-size: clamp(28px, 6vw, 40px); margin: 0; line-height: 1; letter-spacing: .01em; text-wrap: balance; }
+h1 { font-family: var(--display); font-weight: 400; font-size: clamp(28px, 6vw, 40px); margin: 0; line-height: 1; letter-spacing: .01em; text-wrap: balance; }
 .when { font-size: 15px; font-weight: 500; }
 .months { display: flex; gap: 6px; justify-content: flex-end; margin-top: 4px; font-size: 13px; }
 .months span { opacity: .55; padding: 1px 7px; border-radius: 999px; transition: opacity .3s, background .3s; }
@@ -177,9 +177,9 @@ body { background-color: var(--bg); background-image: radial-gradient(120% 60% a
   box-shadow: 0 16px 40px rgba(0, 0, 0, .35), inset 0 0 0 1px rgba(255, 255, 255, .18);
   position: relative; overflow: hidden;
 }
-.sky::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: radial-gradient(80% 120% at 85% 0%, rgba(255, 255, 255, .28), transparent 60%); pointer-events: none; }
+.sky::after { content: ""; position: absolute; inset: 0; background: radial-gradient(80% 120% at 85% 0%, rgba(255, 255, 255, .28), transparent 60%); pointer-events: none; }
 .sky-in { position: relative; z-index: 1; }
-h1 { font-size: 46px; font-size: clamp(32px, 7vw, 46px); }
+h1 { font-size: clamp(32px, 7vw, 46px); }
 .months span.now { background: rgba(255, 255, 255, .45); }
 .stat, section.card {
   background: linear-gradient(180deg, var(--glass-hi), var(--glass));
@@ -224,7 +224,7 @@ button {
 .sky { min-height: 250px; display: flex; align-items: stretch; }
 .sky-in { width: 100%; flex-direction: column; justify-content: space-between; align-items: flex-start; }
 .brand { max-width: 72%; }
-h1 { font-family: var(--title); font-weight: 700; font-size: 64px; font-size: clamp(40px, 11vw, 64px); line-height: .9; letter-spacing: 0; margin-top: 4px; text-shadow: 0 2px 14px rgba(0, 0, 0, .18); }
+h1 { font-family: var(--title); font-weight: 700; font-size: clamp(40px, 11vw, 64px); line-height: .9; letter-spacing: 0; margin-top: 4px; text-shadow: 0 2px 14px rgba(0, 0, 0, .18); }
 .when { text-align: left; position: relative; text-shadow: 0 1px 8px rgba(255, 255, 255, .25); }
 .months { justify-content: flex-start; gap: 2px; flex-wrap: nowrap; white-space: nowrap; }
 .months span { padding: 1px 6px; }
@@ -240,11 +240,11 @@ body, .meter i, .go, .seg button, .fields .f.p i { transition: background-color 
 /* ===== Pinturas das estações no cartão do topo ===== */
 .sky { color: #fbf3e4; background-color: var(--sky-a); }
 .sky::after { display: none; }
-.art { position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 0; }
-.art img { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: right bottom; opacity: 0; transition: opacity 1.6s ease; }
+.art { position: absolute; inset: 0; z-index: 0; }
+.art img { position: absolute; inset: 0; width: 100%; height: 100%; max-width: none; object-fit: cover; object-position: right bottom; opacity: 0; transition: opacity 1.6s ease; }
 .art img.on { opacity: 1; }
-.art::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: linear-gradient(90deg, rgba(12, 10, 8, .62) 0%, rgba(12, 10, 8, .38) 45%, rgba(12, 10, 8, 0) 75%), linear-gradient(0deg, rgba(12, 10, 8, .45) 0%, rgba(12, 10, 8, 0) 45%); }
-.art .dim { position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: #0b1020; opacity: var(--dim, 0); transition: opacity 1.2s ease; z-index: 1; }
+.art::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(12, 10, 8, .62) 0%, rgba(12, 10, 8, .38) 45%, rgba(12, 10, 8, 0) 75%), linear-gradient(0deg, rgba(12, 10, 8, .45) 0%, rgba(12, 10, 8, 0) 45%); }
+.art .dim { position: absolute; inset: 0; background: #0b1020; opacity: var(--dim, 0); transition: opacity 1.2s ease; z-index: 1; }
 .sky h1 { color: #fbf3e4; text-shadow: 0 2px 18px rgba(0, 0, 0, .55); }
 .sky .when, .sky .phase { color: #f3eadb; text-shadow: 0 1px 8px rgba(0, 0, 0, .6); }
 .months span.now { background: rgba(255, 255, 255, .22); }
@@ -255,7 +255,7 @@ h2 { font-size: 22px; line-height: 1.15; }
 .log h3 { font-size: 16px; }
 
 /* Nome do jogo em Uncial Antiqua, caixa alta */
-.sky h1 { font-family: var(--heading); font-weight: 400; text-transform: uppercase; font-size: 54px; font-size: clamp(30px, 8.6vw, 54px); line-height: 1; letter-spacing: .02em; }
+.sky h1 { font-family: var(--heading); font-weight: 400; text-transform: uppercase; font-size: clamp(30px, 8.6vw, 54px); line-height: 1; letter-spacing: .02em; }
 
 
 /* ===== Campos como espigas de trigo: altura = fertilidade ===== */
@@ -317,7 +317,7 @@ h2 { font-size: 22px; line-height: 1.15; }
   box-shadow: 0 8px 18px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .15);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
 @supports not (aspect-ratio: 1 / 1) { .gauge .disc { height: 0; padding-bottom: 64%; } }
-.gauge .disc b { font-size: 22px; font-size: clamp(16px, 4.6vw, 22px); font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1; }
+.gauge .disc b { font-size: clamp(16px, 4.6vw, 22px); font-weight: 500; font-variant-numeric: tabular-nums; color: var(--ink); line-height: 1; }
 .gauge .ico { width: 22px; height: 22px; fill: none; stroke: var(--accent); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
 .gauge figcaption { text-align: center; }
 
@@ -325,7 +325,7 @@ h2 { font-size: 22px; line-height: 1.15; }
 .stat-btn { display: block; width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; min-height: 0; border-radius: 18px; }
 .stat-btn .more { float: right; font-size: 16px; line-height: 12px; color: var(--accent); letter-spacing: 0; }
 .stat-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.modal { position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
+.modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
   padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
   background: rgba(6, 6, 10, .28); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
   opacity: 0; transition: opacity .22s ease; }
@@ -340,7 +340,7 @@ body.modal-open { overflow: hidden; }
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, .55), inset 0 -1px 1px rgba(255, 255, 255, .12), inset 0 0 30px rgba(255, 255, 255, .06), 0 24px 60px rgba(0, 0, 0, .45);
   transform: scale(.94) translateY(8px); transition: transform .28s cubic-bezier(.2, .9, .3, 1.2); }
 .modal.show .glass { transform: none; }
-.glass::before { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; border-radius: inherit; pointer-events: none;
+.glass::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   background: radial-gradient(120% 60% at 15% 0%, rgba(255, 255, 255, .22), transparent 55%), radial-gradient(80% 50% at 100% 100%, rgba(255, 255, 255, .08), transparent 60%); }
 .cel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; position: relative; }
 .cel-head h2 { margin: 0; }
@@ -473,20 +473,6 @@ li .who { font-weight: 700; margin-right: 4px; }
 .page { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; scroll-snap-stop: always; display: grid; gap: 16px; align-content: start; padding: 0 16px; box-sizing: border-box; }
 .pg-hint { text-align: center; color: var(--muted); font-size: 13px; margin: 0; }
 input[type=range] { touch-action: none; }
-/* ===== iPad antigo (iOS 12): sem "gap" em flex, usa margens ===== */
-.no-flexgap .months > * + *, .no-flexgap .stat .v > * + *, .no-flexgap .stepper > * + * { margin-left: 4px; }
-.no-flexgap .legend > *, .no-flexgap .map-legend > * { margin: 0 14px 4px 0; }
-.no-flexgap .map-legend i { margin-right: 6px; }
-.no-flexgap .rv > * + *, .no-flexgap .fields .f > * + *, .no-flexgap .gauge .disc > * + * { margin-top: 2px; }
-.no-flexgap .rv .hd > * + * { margin-left: 8px; }
-.no-flexgap .banner > *, .no-flexgap .foot > *, .no-flexgap .sky-in > * { margin: 4px; }
-.no-flexgap .confirm > * + * { margin-left: 8px; }
-.no-flexgap .sw-wrap > * + * { margin-left: 10px; }
-.no-flexgap .cel-total > * + * { margin-left: 12px; }
-.no-flexgap .cel-bar > * + * { margin-left: 2px; }
-.no-flexgap .court-row > * { margin: 0 6px 6px 0; }
-.no-flexgap .order > * + * { margin-left: 10px; }
-.no-flexgap .pg-tabs > * + *, .no-flexgap .pg-dots > * + * { margin-left: 6px; }
 </style>
 
 </head>
@@ -687,12 +673,6 @@ input[type=range] { touch-action: none; }
   </div>
 </div>
 
-<script>
-/* iPad com iOS antigo: detecta se o navegador entende "gap" em flex */
-(function () { try { var d = document.createElement('div'); d.style.display = 'flex'; d.style.flexDirection = 'column'; d.style.rowGap = '1px';
-  d.appendChild(document.createElement('div')); d.appendChild(document.createElement('div')); document.documentElement.appendChild(d);
-  var ok = d.scrollHeight === 1; d.parentNode.removeChild(d); if (!ok) document.documentElement.className += ' no-flexgap'; } catch (e) {} })();
-</script>
 <script>
 // The Hollow Crown — Fase 1, versão 12 meses: simulação de um condado (sem interface)
 (function (root) {
@@ -1919,19 +1899,12 @@ input[type=range] { touch-action: none; }
       fn(); count++;
       timer = setTimeout(tick, count < 6 ? 140 : 50);
     };
-    const start = e => {
-      if ((e.button != null && e.button !== 0) || btn.disabled) return;
+    btn.addEventListener('pointerdown', e => {
+      if (e.button !== 0 || btn.disabled) return;
       e.preventDefault(); count = 0; fn();
       timer = setTimeout(tick, 400);
-    };
-    if (window.PointerEvent) {
-      btn.addEventListener('pointerdown', start);
-      ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(ev => btn.addEventListener(ev, stop));
-    } else { // iOS 12 e anteriores: toque e mouse
-      btn.addEventListener('touchstart', start, { passive: false });
-      btn.addEventListener('mousedown', start);
-      ['touchend', 'touchcancel', 'mouseup', 'mouseleave', 'blur'].forEach(ev => btn.addEventListener(ev, stop));
-    }
+    });
+    ['pointerup', 'pointerleave', 'pointercancel', 'blur'].forEach(ev => btn.addEventListener(ev, stop));
     btn.addEventListener('click', e => { if (e.detail === 0) fn(); }); // teclado
     btn.addEventListener('contextmenu', e => e.preventDefault());
   }
@@ -2014,7 +1987,6 @@ input[type=range] { touch-action: none; }
   }
 
   function render(view, liveMonth) {
-    if (typeof fitPager === 'function' && window.requestAnimationFrame) requestAnimationFrame(() => { try { fitPager(); } catch (e) {} });
     const s = view || game;
     const own = mine(sel), owner = ownerOf(sel), rival = owner && !own;
     const seen = own || !owner || !!world.intel[owner];
@@ -2685,7 +2657,7 @@ input[type=range] { touch-action: none; }
   $('vol').addEventListener('input', e => setVolume(Number(e.target.value)));
   // iPhone/iPad: o som só pode começar depois do primeiro toque
   function unlock() { if (soundOn) { ensureAudio(); syncMusic(); } }
-  ['pointerdown', 'touchstart', 'touchend', 'mousedown', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { passive: true }));
+  ['pointerdown', 'touchend', 'keydown'].forEach(ev => document.addEventListener(ev, unlock, { passive: true }));
   document.addEventListener('visibilitychange', () => {
     if (!ac) return;
     try { if (document.visibilityState === 'hidden') ac.suspend(); else if (soundOn) ac.resume(); } catch (e) {}
@@ -2746,7 +2718,7 @@ input[type=range] { touch-action: none; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261101162611';
+  var BUILD = '20261101163008';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
