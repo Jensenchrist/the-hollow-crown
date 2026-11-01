@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); } body { margin: 0; } [hidden] { display: none !important; } img { max-width: 100%; }</style>
-<title>The Hollow Crown · 12 meses</title>
+<title>The Hollow Crown · Fase 2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@600;700&family=Uncial+Antiqua&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Alegreya+Sans:wght@400;500;700&display=swap">
@@ -392,6 +392,52 @@ body.modal-open { overflow: hidden; }
 .banner.info { background: rgba(255, 255, 255, .08); border: 1px solid var(--accent); }
 .banner.info button { border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* ===== Fase 2: mapa do sul, vizinhos, corte ===== */
+.map-wrap { position: relative; }
+.map { width: 100%; height: auto; display: block; touch-action: manipulation; }
+.map .cty { cursor: pointer; }
+.map .cty path { stroke: rgba(0, 0, 0, .45); stroke-width: 1.4; stroke-linejoin: round; transition: filter .3s, opacity .3s; }
+.map .cty.far path { opacity: .55; }
+.map .cty.sel path { stroke: #fff6d6; stroke-width: 3; filter: drop-shadow(0 0 6px rgba(255, 240, 200, .55)); }
+.map .cty:focus { outline: none; }
+.map .cty:focus-visible path { stroke: #fff; stroke-width: 3; }
+.map text { font-family: var(--heading); font-size: 14px; fill: #fffaf0; paint-order: stroke; stroke: rgba(0, 0, 0, .55); stroke-width: 3px; pointer-events: none; }
+.map text.own { font-family: var(--body); font-size: 11.5px; letter-spacing: .04em; }
+.map .river { fill: none; stroke: #8fc3e6; stroke-width: 3.5; stroke-linecap: round; opacity: .8; pointer-events: none; }
+.map .sea { fill: rgba(120, 170, 210, .12); }
+.map .mark { pointer-events: none; }
+.map-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); margin-top: 8px; }
+.map-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.map-legend i { width: 12px; height: 12px; border-radius: 4px; background: var(--c); display: inline-block; }
+.lords { display: grid; gap: 8px; margin-top: 12px; }
+.lord { display: grid; grid-template-columns: 14px 1fr auto; gap: 4px 10px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px 12px; font-size: 14px; }
+.lord i { width: 12px; height: 12px; border-radius: 50%; background: var(--c); }
+.lord small { grid-column: 2 / 4; color: var(--muted); font-size: 12.5px; }
+.lord b { font-variant-numeric: tabular-nums; }
+.loyal { display: grid; gap: 8px; margin: 4px 0 14px; }
+.loyal .row { display: grid; grid-template-columns: 112px 1fr 34px; gap: 8px; align-items: center; font-size: 14px; }
+.loyal .bar { position: relative; height: 10px; border-radius: 6px; background: var(--bar); overflow: visible; }
+.loyal .bar i { display: block; height: 100%; border-radius: 6px; background: var(--c); transition: width .4s; }
+.loyal .bar u { position: absolute; top: -3px; bottom: -3px; left: 75%; width: 2px; background: rgba(255, 255, 255, .55); }
+.loyal .row b { text-align: right; font-variant-numeric: tabular-nums; }
+.dip { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dip button { text-align: left; padding: 10px 14px; border-radius: 18px; }
+.dip button small { display: block; color: var(--muted); font-size: 12.5px; }
+.dip button.on { border-color: var(--accent); background: rgba(255, 255, 255, .12); }
+.why { color: var(--muted); font-size: 13.5px; margin: 10px 0 0; }
+.focus-seg { grid-template-columns: repeat(4, 1fr); }
+.focus-seg button { padding: 8px 4px; font-size: 14px; }
+.auto-note { font-size: 13.5px; color: var(--muted); border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; margin: 0 0 12px; }
+.court-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 4px; }
+.court-row button { padding: 6px 12px; border-radius: 999px; font-size: 14px; }
+.court-row button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
+.court-h { font-family: var(--heading); font-size: 16px; margin: 14px 0 2px; }
+.court-h:first-of-type { margin-top: 0; }
+.tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; background: var(--c, var(--surface)); color: #1a1410; font-weight: 700; vertical-align: 2px; margin-left: 6px; }
+.stat .v .q { color: var(--muted); }
+.log h3 small { font-family: var(--body); color: var(--muted); font-size: 12.5px; margin-left: 6px; }
+li .who { font-weight: 700; margin-right: 4px; }
+.old-phase { color: var(--muted); font-size: 13.5px; }
 </style>
 
 </head>
@@ -406,7 +452,7 @@ body.modal-open { overflow: hidden; }
   </div>
   <div class="sky-in">
     <div class="brand">
-      <div class="phase">Fase 1 · versão 12 meses</div>
+      <div class="phase">Fase 2 · o sul da Inglaterra</div>
       <h1>The Hollow Crown</h1>
     </div>
     <div class="when" id="when"></div>
@@ -415,18 +461,40 @@ body.modal-open { overflow: hidden; }
 
 <main class="wrap">
   <div id="banner"></div>
+  <section class="card" aria-labelledby="h-map">
+    <h2 id="h-map">O Sul da Inglaterra</h2>
+    <p class="sub" id="map-sub">Toque num condado para ver de perto.</p>
+    <div class="map-wrap" id="map"></div>
+    <div class="map-legend" id="map-legend"></div>
+  </section>
   <div class="stats" id="stats"></div>
   <button class="go" id="go" type="button"></button>
   <button class="auto" id="auto" type="button">Viver até algo importante ››</button>
 
-  <section class="card" aria-labelledby="h-fc">
+  <section class="card" id="c-nb" aria-labelledby="h-nb" hidden>
+    <h2 id="h-nb">Condado vizinho</h2>
+    <p class="sub" id="nb-sub"></p>
+    <div class="lbl">Lealdade dos senhores locais</div>
+    <div class="loyal" id="nb-loyal"></div>
+    <div class="dip" id="nb-acts"></div>
+    <p class="why" id="nb-why"></p>
+  </section>
+
+  <section class="card" id="c-focus" aria-labelledby="h-focus" hidden>
+    <h2 id="h-focus">Administração</h2>
+    <p class="sub" id="focus-sub">Um administrador cuida deste condado por você. Escolha o que ele deve priorizar.</p>
+    <div class="seg focus-seg" id="focus"></div>
+    <p class="taxinfo" id="focus-info"></p>
+  </section>
+
+  <section class="card" id="c-fc" aria-labelledby="h-fc">
         <h2 id="h-fc">Previsão para o fim da estação</h2>
         <p class="sub">Estimativa sem imprevistos. Muda conforme você decide.</p>
         <div class="fc" id="fc"></div>
         <ul class="notes" id="warn"></ul>
       </section>
 
-  <section class="card" aria-labelledby="h-land">
+  <section class="card" id="c-land" aria-labelledby="h-land">
         <h2 id="h-land">A terra</h2>
         <p class="sub" id="land-sub"></p>
         <div class="fields" id="fields" aria-label="Fertilidade dos 10 campos"></div>
@@ -450,14 +518,15 @@ body.modal-open { overflow: hidden; }
         </div>
       </section>
 
-  <section class="card" aria-labelledby="h-tasks">
+  <section class="card" id="c-tasks" aria-labelledby="h-tasks">
         <h2 id="h-tasks">Obrigações</h2>
-        <p class="sub">Distribua o povo de Kent entre as tarefas desta estação. Toque para mudar de 1 em 1; segure para ir mais rápido.</p>
+        <p class="auto-note" id="tasks-auto" hidden></p>
+        <p class="sub">Distribua o povo entre as tarefas desta estação. Toque para mudar de 1 em 1; segure para ir mais rápido.</p>
         <div id="tasks"></div>
         <div class="idle"><span>Sem tarefa (descansando)</span><b id="idle"></b></div>
       </section>
 
-  <section class="card" aria-labelledby="h-prod">
+  <section class="card" id="c-prod" aria-labelledby="h-prod">
     <h2 id="h-prod">Produção</h2>
     <p class="sub">O que o condado transforma com o que colhe.</p>
     <div class="prod-row">
@@ -473,7 +542,7 @@ body.modal-open { overflow: hidden; }
     <p class="taxinfo" id="bake-info"></p>
   </section>
 
-  <section class="card" aria-labelledby="h-decrees">
+  <section class="card" id="c-dec" aria-labelledby="h-decrees">
         <h2 id="h-decrees">Decretos</h2>
         <div class="taxhead"><label class="lbl" for="rat" id="l-rations">Rações</label></div>
         <div class="taxrow">
@@ -494,10 +563,16 @@ body.modal-open { overflow: hidden; }
         </div>
       </section>
 
-  <section class="card" aria-labelledby="h-mkt">
+  <section class="card" id="c-mkt" aria-labelledby="h-mkt">
     <h2 id="h-mkt">Mercado</h2>
     <p class="sub" id="mkt-sub">O mercador fica em Kent até o fim da estação. Na próxima, volta com outros produtos.</p>
     <div class="mkt" id="mkt"></div>
+  </section>
+
+  <section class="card" id="c-court" aria-labelledby="h-court">
+    <h2 id="h-court">A corte</h2>
+    <p class="sub">Seu padre e seu espião trabalham onde você mandar. Valem por um exército antes da guerra.</p>
+    <div id="court"></div>
   </section>
 
   <section class="card" aria-labelledby="h-res">
@@ -518,7 +593,7 @@ body.modal-open { overflow: hidden; }
 
   <section class="card" aria-labelledby="h-log">
         <h2 id="h-log">Crônica</h2>
-        <div class="log" id="log"><p class="ok">A crônica de Kent começa em março.</p></div>
+        <div class="log" id="log"><p class="ok">A crônica do sul começa em março.</p></div>
       </section>
 
 
@@ -526,6 +601,7 @@ body.modal-open { overflow: hidden; }
 
   <div class="foot">
     <span id="goal"></span>
+    <a class="old-phase" href="fase1/" id="old-phase" hidden>Jogar a Fase 1 (só Kent)</a>
     <span class="confirm" id="reset-area"><button type="button" id="reset">Recomeçar</button></span>
   </div>
 </main>
@@ -533,7 +609,7 @@ body.modal-open { overflow: hidden; }
 <div class="modal" id="celeiro" hidden>
   <div class="glass" role="dialog" aria-modal="true" aria-labelledby="cel-t">
     <div class="cel-head">
-      <h2 id="cel-t">Celeiro de Kent</h2>
+      <h2 id="cel-t">Celeiro</h2>
       <button type="button" class="x" id="cel-x" aria-label="Fechar">×</button>
     </div>
     <div id="cel-body"></div>
@@ -639,6 +715,7 @@ body.modal-open { overflow: hidden; }
     if (!s.foodBy) s.foodBy = { trigo: s.food * 0.6, gado: s.food * 0.2, peixe: s.food * 0.2, caca: 0, compra: 0, pao: 0 };
     if (s.foodBy.pao == null) s.foodBy.pao = 0;
     if (s.bakePct == null) s.bakePct = 0;
+    if (!s.lastPlanted || s.lastPlanted.length !== s.fields.length) s.lastPlanted = s.fields.map((f, i) => (s.lastPlanted && s.lastPlanted[i]) || 0);
     if (!s.market || s.market.season !== s.season || s.market.year !== s.year) s.market = rollMarket(s, null);
     return s;
   }
@@ -857,6 +934,8 @@ body.modal-open { overflow: hidden; }
     if (!starving) {
       let rate = s.happy > 70 ? 0.05 : s.happy > 50 ? 0.03 : s.happy > 35 ? 0.01 : -0.03;
       if (s.season === 0 && rate > 0) rate += 0.01;
+      // Fase 2: gente nova só chega se o celeiro passa da próxima colheita com folga
+      if (s.growthNeedsFood && rate > 0) rate *= clamp((s.food / Math.max(1, s.pop) - [2, 1, 0.3, 3][s.season]) / 1.2, 0, 1);
       const exact = s.pop * rate / 3 + (s.popFrac || 0);
       const change = Math.trunc(exact);
       s.popFrac = exact - change;
@@ -894,8 +973,8 @@ body.modal-open { overflow: hidden; }
           rep.push({ kind: 'bad', text: 'Revolta! O povo saqueou celeiro e tesouro.' });
         }
       }
-      if (s.pop <= LOSE_POP) { s.lost = true; rep.push({ kind: 'bad', text: 'O condado se esvaziou. Fim de jogo.' }); }
-      if (!s.won && s.pop >= GOAL_POP && s.happy >= GOAL_HAPPY) {
+      if (s.pop <= LOSE_POP) { s.lost = true; rep.push({ kind: 'bad', text: s.noGoal ? 'O condado se esvaziou.' : 'O condado se esvaziou. Fim de jogo.' }); }
+      if (!s.noGoal && !s.won && s.pop >= GOAL_POP && s.happy >= GOAL_HAPPY) {
         s.won = true; rep.push({ kind: 'good', text: `Meta alcançada: ${GOAL_POP} pessoas e povo satisfeito!` });
       }
       fitAlloc(s);
@@ -906,7 +985,7 @@ body.modal-open { overflow: hidden; }
       rep.forEach(r => report.push(Object.assign({ month: name }, r)));
     }
     s.feastThisSeason = false;
-    if (rand) {
+    if (rand && !s.noMarket) {
       s.market = rollMarket(s, rand);
       const names = Object.keys(s.market.stock).map(k => marketItem(k).name.toLowerCase());
       if (names.length && months.length) months[months.length - 1].report.push({ kind: 'event', text: `O mercador chegou com ${names.length > 1 ? names.slice(0, -1).join(', ') + ' e ' + names.slice(-1) : names[0]}.` });
@@ -951,20 +1030,387 @@ body.modal-open { overflow: hidden; }
 
   const api = { SEASONS, MONTHS, TASKS, BUY_FOOD, BUY_COST, GOAL_POP, GOAL_HAPPY, WORKERS_PER_FIELD_PLANT,
     FEAST_GOLD, FEAST_FOOD, FEAST_HAPPY, taxRateOf, taxGoldPer, taxHappy,
-    FOOD_SRC, HARVEST_MONTH, MARKET, marketItem, priceOf, rollMarket, buyMarket, WHEAT_PER_BREAD, WOOD_PER_BREAD, BREAD_HAPPY, bakePctOf, bakePlan, rationPctOf, rationHappy, rng, newGame, migrate, normalizeFood, yieldPerWorker, eatPerSeason, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
+    FOOD_SRC, HARVEST_MONTH, MARKET, marketItem, priceOf, rollMarket, buyMarket, WHEAT_PER_BREAD, WOOD_PER_BREAD, BREAD_HAPPY, bakePctOf, bakePlan, rationPctOf, rationHappy, rng, newGame, migrate, fitAlloc, clamp, normalizeFood, yieldPerWorker, eatPerSeason, step, stepMonth, forecast, setAlloc, buyFood, feast, idle, assigned, productivity, clone, woodNeedWinter };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.HC = api;
 })(this);
 
 </script>
 <script>
+// The Hollow Crown — Fase 2: o sul da Inglaterra (6 condados, 2 rivais)
+// Usa a simulação de condado da Fase 1 (HC) para cada condado; aqui ficam o tesouro dos lordes,
+// a diplomacia, o padre, o espião, a IA dos rivais e a troca de donos.
+(function (root) {
+  'use strict';
+  const HC = (typeof module !== 'undefined' && module.exports) ? require('./sim12.js') : root.HC;
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+  const clone = o => JSON.parse(JSON.stringify(o));
+  const PLAYER = 'jef';
+
+  const LORDS = {
+    jef: { name: 'Você', title: 'Lorde de Kent', seat: 'kent', color: '#e6c063', style: null },
+    aldric: { name: 'Lorde Aldric', title: 'Lorde Aldric de Winchester', seat: 'hampshire', color: '#d0614f', style: 'agressivo' },
+    matilda: { name: 'Lady Matilda', title: 'Lady Matilda de Colchester', seat: 'essex', color: '#5b8fd6', style: 'ardilosa' }
+  };
+
+  // Vizinhança real dos condados (o Tâmisa liga Kent a Essex e a Middlesex)
+  const ADJ = {
+    kent: ['sussex', 'surrey', 'middlesex', 'essex'],
+    sussex: ['kent', 'surrey', 'hampshire'],
+    surrey: ['kent', 'sussex', 'hampshire', 'middlesex'],
+    hampshire: ['sussex', 'surrey'],
+    middlesex: ['surrey', 'essex', 'kent'],
+    essex: ['middlesex', 'kent']
+  };
+
+  const COUNTY_SETUP = {
+    kent: { name: 'Kent', owner: 'jef', loyal: { jef: 80, aldric: 0, matilda: 0 } },
+    hampshire: { name: 'Hampshire', owner: 'aldric', loyal: { jef: 0, aldric: 80, matilda: 0 },
+      pop: 140, food: 300, herd: 26, wood: 60, happy: 58, forest: 95, hunt: 90, fish: 70,
+      fields: [80, 78, 75, 72, 70, 68, 66, 64, 60, 55], county: { name: 'Hampshire', stone: 1500, iron: 800, coastKm: 40 },
+      note: 'New Forest, floresta real, e o porto do sul' },
+    essex: { name: 'Essex', owner: 'matilda', loyal: { jef: 0, aldric: 0, matilda: 80 },
+      pop: 135, food: 320, herd: 22, wood: 40, happy: 55, forest: 60, hunt: 55, fish: 85,
+      fields: [95, 92, 90, 88, 85, 82, 80, 76, 72, 70], county: { name: 'Essex', stone: 500, iron: 300, coastKm: 55 },
+      note: 'Campos férteis e litoral, do outro lado do Tâmisa' },
+    sussex: { name: 'Sussex', owner: null, loyal: { jef: 15, aldric: 20, matilda: 0 },
+      pop: 90, food: 200, herd: 18, wood: 50, happy: 50, forest: 85, hunt: 75, fish: 75,
+      fields: [70, 68, 66, 64, 60, 58, 55, 52, 50, 48], county: { name: 'Sussex', stone: 3000, iron: 7000, coastKm: 60 },
+      note: 'Litoral e o ferro farto das matas do Weald' },
+    surrey: { name: 'Surrey', owner: null, loyal: { jef: 15, aldric: 15, matilda: 5 },
+      pop: 80, food: 220, herd: 20, wood: 45, happy: 52, forest: 80, hunt: 70, fish: 50,
+      fields: [85, 82, 80, 78, 75, 72, 70, 68, 65, 62], county: { name: 'Surrey', stone: 2500, iron: 1200, coastKm: 0 },
+      note: 'Terra boa e florestas, o celeiro do meio do mapa' },
+    middlesex: { name: 'Middlesex', owner: null, loyal: { jef: 10, aldric: 5, matilda: 15 },
+      pop: 110, food: 300, herd: 16, wood: 40, happy: 52, forest: 40, hunt: 30, fish: 90,
+      fields: [74, 72, 70, 68, 66, 64, 62, 60], county: { name: 'Middlesex', stone: 800, iron: 200, coastKm: 0 },
+      taxMult: 2, note: 'Pequeno, mas tem Londres: ouro e comércio' }
+  };
+  const ORDER = ['kent', 'sussex', 'surrey', 'middlesex', 'hampshire', 'essex'];
+
+  const GIFT_COST = 60, GIFT_LOYAL = 10;
+  const MARRY_COST = 150, MARRY_LOYAL = 25, MARRY_MIN = 30;
+  const BUY_MIN = 50;
+  const PRIEST_LOYAL = 6, PRIEST_OWNER_DROP = 4;
+  const SPY = { espiar: { name: 'Espiar', risk: 0.25 }, boatos: { name: 'Espalhar boatos', risk: 0.35 }, sabotar: { name: 'Incendiar o celeiro', risk: 0.45 } };
+  const SPY_COOLDOWN = 2, INTEL_SEASONS = 4;
+  const JOIN_AT = 75, JOIN_LEAD = 15, REVOLT_OWNER = 25, REVOLT_OTHER = 60;
+  const FOCUS = { manual: 'À mão', equilibrado: 'Equilibrado', celeiro: 'Celeiro', madeira: 'Madeira' };
+
+  const buyPrice = c => 120 + c.pop;
+  const who = l => l === PLAYER ? 'você' : LORDS[l].title;
+  // sedes dos lordes só mudam de mãos pela guerra (Fase 3)
+  const isSeat = id => Object.keys(LORDS).some(l => LORDS[l].seat === id);
+
+  function makeCounty(id, seed) {
+    const cfg = COUNTY_SETUP[id];
+    const c = HC.newGame(seed);
+    Object.keys(cfg).forEach(k => { if (!['name', 'owner', 'loyal', 'note', 'taxMult'].includes(k)) c[k] = clone(cfg[k]); });
+    c.lastPlanted = c.fields.map(() => 0);
+    c.foodBy = { trigo: c.food * 0.6, gado: c.food * 0.2, peixe: c.food * 0.2, caca: 0, compra: 0, pao: 0 };
+    c.id = id; c.name = cfg.name; c.owner = cfg.owner; c.loyal = clone(cfg.loyal);
+    c.note = cfg.note || ''; c.taxMult = cfg.taxMult || 1;
+    c.focus = id === 'kent' ? 'manual' : 'equilibrado';
+    c.noGoal = true; c.noMarket = true; c.growthNeedsFood = true; c.gold = 0;
+    c.gifted = false; c.married = false;
+    if (id !== 'kent') autoManage(c, c.owner || 'local');
+    return c;
+  }
+
+  function newWorld(seed) {
+    seed = seed || 1;
+    const w = { v: 2, seed, turn: 0, year: 1, season: 0, month: 0, won: false, lost: false,
+      lords: {}, counties: {}, intel: {}, news: [] };
+    Object.keys(LORDS).forEach(id => {
+      w.lords[id] = { id, gold: id === PLAYER ? 60 : 90, priest: null, spy: { mission: null, cooldown: 0 }, relation: {}, out: false };
+    });
+    ORDER.forEach((id, i) => { w.counties[id] = makeCounty(id, seed * 17 + i * 101); });
+    w.market = HC.rollMarket({ seed, year: 1, season: 0 }, HC.rng(seed * 97 + 5));
+    return w;
+  }
+
+  const owned = (w, lord) => ORDER.filter(id => w.counties[id].owner === lord);
+  const canReach = (w, lord, id) => w.counties[id].owner !== lord && owned(w, lord).some(o => ADJ[o].includes(id));
+
+  // ===== Administração automática =====
+  function autoManage(c, who) {
+    HC.migrate(c);
+    const p = c.pop, season = c.season, focus = c.focus || 'equilibrado';
+    HC.TASKS.forEach(t => { c.alloc[t] = 0; });
+    const set = (t, v) => HC.setAlloc(c, t, Math.max(0, Math.min(HC.idle(c), Math.floor(v))));
+    set('gado', Math.ceil(c.herd / 4));
+    const good = c.fields.filter(f => f >= 58).length;
+    // na primavera planta tudo o que a gente der conta; o resto vai para lenha, rio e mata
+    const share = focus === 'celeiro' ? 0.85 : focus === 'madeira' ? 0.6 : 0.78;
+    const campos = season === 0 ? Math.min(good * 10, Math.floor(HC.idle(c) * share / 10) * 10)
+      : season === 1 ? c.planted.length * 6 : season === 2 ? c.planted.length * 8 : 0;
+    set('campos', campos);
+    // lenha: o bastante para o inverno com folga; a mais só se o foco for madeira
+    const need = HC.woodNeedWinter(c) * (c.bakePct ? 1.5 : 1.2);
+    const want = focus === 'madeira' ? need * 2.5 + 40 : need * 1.6 + 10;
+    if (season === 3) set('madeira', c.wood < need ? p * 0.08 : 0);
+    else set('madeira', c.wood >= want ? p * 0.03 : p * (focus === 'madeira' ? 0.2 : 0.11));
+    const hunt = c.hunt == null ? 70 : c.hunt;
+    if (hunt > 40) set('caca', season >= 2 ? 15 : 6);
+    set('pesca', c.fish > 60 ? 40 : c.fish > 40 ? 26 : 12);
+    // o administrador cuida das rações; o rival também cuida dos impostos
+    // folga = quantas estações sobram depois de chegar à próxima colheita
+    const surplus = c.food / Math.max(1, p) - [2, 1, 0.3, 3][season];
+    // quanta gente a terra sustenta, pelo que entrou de comida no último ano
+    const yearIn = (c.yearIn || []).length >= 4 ? c.yearIn.reduce((x, y) => x + y, 0) : null;
+    const cap = yearIn ? yearIn / 4 : p * 1.3;
+    c.rationPct = surplus > 1.5 ? 115 : surplus < -0.6 ? 80 : surplus < -0.2 ? 88 : surplus < 0.3 ? 95 : 100;
+    c.bakePct = focus === 'madeira' && c.wood > need * 1.3 && surplus > 0 ? 35 : c.wood > need * 2 && season !== 3 && surplus > 0.5 ? 20 : 0;
+    const crowded = p > cap * 0.92;
+    if (crowded) c.rationPct = Math.min(c.rationPct, 95);
+    if (who !== PLAYER) {
+      if (c.happy < 22) c.taxRate = 0;
+      else if (crowded) c.taxRate = c.happy > 45 ? 50 : c.happy > 38 ? 30 : 12;
+      else if (surplus < 0) c.taxRate = 10;
+      else c.taxRate = c.happy > 65 ? 30 : 18;
+    }
+    c.surplus = Math.round(surplus * 10) / 10; c.capacity = Math.round(cap);
+  }
+
+  // ===== Diplomacia (ações imediatas do jogador ou da IA) =====
+  function relate(w, a, b, d) {
+    if (!a || !b || a === b) return;
+    const ra = w.lords[a].relation, rb = w.lords[b].relation;
+    ra[b] = clamp((ra[b] || 0) + d, -100, 100); rb[a] = clamp((rb[a] || 0) + d, -100, 100);
+  }
+  function addLoyal(c, lord, d) { c.loyal[lord] = clamp((c.loyal[lord] || 0) + d, 0, 100); }
+
+  function canGift(w, lord, id) { const c = w.counties[id]; return canReach(w, lord, id) && !c.gifted && w.lords[lord].gold >= GIFT_COST; }
+  function gift(w, lord, id) {
+    if (!canGift(w, lord, id)) return false;
+    const c = w.counties[id];
+    w.lords[lord].gold -= GIFT_COST; c.gifted = true; addLoyal(c, lord, GIFT_LOYAL);
+    if (c.owner) relate(w, lord, c.owner, -5);
+    return true;
+  }
+  function canMarry(w, lord, id) { const c = w.counties[id]; return canReach(w, lord, id) && !c.owner && !c.married && (c.loyal[lord] || 0) >= MARRY_MIN && w.lords[lord].gold >= MARRY_COST; }
+  function marry(w, lord, id) {
+    if (!canMarry(w, lord, id)) return false;
+    const c = w.counties[id];
+    w.lords[lord].gold -= MARRY_COST; c.married = lord; addLoyal(c, lord, MARRY_LOYAL);
+    return true;
+  }
+  function canBuy(w, lord, id) { const c = w.counties[id]; return canReach(w, lord, id) && !c.owner && (c.loyal[lord] || 0) >= BUY_MIN && w.lords[lord].gold >= buyPrice(c); }
+  function buy(w, lord, id, news) {
+    if (!canBuy(w, lord, id)) return false;
+    const c = w.counties[id];
+    w.lords[lord].gold -= buyPrice(c);
+    transfer(w, id, lord, news, lord === PLAYER ? `Você comprou a lealdade dos senhores de ${c.name}. O condado de ${c.name} agora é seu!` : `${LORDS[lord].title} comprou a lealdade dos senhores de ${c.name}.`);
+    return true;
+  }
+  function setPriest(w, lord, id) {
+    if (id && !(w.counties[id].owner === lord || canReach(w, lord, id))) return false;
+    w.lords[lord].priest = id || null; return true;
+  }
+  function setSpy(w, lord, id, kind) {
+    const L = w.lords[lord];
+    if (!id) { L.spy.mission = null; return true; }
+    const c = w.counties[id];
+    if (L.spy.cooldown > 0 || !c.owner || c.owner === lord || !SPY[kind]) return false;
+    L.spy.mission = { id, kind }; return true;
+  }
+
+  function transfer(w, id, lord, news, text) {
+    const c = w.counties[id], prev = c.owner;
+    c.owner = lord;
+    c.loyal[lord] = Math.max(c.loyal[lord] || 0, 60);
+    if (prev) c.loyal[prev] = Math.min(c.loyal[prev] || 0, 20);
+    c.focus = lord === PLAYER ? 'equilibrado' : c.focus;
+    c.gifted = false;
+    if (lord === PLAYER && c.focus === 'manual') c.focus = 'equilibrado';
+    Object.keys(w.lords).forEach(l => { if (w.lords[l].priest === id && l !== lord && !canReach(w, l, id)) w.lords[l].priest = null; });
+    news.push({ kind: lord === PLAYER ? 'good' : prev === PLAYER ? 'bad' : 'event', county: id, text });
+    if (prev && prev !== PLAYER && !owned(w, prev).length) {
+      w.lords[prev].out = true;
+      news.push({ kind: 'good', county: id, text: `${LORDS[prev].title} perdeu todas as terras e saiu da disputa.` });
+    }
+  }
+
+  // ===== Inteligência dos rivais =====
+  function aiTurn(w, lord, rand, news) {
+    const L = w.lords[lord]; if (L.out) return;
+    const style = LORDS[lord].style;
+    owned(w, lord).forEach(id => { const c = w.counties[id]; autoManage(c, lord); });
+    // escolhe o alvo: o condado alcançável onde já tem mais influência (o agressivo prefere os seus)
+    const targets = ORDER.filter(id => canReach(w, lord, id));
+    const hostile = (L.relation[PLAYER] || 0) < -20;
+    const score = id => {
+      const c = w.counties[id];
+      let v = (c.loyal[lord] || 0) - (c.owner ? 25 : 0);
+      if (c.owner === PLAYER && (style === 'agressivo' || hostile)) v += 20;
+      if (id === 'middlesex') v += 10;
+      return v;
+    };
+    targets.sort((a, b) => score(b) - score(a));
+    // mantém o alvo da estação anterior se ainda fizer sentido; senão escolhe entre os dois melhores
+    let t = L.priest && targets.includes(L.priest) && rand() < 0.85 ? L.priest : targets[rand() < 0.7 ? 0 : Math.min(1, targets.length - 1)];
+    if (w.turn < 2) t = null; // os rivais levam umas estações para se organizar
+    if (t) {
+      setPriest(w, lord, t);
+      if (canBuy(w, lord, t)) buy(w, lord, t, news);
+      else if (canMarry(w, lord, t) && L.gold >= MARRY_COST + 40) marry(w, lord, t);
+      else if (L.gold >= GIFT_COST + (style === 'agressivo' ? 60 : 100)) gift(w, lord, t);
+    }
+    // espião: a ardilosa sabota quem a incomoda; o agressivo espia de vez em quando
+    if (L.spy.cooldown === 0 && !L.spy.mission) {
+      const enemy = owned(w, PLAYER);
+      const r = rand();
+      if (style === 'ardilosa' && enemy.length && r < ((L.relation[PLAYER] || 0) < -10 ? 0.3 : 0.07)) {
+        const pick = enemy[Math.floor(rand() * enemy.length)];
+        setSpy(w, lord, pick, rand() < 0.5 ? 'sabotar' : 'boatos');
+      } else if (style === 'agressivo' && enemy.length && r < ((L.relation[PLAYER] || 0) < -10 ? 0.15 : 0.04)) {
+        setSpy(w, lord, enemy[0], 'boatos');
+      }
+    }
+  }
+
+  // ===== Missões do espião e pregação do padre (no fim da estação) =====
+  function resolveSpy(w, lord, rand, news) {
+    const L = w.lords[lord];
+    if (L.spy.cooldown > 0) { L.spy.cooldown--; }
+    const m = L.spy.mission; if (!m) return;
+    L.spy.mission = null; L.spy.cooldown = 1;
+    const c = w.counties[m.id];
+    if (!c.owner || c.owner === lord) return;
+    const victim = c.owner, mine = lord === PLAYER, theirs = victim === PLAYER;
+    if (rand() < SPY[m.kind].risk + (w.lords[victim].priest === m.id ? 0.1 : 0)) {
+      L.spy.cooldown = SPY_COOLDOWN;
+      relate(w, lord, victim, -25);
+      news.push({ kind: mine ? 'bad' : 'event', county: m.id,
+        text: mine ? `Seu espião foi pego em ${c.name}. ${LORDS[victim].title} sabe que foi você.`
+          : `Um espião de ${LORDS[lord].title} foi pego em ${c.name}.` });
+      return;
+    }
+    if (m.kind === 'espiar') {
+      if (mine) { w.intel[victim] = INTEL_SEASONS; news.push({ kind: 'good', county: m.id, text: `Seu espião voltou de ${c.name} com os segredos de ${LORDS[victim].title}.` }); }
+    } else if (m.kind === 'boatos') {
+      c.happy = clamp(c.happy - 5, 0, 100); addLoyal(c, victim, -8);
+      news.push({ kind: theirs ? 'bad' : mine ? 'good' : 'event', county: m.id, text: theirs ? `Boatos maldosos correm em ${c.name}; o povo anda desconfiado.` : `Boatos se espalharam em ${c.name}.` });
+    } else if (m.kind === 'sabotar') {
+      const lost = Math.round(c.food * 0.15); c.food -= lost; HC.normalizeFood(c);
+      news.push({ kind: theirs ? 'bad' : mine ? 'good' : 'event', county: m.id, text: theirs ? `Um incêndio destruiu ${lost} de comida no celeiro de ${c.name}.` : `O celeiro de ${c.name} pegou fogo (−${lost} comida).` });
+    }
+  }
+
+  function preach(w, lord) {
+    const id = w.lords[lord].priest; if (!id) return;
+    const c = w.counties[id];
+    addLoyal(c, lord, PRIEST_LOYAL);
+    if (c.owner && c.owner !== lord) addLoyal(c, c.owner, -PRIEST_OWNER_DROP);
+  }
+
+  // ===== A estação inteira, no sul todo =====
+  function step(input, rand) {
+    const w = clone(input);
+    const news = [];
+    if (w.lost) return { world: w, months: {}, news };
+    // 1. Rivais decidem
+    Object.keys(LORDS).forEach(l => { if (l !== PLAYER) aiTurn(w, l, rand || (() => 0.99), news); });
+    // 2. Cada condado vive 3 meses
+    const months = {}, income = {}, reports = {};
+    ORDER.forEach(id => {
+      const c = w.counties[id];
+      if (c.owner !== PLAYER && c.focus !== 'manual') autoManage(c, c.owner || 'local');
+      if (c.owner === PLAYER && c.focus !== 'manual') autoManage(c, PLAYER);
+      // rivais e senhores locais compram grão quando o celeiro não chega à colheita
+      if (c.owner !== PLAYER || c.focus !== 'manual') {
+        const purse = c.owner ? w.lords[c.owner] : c;
+        const fund = c.owner ? 'gold' : 'purse';
+        let n = 0;
+        while (n < 8 && (purse[fund] || 0) >= HC.BUY_COST && c.food / Math.max(1, c.pop) < [2, 1, 0.3, 3][c.season] + 0.3) {
+          purse[fund] -= HC.BUY_COST; c.food += HC.BUY_FOOD; c.foodBy.compra += HC.BUY_FOOD; n++;
+        }
+        if (n && c.owner === PLAYER) news.push({ kind: 'event', county: id, text: `O administrador de ${c.name} comprou ${n} ${n > 1 ? 'sacos' : 'saco'} de grão (−${n * HC.BUY_COST} ouro).` });
+      }
+      c.gold = 0; c.market = w.market;
+      const out = HC.step(c, rand);
+      const nc = out.state;
+      const tax = Math.round(Math.max(0, nc.gold) * (c.taxMult || 1));
+      nc.gold = 0;
+      if (!c.owner) nc.purse = Math.min(400, (c.purse || 0) + tax);
+      nc.yearIn = (c.yearIn || []).concat(out.totals ? out.totals.foodIn : 0).slice(-4);
+      w.counties[id] = Object.assign(nc, { id: c.id, name: c.name, owner: c.owner, loyal: c.loyal, note: c.note, taxMult: c.taxMult, focus: c.focus, married: c.married, gifted: false });
+      months[id] = out.months; reports[id] = out.report;
+      if (c.owner) income[c.owner] = (income[c.owner] || 0) + tax;
+      if (out.report.some(r => /Revolta!/.test(r.text))) news.push({ kind: c.owner === PLAYER ? 'bad' : 'event', county: id, text: `Revolta em ${c.name}!` });
+    });
+    // 3. Tesouro: impostos menos o dízimo de quem tem padre
+    Object.keys(w.lords).forEach(l => {
+      const L = w.lords[l], inc = income[l] || 0;
+      const tithe = L.priest ? Math.round(inc * 0.1) : 0;
+      L.gold += inc - tithe;
+      L.lastIncome = inc; L.lastTithe = tithe;
+    });
+    // 4. Padres pregam, espiões agem
+    Object.keys(w.lords).forEach(l => { if (!w.lords[l].out) preach(w, l); });
+    Object.keys(w.lords).forEach(l => resolveSpy(w, l, rand || (() => 0.99), news));
+    // 5. Fidelidade: o dono ganha com povo feliz e perde com povo infeliz; o resto esfria aos poucos
+    ORDER.forEach(id => {
+      const c = w.counties[id];
+      Object.keys(LORDS).forEach(l => {
+        if (l === c.owner) addLoyal(c, l, (c.happy - 45) / 10 + (w.lords[l].priest === id ? 2 : 0));
+        else if (w.lords[l].priest !== id) addLoyal(c, l, -1);
+      });
+    });
+    // 6. Condados mudam de dono
+    ORDER.forEach(id => {
+      const c = w.counties[id];
+      const ranked = Object.keys(LORDS).filter(l => !w.lords[l].out && l !== c.owner).sort((a, b) => (c.loyal[b] || 0) - (c.loyal[a] || 0));
+      const top = ranked[0], second = ranked[1];
+      if (!c.owner) {
+        if (top && c.loyal[top] >= JOIN_AT && c.loyal[top] - (c.loyal[second] || 0) >= JOIN_LEAD)
+          transfer(w, id, top, news, `${c.name} jurou lealdade a ${who(top)}.`);
+      } else if (!isSeat(id) && (c.loyal[c.owner] || 0) < REVOLT_OWNER && top && (c.loyal[top] || 0) >= REVOLT_OTHER) {
+        transfer(w, id, top, news, `${c.name} se revoltou contra ${who(c.owner)} e passou para ${who(top)}.`);
+      }
+    });
+    // 7. Mercador e informações
+    Object.keys(w.intel).forEach(k => { w.intel[k]--; if (w.intel[k] <= 0) delete w.intel[k]; });
+    const k = w.counties.kent;
+    w.turn = (w.turn || 0) + 1; w.year = k.year; w.season = k.season; w.month = k.month;
+    if (rand) {
+      w.market = HC.rollMarket({ seed: w.seed, year: w.year, season: w.season }, rand);
+      const names = Object.keys(w.market.stock).map(id => HC.marketItem(id).name.toLowerCase());
+      if (names.length) news.push({ kind: 'event', county: 'kent', text: `O mercador chegou com ${names.length > 1 ? names.slice(0, -1).join(', ') + ' e ' + names.slice(-1) : names[0]}.` });
+    }
+    // 8. Fim do Ato I
+    const mine = owned(w, PLAYER);
+    if (w.counties.kent.owner !== PLAYER || w.counties.kent.lost) { w.lost = true; news.push({ kind: 'bad', county: 'kent', text: 'Você perdeu Kent. O Ato I terminou em derrota.' }); }
+    else if (!w.won && mine.length >= 4 && mine.includes('middlesex')) { w.won = true; news.push({ kind: 'good', county: 'middlesex', text: 'Você domina o sul e Londres. O Ato I está vencido!' }); }
+    return { world: w, months, reports, news };
+  }
+
+  // Ações do jogador que mexem no ouro do tesouro usando as regras do condado
+  function withTreasury(w, id, fn) {
+    const c = w.counties[id], L = w.lords[PLAYER];
+    c.gold = L.gold; c.market = w.market;
+    const ok = fn(c);
+    L.gold = c.gold; c.gold = 0;
+    return ok;
+  }
+
+  const api = { PLAYER, LORDS, ADJ, ORDER, FOCUS, SPY, GIFT_COST, GIFT_LOYAL, MARRY_COST, MARRY_LOYAL, MARRY_MIN, BUY_MIN,
+    PRIEST_LOYAL, JOIN_AT, JOIN_LEAD, REVOLT_OWNER, REVOLT_OTHER, buyPrice, isSeat,
+    newWorld, step, owned, canReach, autoManage, gift, canGift, marry, canMarry, buy, canBuy, setPriest, setSpy, withTreasury, clone };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.HW = api;
+})(this);
+
+</script>
+<script>
 (function () {
   'use strict';
-  const H = window.HC;
-  const KEY = 'hollow-crown-12meses';
+  const H = window.HC, W = window.HW;
+  const KEY = 'hollow-crown-fase2';
   const $ = id => document.getElementById(id);
+  const ME = W.PLAYER;
 
-  let game, log = [];
+  let world, sel = 'kent', game, log = [];
   let playing = false, timers = [], seasonFc = null;
   // Céu de cada mês: o ano como um dia, de março (amanhecer) a fevereiro (fim da noite)
   const SKY = [
@@ -996,12 +1442,25 @@ body.modal-open { overflow: hidden; }
   function load() {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) { const d = JSON.parse(raw); if (d && d.game && d.game.fields && d.game.fields.length === 10) { game = H.migrate(d.game); log = d.log || []; return; } }
+      if (raw) { const d = JSON.parse(raw); if (d && d.world && d.world.v === 2 && d.world.counties) { world = d.world; sel = d.sel && world.counties[d.sel] ? d.sel : 'kent'; log = d.log || []; bind(); return; } }
     } catch (e) {}
     fresh();
   }
-  function fresh() { game = H.newGame(Math.floor(Math.random() * 1e9) + 1); game.turn = 0; log = []; }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify({ game, log })); } catch (e) {} }
+  function fresh() { world = W.newWorld(Math.floor(Math.random() * 1e9) + 1); sel = 'kent'; log = []; bind(); }
+  function save() { try { if (game && mine(sel)) world.lords[ME].gold = game.gold; localStorage.setItem(KEY, JSON.stringify({ world, sel, log })); } catch (e) {} }
+  const mine = id => world.counties[id].owner === ME;
+  const ownerOf = id => world.counties[id].owner;
+  const lordName = l => l === ME ? 'Você' : W.LORDS[l].name;
+  // "game" é sempre o condado aberto; nas suas terras, o ouro dele é o seu tesouro
+  function bind() {
+    game = world.counties[sel];
+    H.migrate(game);
+    game.market = world.market;
+    game.gold = mine(sel) ? world.lords[ME].gold : 0;
+    if (mine(sel) && game.focus !== 'manual') W.autoManage(game, ME);
+  }
+  function commit() { if (mine(sel)) world.lords[ME].gold = game.gold; save(); render(); }
+  const isAuto = () => mine(sel) && game.focus !== 'manual';
 
   const TASK_INFO = {
     campos: { name: 'Campos', hint: s => s.season === 0 ? '10 pessoas plantam 1 campo · os mais férteis primeiro'
@@ -1051,7 +1510,7 @@ body.modal-open { overflow: hidden; }
     btn.addEventListener('contextmenu', e => e.preventDefault());
   }
   function change(t, d) {
-    if (game.lost) return;
+    if (game.lost || !mine(sel) || isAuto()) return;
     const cur = game.alloc[t];
     let next = cur + d;
     if (d > 0) next = Math.min(next, cur + H.idle(game));
@@ -1103,6 +1562,7 @@ body.modal-open { overflow: hidden; }
   function renderReserves(s) {
     let c = s.county || {};
     if (!(c.stone > 100)) c = { name: 'Kent', stone: 6000, iron: 2500, coastKm: 18 };
+    $('h-res').textContent = 'Reservas de ' + (s.name || 'Kent');
     const fert = Math.round(s.fields.reduce((a, b) => a + b, 0) / s.fields.length);
     const items = [
       ['campos', 'Terra fértil', `${s.fields.length} campos`, level(fert), `fertilidade ${fert}%`],
@@ -1129,7 +1589,9 @@ body.modal-open { overflow: hidden; }
 
   function render(view, liveMonth) {
     const s = view || game;
-    const lock = s.lost || playing;
+    const own = mine(sel), owner = ownerOf(sel), rival = owner && !own;
+    const seen = own || !owner || !!world.intel[owner];
+    const lock = world.lost || playing || !own;
     if (typeof syncMusic === 'function') { try { syncMusic(); } catch (e) {} }
     renderReserves(s);
     const first = (playing && seasonStart ? seasonStart.season : s.season) * 3;
@@ -1139,29 +1601,42 @@ body.modal-open { overflow: hidden; }
       const m = first + i, cls = !playing ? '' : m === liveMonth ? 'now' : m < liveMonth ? 'done' : '';
       return `<span class="${cls}">${H.MONTHS[m].toLowerCase()}</span>`;
     }).join('');
-    $('when').innerHTML = `Kent · Ano ${s.year} · <b>${playing ? H.MONTHS[liveMonth] : H.SEASONS[s.season]}</b><div class="months">${trio}</div>`;
+    $('when').innerHTML = `${s.name} · Ano ${s.year} · <b>${playing ? H.MONTHS[liveMonth] : H.SEASONS[s.season]}</b><div class="months">${trio}</div>`;
+
+    ['c-fc', 'c-tasks', 'c-prod', 'c-dec', 'c-mkt'].forEach(id => { $(id).hidden = !own; });
+    $('c-nb').hidden = own;
+    $('c-focus').hidden = !own || sel === 'kent';
 
     const f = playing && seasonFc ? seasonFc : H.forecast(s);
     const happyWord = s.happy >= 70 ? 'contente' : s.happy >= 50 ? 'tranquilo' : s.happy >= 30 ? 'insatisfeito' : 'à beira da revolta';
+    const L = world.lords[ME];
+    const q = '<span class="q">?</span>';
+    const ownerWord = own ? (sel === 'kent' ? 'sua sede' : 'suas terras') : owner ? 'de ' + W.LORDS[owner].name : 'neutro';
     $('stats').innerHTML = [
-      ['Povo', s.pop, `meta: ${H.GOAL_POP}`, null, 'povo'],
-      ['Comida', s.food, `dura ${f.seasonsOfFood.toLocaleString('pt-BR')} ${f.seasonsOfFood === 1 ? 'estação' : 'estações'}`, null, 'comida'],
+      ['Povo', s.pop, ownerWord, null, 'povo'],
+      ['Comida', seen ? s.food : q, own ? `dura ${f.seasonsOfFood.toLocaleString('pt-BR')} ${f.seasonsOfFood === 1 ? 'estação' : 'estações'}` : seen ? 'no celeiro deles' : 'mande espiar', null, 'comida'],
       ['Felicidade', Math.round(s.happy), happyWord, s.happy, 'felicidade'],
-      ['Ouro', s.gold, `impostos a ${H.taxRateOf(s)}%`, null, 'ouro'],
-      ['Lenha', s.wood, `inverno pede ${H.woodNeedWinter(s)}`, null, 'lenha'],
-      ['Gado', s.herd, 'cabeças', null, 'gado']
-    ].map(([k, v, sub, m, ic]) => ic === 'comida'
+      ['Tesouro', L.gold, `+${incomeOf(ME)} por estação`, null, 'ouro'],
+      ['Lenha', seen ? s.wood : q, own ? `inverno pede ${H.woodNeedWinter(s)}` : 'estoque', null, 'lenha'],
+      ['Gado', seen ? s.herd : q, 'cabeças', null, 'gado']
+    ].map(([k, v, sub, m, ic]) => ic === 'comida' && own
       ? `<button type="button" class="stat stat-btn" id="open-cel" aria-haspopup="dialog"><div class="k">${k} <span class="more" aria-hidden="true">›</span></div><div class="v"><span>${v}</span>${icon(ic)}</div><div class="s">${sub}</div></button>`
       : `<div class="stat"><div class="k">${k}</div><div class="v"><span>${v}</span>${icon(ic)}</div><div class="s">${sub}</div>${m != null ? `<div class="meter"><i style="width:${m}%"></i></div>` : ''}</div>`).join('');
     lastView = s;
-    renderMarket(s, lock);
+    renderMap();
+    if (!own) renderNeighbor(s); else if (sel !== 'kent') renderFocus();
+    renderCourt();
+    if (own) renderMarket(s, lock);
     if (!$('celeiro').hidden) renderCeleiro();
 
+    const auto = isAuto();
+    $('tasks-auto').hidden = !auto;
+    $('tasks-auto').textContent = auto ? `O administrador distribui o povo de ${s.name} (foco: ${W.FOCUS[game.focus].toLowerCase()}). Para ajustar você mesmo, escolha "À mão" em Administração.` : '';
     H.TASKS.forEach(t => {
       $('v-' + t).textContent = s.alloc[t];
       $('h-' + t).textContent = TASK_INFO[t].hint(s);
-      $('m-' + t).disabled = lock || s.alloc[t] <= 0;
-      $('p-' + t).disabled = lock || H.idle(s) <= 0;
+      $('m-' + t).disabled = lock || auto || s.alloc[t] <= 0;
+      $('p-' + t).disabled = lock || auto || H.idle(s) <= 0;
     });
     $('idle').textContent = H.idle(s);
 
@@ -1169,38 +1644,44 @@ body.modal-open { overflow: hidden; }
     $('rat').value = rp; paintRange($('rat'), $('rat-b'));
     $('rat').setAttribute('aria-valuetext', rp + '%');
     const rword = rp < 75 ? 'meia ração' : rp < 95 ? 'ração curta' : rp <= 105 ? 'ração normal' : rp < 130 ? 'ração farta' : 'ração dupla';
-    $('rat-info').textContent = `${rword} · o povo come ${Math.round(H.eatPerSeason(s) / 3)} por mês · felicidade ${rh > 0 ? '+' + rh.toLocaleString('pt-BR') : rh === 0 ? 'não muda' : '−' + Math.abs(rh).toLocaleString('pt-BR')}`;
-    $('rat').disabled = $('rat-m').disabled = $('rat-p').disabled = lock;
+    $('rat-info').textContent = `${rword} · o povo come ${Math.round(H.eatPerSeason(s) / 3)} por mês · felicidade ${rh > 0 ? '+' + rh.toLocaleString('pt-BR') : rh === 0 ? 'não muda' : '−' + Math.abs(rh).toLocaleString('pt-BR')}` + (auto ? ' · o administrador decide as rações' : '');
+    $('rat').disabled = $('rat-m').disabled = $('rat-p').disabled = lock || auto;
     const bp = H.bakePctOf(s), plan = H.bakePlan(s), loavesNow = Math.round((s.foodBy ? s.foodBy.pao || 0 : 0) / H.WHEAT_PER_BREAD);
     $('bake').value = bp; paintRange($('bake'), $('bake-b')); $('bake').setAttribute('aria-valuetext', bp + '%');
-    $('bake-info').textContent = bp === 0
+    $('bake-info').textContent = (bp === 0
       ? `Padaria parada · ${loavesNow} pães no celeiro`
-      : `assa cerca de ${plan.loaves} pães no próximo mês · gasta ${plan.wood} de lenha · ${loavesNow} pães no celeiro` + (plan.loaves === 0 && s.wood < H.WOOD_PER_BREAD ? ' · sem lenha para o forno' : plan.loaves === 0 ? ' · sem trigo para assar' : '');
-    $('bake').disabled = $('bake-m').disabled = $('bake-p').disabled = lock;
-    const rate = H.taxRateOf(s), hp = H.taxHappy(rate), gp = Math.round(s.pop * H.taxGoldPer(rate));
+      : `assa cerca de ${plan.loaves} pães no próximo mês · gasta ${plan.wood} de lenha · ${loavesNow} pães no celeiro` + (plan.loaves === 0 && s.wood < H.WOOD_PER_BREAD ? ' · sem lenha para o forno' : plan.loaves === 0 ? ' · sem trigo para assar' : '')) + (auto ? ' · o administrador cuida da padaria' : '');
+    $('bake').disabled = $('bake-m').disabled = $('bake-p').disabled = lock || auto;
+    const rate = H.taxRateOf(s), hp = H.taxHappy(rate), gp = Math.round(s.pop * H.taxGoldPer(rate) * (game.taxMult || 1));
     $('tax').value = rate; $('tax-v').textContent = rate + '%'; paintRange($('tax'), $('tax-b'));
     $('tax').setAttribute('aria-valuetext', rate + '%');
-    $('tax-info').textContent = `+${gp} de ouro por estação · felicidade ${hp > 0 ? '+' + hp : hp === 0 ? 'não muda' : '−' + Math.abs(hp)}`;
+    $('tax-info').textContent = `+${gp} de ouro por estação${game.taxMult > 1 ? ' (Londres paga em dobro)' : ''} · felicidade ${hp > 0 ? '+' + hp : hp === 0 ? 'não muda' : '−' + Math.abs(hp)}`;
     $('tax').disabled = $('tax-m').disabled = $('tax-p').disabled = lock;
     $('feast-s').textContent = s.feastThisSeason ? 'Já houve festa nesta estação' : `${H.FEAST_GOLD} ouro + ${H.FEAST_FOOD} comida → +${H.FEAST_HAPPY} felicidade`;
-    $('feast').disabled = lock || s.feastThisSeason || s.gold < H.FEAST_GOLD || s.food < H.FEAST_FOOD;
+    $('feast').disabled = lock || s.feastThisSeason || L.gold < H.FEAST_GOLD || s.food < H.FEAST_FOOD;
 
-    $('fc').innerHTML = `<div><div class="k">Comida</div><div class="v">${delta(playing ? seasonStart.food : s.food, f.food)}</div></div>
-      <div><div class="k">Povo</div><div class="v">${delta(playing ? seasonStart.pop : s.pop, f.pop)}</div></div>
-      <div><div class="k">Felicidade</div><div class="v">${delta(Math.round(playing ? seasonStart.happy : s.happy), Math.round(f.happy))}</div></div>`;
-    $('warn').innerHTML = f.warnings.length ? f.warnings.map(w => `<li class="warn">${w}</li>`).join('') : '<li class="good">Nada preocupante à vista.</li>';
+    if (own) {
+      $('fc').innerHTML = `<div><div class="k">Comida</div><div class="v">${delta(playing ? seasonStart.food : s.food, f.food)}</div></div>
+        <div><div class="k">Povo</div><div class="v">${delta(playing ? seasonStart.pop : s.pop, f.pop)}</div></div>
+        <div><div class="k">Felicidade</div><div class="v">${delta(Math.round(playing ? seasonStart.happy : s.happy), Math.round(f.happy))}</div></div>`;
+      // com administrador, deixar campos em descanso é escolha dele, não um problema
+      const warns = f.warnings.filter(w => !(auto && /^Só \d+ de \d+ campos/.test(w)));
+      if (auto && s.surplus != null && s.surplus < 0) warns.push(`O celeiro não chega à colheita: o administrador vai comprar grão com o seu tesouro (${H.BUY_COST} ouro o saco).`);
+      $('warn').innerHTML = warns.length ? warns.map(w => `<li class="warn">${w}</li>`).join('') : '<li class="good">Nada preocupante à vista.</li>';
+    }
 
-    $('go').textContent = s.lost ? 'Fim de jogo' : playing ? `${H.MONTHS[Math.min(liveMonth, first + 2)]} passando · pular ▸▸` : `Viver ${['a Primavera', 'o Verão', 'o Outono', 'o Inverno'][s.season]} →`;
-    $('go').disabled = s.lost && !playing;
+    $('go').textContent = world.lost ? 'Fim de jogo' : playing ? `${H.MONTHS[Math.min(liveMonth, first + 2)]} passando · pular ▸▸` : `Viver ${['a Primavera', 'o Verão', 'o Outono', 'o Inverno'][s.season]} →`;
+    $('go').disabled = world.lost && !playing;
     $('auto').textContent = autoRun ? 'Parar o tempo ■' : 'Viver até algo importante ››';
-    $('auto').disabled = (s.lost && !autoRun) || (playing && !autoRun);
+    $('auto').disabled = (world.lost && !autoRun) || (playing && !autoRun);
     $('auto').classList.toggle('running', autoRun);
     if (autoRun) $('go').textContent = `${H.MONTHS[Math.min(liveMonth == null ? s.season * 3 : liveMonth, (seasonStart ? seasonStart.season : s.season) * 3 + 2)]} passando · vivendo até algo importante`;
     $('go').classList.toggle('skip', playing);
 
+    $('fields').style.gridTemplateColumns = `repeat(${s.fields.length}, minmax(0, 1fr))`;
+    $('fields').setAttribute('aria-label', `Fertilidade dos ${s.fields.length} campos`);
     $('fields').innerHTML = s.fields.map((v, i) => `<div class="f${s.planted.includes(i) ? ' p' : ''}" title="Campo ${i + 1}: fertilidade ${v}%"><span class="ear" style="height:${Math.max(18, v)}%"><svg viewBox="0 0 40 100" aria-hidden="true"><path class="st" d="M20 100V22"/><path d="M20 6c5 6 5 14 0 20-5-6-5-14 0-20z"/><path d="M19 34C11 33 6 27 5 19c8 1 13 6 14 15zM21 34c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 50C11 49 6 43 5 35c8 1 13 6 14 15zM21 50c8-1 13-7 14-15-8 1-13 6-14 15z"/><path d="M19 66C11 65 6 59 5 51c8 1 13 6 14 15zM21 66c8-1 13-7 14-15-8 1-13 6-14 15z"/></svg></span><b>${v}</b></div>`).join('');
-    $('land-sub').textContent = s.planted.length ? `${s.planted.length} campos plantados neste ano. Plantar todo ano cansa a terra; os campos em descanso se recuperam.`
-      : 'Plantar todo ano cansa a terra; campos em descanso se recuperam. Na primavera, os mais férteis são plantados primeiro.';
+    $('land-sub').textContent = (s.note ? s.note + '. ' : '') + (s.planted.length ? `${s.planted.length} campos plantados neste ano.` : 'Plantar todo ano cansa a terra; campos em descanso se recuperam.');
     [['forest', s.forest], ['fish', s.fish], ['hunt', s.hunt == null ? 70 : s.hunt]].forEach(([k, v]) => {
       const p = Math.max(0, Math.min(100, Math.round(v)));
       $(k).setAttribute('stroke-dasharray', p + ' 100');
@@ -1208,21 +1689,172 @@ body.modal-open { overflow: hidden; }
       $('g-' + k).classList.toggle('low', p < 30);
     });
 
-    $('goal').textContent = `Meta da Fase 1: chegar a ${H.GOAL_POP} pessoas com o povo satisfeito (felicidade ${H.GOAL_HAPPY}+).`;
+    const mineList = W.owned(world, ME);
+    $('goal').textContent = `Ato I: tenha 4 condados do sul, incluindo Middlesex (Londres). Hoje: ${mineList.length} de 4${mineList.includes('middlesex') ? ', com Londres' : ', sem Londres'}.`;
 
     if (playing || autoRun) { $('banner').innerHTML = ''; return; }
-    if (autoMsg && !s.lost) { $('banner').innerHTML = `<div class="banner info"><span>${autoMsg}</span><button type="button" id="ok-auto">Entendi</button></div>`; const ok = $('ok-auto'); if (ok) ok.addEventListener('click', () => { autoMsg = ''; render(); }); return; }
-    if (s.lost) $('banner').innerHTML = `<div class="banner lose"><span>Kent se esvaziou no ano ${s.year}. O condado não resistiu.</span><button type="button" id="again">Jogar de novo</button></div>`;
-    else if (s.won) $('banner').innerHTML = `<div class="banner win"><span>Meta alcançada! Kent prospera. Você pode continuar jogando.</span></div>`;
+    if (autoMsg && !world.lost) { $('banner').innerHTML = `<div class="banner info"><span>${autoMsg}</span><button type="button" id="ok-auto">Entendi</button></div>`; const ok = $('ok-auto'); if (ok) ok.addEventListener('click', () => { autoMsg = ''; render(); }); return; }
+    if (world.lost) $('banner').innerHTML = `<div class="banner lose"><span>Você perdeu Kent no ano ${world.year}. O Ato I terminou.</span><button type="button" id="again">Jogar de novo</button></div>`;
+    else if (world.won) $('banner').innerHTML = `<div class="banner win"><span>Ato I vencido! O sul e Londres são seus. Você pode continuar jogando; a guerra vem na Fase 3.</span></div>`;
     else $('banner').innerHTML = '';
     const again = $('again'); if (again) again.addEventListener('click', () => { fresh(); save(); render(); renderLog(); });
   }
 
+  // Ouro que entra por estação (impostos de todas as suas terras, menos o dízimo)
+  function incomeOf(lord) {
+    let g = 0;
+    W.owned(world, lord).forEach(id => { const c = world.counties[id]; g += c.pop * H.taxGoldPer(H.taxRateOf(c)) * (c.taxMult || 1); });
+    if (world.lords[lord].priest) g *= 0.9;
+    return Math.round(g);
+  }
+
+  // ===== Mapa esquemático do sul =====
+  const MAP = {
+    hampshire: { d: 'M10 50 L112 24 L108 68 L112 118 L104 176 L58 198 L14 180 L6 120 Z', x: 58, y: 112 },
+    middlesex: { d: 'M112 24 L184 18 L192 62 L108 68 Z', x: 150, y: 34 },
+    essex: { d: 'M184 18 L250 4 L338 10 L352 50 L296 56 L192 62 Z', x: 268, y: 30 },
+    surrey: { d: 'M108 68 L192 62 L204 112 L112 118 Z', x: 156, y: 88 },
+    kent: { d: 'M192 62 L296 56 L352 50 L342 110 L300 150 L236 160 L204 112 Z', x: 276, y: 100 },
+    sussex: { d: 'M112 118 L204 112 L236 160 L190 182 L104 176 Z', x: 164, y: 146 }
+  };
+  const NEUTRAL = '#8d9a86', SY = 1.4;
+  const colorOf = id => ownerOf(id) ? W.LORDS[ownerOf(id)].color : NEUTRAL;
+  function renderMap() {
+    const L = world.lords[ME];
+    const cty = W.ORDER.map(id => {
+      const c = world.counties[id], m = MAP[id], o = c.owner;
+      const far = !o || o !== ME ? !W.canReach(world, ME, id) : false;
+      const sub = o === ME ? 'você' : o ? W.LORDS[o].name.replace(/^(Lorde|Lady) /, '') : `neutro · ${Math.round(c.loyal[ME] || 0)}%`;
+      const my = Math.round(m.y * SY);
+      const seat = W.isSeat(id) ? `<path class="mark" d="M${m.x - 7} ${my - 20}h14v-6l-2.5 2-2-3-2.5 3-2.5-3-2 3-2.5-2z" fill="#fff3c4" stroke="rgba(0,0,0,.5)" stroke-width="1"/>` : '';
+      const priest = L.priest === id ? `<path class="mark" d="M${m.x + 34} ${my - 16}v15M${m.x + 28.5} ${my - 11}h11" stroke="#fffaf0" stroke-width="2.6" stroke-linecap="round"/>` : '';
+      const spy = L.spy.mission && L.spy.mission.id === id ? `<circle class="mark" cx="${m.x - 32}" cy="${my - 6}" r="5" fill="#1a1410" stroke="#fffaf0" stroke-width="1.5"/>` : '';
+      const Y = v => Math.round(v * SY);
+      return `<g class="cty${id === sel ? ' sel' : ''}${far ? ' far' : ''}" data-id="${id}" role="button" tabindex="0" aria-label="${c.name}, ${o === ME ? 'seu' : o ? 'de ' + W.LORDS[o].name : 'neutro'}">
+        <path d="${m.d}" transform="scale(1 ${SY})" vector-effect="non-scaling-stroke" fill="${colorOf(id)}" fill-opacity=".86"/>${seat}${priest}${spy}
+        <text x="${m.x}" y="${Y(m.y)}" text-anchor="middle">${c.name}</text>
+        ${id === 'middlesex' ? `<text class="own" x="${m.x}" y="${Y(m.y) + 14}" text-anchor="middle" style="font-style:italic">Londres</text>` : ''}
+        <text class="own" x="${m.x}" y="${Y(m.y) + (id === 'middlesex' ? 28 : 15)}" text-anchor="middle">${sub}</text></g>`;
+    }).join('');
+    const london = '';
+    $('map').innerHTML = `<svg class="map" viewBox="0 0 360 ${Math.round(206 * SY)}" role="group" aria-label="Mapa dos seis condados do sul">
+      <rect class="sea" x="0" y="0" width="360" height="${Math.round(206 * SY)}" rx="14"/>${cty}
+      <path class="river" transform="scale(1 ${SY})" vector-effect="non-scaling-stroke" d="M100 66 C140 64 168 66 192 62 S 290 57 356 49"/>${london}</svg>`;
+    $('map-legend').innerHTML = [[ME, 'Você'], ['aldric', W.LORDS.aldric.title], ['matilda', W.LORDS.matilda.title]].map(([l, n]) => `<span><i style="--c:${W.LORDS[l].color}"></i>${n} · ${W.owned(world, l).length}</span>`).join('') + `<span><i style="--c:${NEUTRAL}"></i>Neutro</span>`;
+    $('map-sub').textContent = playing ? 'O tempo está passando…' : `Aberto: ${world.counties[sel].name}. Toque em outro condado para ver de perto.`;
+  }
+  function pick(id) {
+    if (playing || !world.counties[id] || id === sel) return;
+    sel = id; bind(); save(); render();
+  }
+  $('map').addEventListener('click', e => { const g = e.target.closest && e.target.closest('.cty'); if (g) pick(g.dataset.id); });
+  $('map').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset && e.target.dataset.id) { e.preventDefault(); pick(e.target.dataset.id); } });
+
+  // ===== Condado vizinho: lealdade e diplomacia =====
+  function renderNeighbor(s) {
+    const c = world.counties[sel], o = c.owner, L = world.lords[ME];
+    const reach = W.canReach(world, ME, sel), seat = W.isSeat(sel);
+    $('h-nb').innerHTML = o ? `Terras de ${W.LORDS[o].name}<span class="tag" style="--c:${W.LORDS[o].color}">${seat ? 'sede' : 'rival'}</span>` : `${c.name}<span class="tag" style="--c:${NEUTRAL}">neutro</span>`;
+    $('nb-sub').textContent = c.note + '. ' + (o ? `${W.LORDS[o].title} governa ${c.name}.` : `Senhores locais governam ${c.name} e ainda não juraram lealdade a ninguém.`);
+    $('nb-loyal').innerHTML = [ME, 'aldric', 'matilda'].map(l => {
+      const v = Math.round(c.loyal[l] || 0);
+      return `<div class="row"><span>${lordName(l)}</span><span class="bar"><i style="width:${v}%;--c:${W.LORDS[l].color}"></i><u></u></span><b>${v}</b></div>`;
+    }).join('');
+    const btn = (act, title, small, ok) => `<button type="button" data-act="${act}" ${ok && !playing ? '' : 'disabled'}>${title}<small>${small}</small></button>`;
+    const spyBusy = L.spy.cooldown > 0 || !!L.spy.mission;
+    const spyTxt = k => L.spy.mission && L.spy.mission.id === sel && L.spy.mission.kind === k ? 'missão marcada para esta estação' : `${Math.round(W.SPY[k].risk * 100)}% de risco de ser pego`;
+    const acts = [
+      btn('gift', 'Mandar presentes', `${W.GIFT_COST} ouro · +${W.GIFT_LOYAL} de lealdade${c.gifted ? ' · já enviados nesta estação' : ''}`, W.canGift(world, ME, sel)),
+      L.priest === sel ? btn('priest-off', 'Recolher o padre', `ele prega aqui: +${W.PRIEST_LOYAL} por estação`, true)
+        : btn('priest', 'Enviar o padre', `+${W.PRIEST_LOYAL} de lealdade por estação${o ? ', −4 para o dono' : ''}`, reach)
+    ];
+    if (!o) {
+      acts.push(btn('marry', 'Casamento', c.married ? 'já houve um casamento aqui' : `${W.MARRY_COST} ouro · +${W.MARRY_LOYAL} · pede lealdade ${W.MARRY_MIN}`, W.canMarry(world, ME, sel)));
+      acts.push(btn('buy', 'Comprar a lealdade', `${W.buyPrice(c)} ouro · pede lealdade ${W.BUY_MIN} · o condado vira seu na hora`, W.canBuy(world, ME, sel)));
+    } else {
+      ['espiar', 'boatos', 'sabotar'].forEach(k => acts.push(btn('spy-' + k, W.SPY[k].name, spyTxt(k), !spyBusy)));
+    }
+    $('nb-acts').innerHTML = acts.join('');
+    let why = '';
+    if (!reach) why = 'Longe demais: presentes, casamento e o padre só alcançam condados vizinhos às suas terras.';
+    else if (seat) why = `${c.name} é a sede de ${W.LORDS[o].title}: só a guerra toma uma sede (Fase 3). Mas o padre e o espião ainda enfraquecem o rival.`;
+    else if (o) why = `Um condado rival passa para você se a lealdade ao dono cair abaixo de ${W.REVOLT_OWNER} e a sua passar de ${W.REVOLT_OTHER}. Boatos e o padre ajudam.`;
+    else why = `Um condado neutro jura lealdade a quem chegar a ${W.JOIN_AT} com ${W.JOIN_LEAD} pontos à frente do segundo (a marca na barra).`;
+    if (o && L.spy.cooldown > 0) why += ` Seu espião está escondido por mais ${L.spy.cooldown} ${L.spy.cooldown === 1 ? 'estação' : 'estações'}.`;
+    if (o && world.intel[o]) why += ` Você conhece os segredos de ${W.LORDS[o].name} por mais ${world.intel[o]} ${world.intel[o] === 1 ? 'estação' : 'estações'}.`;
+    $('nb-why').textContent = why;
+  }
+  $('nb-acts').addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('button[data-act]'); if (!b || b.disabled || playing) return;
+    const a = b.dataset.act, news = [];
+    let ok = false;
+    if (a === 'gift') ok = W.gift(world, ME, sel);
+    else if (a === 'marry') ok = W.marry(world, ME, sel);
+    else if (a === 'buy') ok = W.buy(world, ME, sel, news);
+    else if (a === 'priest') ok = W.setPriest(world, ME, sel);
+    else if (a === 'priest-off') ok = W.setPriest(world, ME, null);
+    else if (a.indexOf('spy-') === 0) ok = W.setSpy(world, ME, sel, a.slice(4));
+    if (!ok) return;
+    if (news.length) { log.push({ title: `${H.SEASONS[game.season]} do ano ${game.year}`, items: news }); renderLog(); }
+    bind(); save(); render();
+  });
+
+  // ===== Administração dos outros condados =====
+  const FOCUS_INFO = {
+    manual: 'Você distribui o povo e decide rações e padaria, como em Kent.',
+    equilibrado: 'Campos, lenha, caça e pesca na medida. Se o celeiro não chegar à colheita, compra grão com o seu tesouro.',
+    celeiro: 'Mais gente nos campos e no rio, menos lenha. Bom para crescer.',
+    madeira: 'Mais lenhadores e a padaria acesa: mais pão, povo mais alegre. Lenha de sobra para as construções da Fase 3.'
+  };
+  function renderFocus() {
+    const box = $('focus');
+    box.innerHTML = Object.keys(W.FOCUS).map(k => `<button type="button" data-f="${k}" aria-pressed="${game.focus === k}" ${playing || world.lost ? 'disabled' : ''}>${W.FOCUS[k]}</button>`).join('');
+    $('focus-info').textContent = FOCUS_INFO[game.focus] || '';
+  }
+  $('focus').addEventListener('click', e => {
+    const b = e.target.closest && e.target.closest('button[data-f]'); if (!b || b.disabled) return;
+    game.focus = b.dataset.f; bind(); save(); render();
+  });
+
+  // ===== A corte: padre, espião e rivais =====
+  function renderCourt() {
+    const L = world.lords[ME];
+    const places = W.ORDER.filter(id => mine(id) || W.canReach(world, ME, id));
+    const priestAt = L.priest ? world.counties[L.priest].name : null;
+    const chips = places.map(id => `<button type="button" data-pr="${id}" aria-pressed="${L.priest === id}" ${playing ? 'disabled' : ''}>${world.counties[id].name}</button>`).join('')
+      + `<button type="button" data-pr="" aria-pressed="${!L.priest}" ${playing ? 'disabled' : ''}>Na capela</button>`;
+    const m = L.spy.mission;
+    const spyLine = L.spy.cooldown > 0 && !m ? `Escondido: volta a trabalhar em ${L.spy.cooldown} ${L.spy.cooldown === 1 ? 'estação' : 'estações'}.`
+      : m ? `Missão nesta estação: ${W.SPY[m.kind].name.toLowerCase()} em ${world.counties[m.id].name} (${Math.round(W.SPY[m.kind].risk * 100)}% de risco). <button type="button" data-spy-off>Cancelar</button>`
+      : 'Livre. Abra um condado rival no mapa para dar uma missão: espiar, espalhar boatos ou incendiar o celeiro.';
+    const rel = v => v >= 20 ? 'cordial' : v <= -20 ? 'hostil' : 'neutra';
+    const lords = ['aldric', 'matilda'].map(l => {
+      const R = world.lords[l], n = W.owned(world, l);
+      const known = !!world.intel[l];
+      return `<div class="lord"><i style="--c:${W.LORDS[l].color}"></i><span>${W.LORDS[l].title}</span><b>${known ? R.gold + ' ouro' : '? ouro'}</b>
+        <small>${R.out ? 'fora da disputa' : `${n.length} ${n.length === 1 ? 'condado' : 'condados'} · ${W.LORDS[l].style} · relação ${rel(L.relation[l] || 0)}`}${known && R.priest ? ` · padre em ${world.counties[R.priest].name}` : ''}</small></div>`;
+    }).join('');
+    $('court').innerHTML = `<h3 class="court-h">O padre</h3>
+      <p class="sub" style="margin:0">${priestAt ? `Prega em ${priestAt}: +${W.PRIEST_LOYAL} de lealdade a você por estação.` : 'Está na capela de Kent.'} Enquanto ele trabalha, a Igreja leva 10% dos impostos.${L.lastTithe ? ` Último dízimo: ${L.lastTithe} ouro.` : ''}</p>
+      <div class="court-row" id="pr">${chips}</div>
+      <h3 class="court-h">O espião</h3>
+      <p class="sub" style="margin:0">${spyLine}</p>
+      <h3 class="court-h">Os rivais</h3>
+      <div class="lords">${lords}</div>`;
+  }
+  $('court').addEventListener('click', e => {
+    const t = e.target.closest && e.target.closest('button'); if (!t || t.disabled || playing) return;
+    if (t.hasAttribute('data-pr')) { W.setPriest(world, ME, t.getAttribute('data-pr') || null); }
+    else if (t.hasAttribute('data-spy-off')) { W.setSpy(world, ME, null); }
+    else return;
+    bind(); save(); render();
+  });
+
   function renderLog(upTo) {
     const box = $('log');
     const items = upTo == null ? log : log.slice(0, upTo);
-    if (!items.length) { box.innerHTML = '<p class="ok">A crônica de Kent começa em março.</p>'; return; }
-    box.innerHTML = items.slice().reverse().map(e => `<div><h3>${e.title}</h3><ul class="notes">${e.items.map(x => `<li class="${x.kind}">${x.text}</li>`).join('')}</ul></div>`).join('');
+    if (!items.length) { box.innerHTML = '<p class="ok">A crônica do sul começa em março.</p>'; return; }
+    box.innerHTML = items.slice().reverse().map(e => `<div><h3>${e.title}</h3><ul class="notes">${e.items.map(x => `<li class="${x.kind}">${x.who ? `<span class="who">${x.who}:</span>` : ''}${x.text}</li>`).join('')}</ul></div>`).join('');
   }
 
   let seasonStart = null, autoRun = false, autoMsg = '', autoSeasons = 0, autoBase = null;
@@ -1231,57 +1863,67 @@ body.modal-open { overflow: hidden; }
     playing = false; seasonFc = null; seasonStart = null;
     render(); renderLog();
   }
-  // Vive uma estação mostrando os meses; gap = tempo de cada mês
+  // Vive uma estação no sul inteiro, mostrando os meses do condado aberto
   function playSeason(gap, done) {
-    const turn = game.turn || 0;
-    const rand = H.rng(game.seed * 7 + turn * 7919 + 13);
-    const start = game;
-    const out = H.step(game, rand);
-    // Guarda o resultado já no início: fechar a página no meio não perde nada
-    let year = start.year;
-    out.months.forEach(m => {
-      log.push({ title: `${m.name} do ano ${year}`, items: m.report.length ? m.report : [{ kind: 'sum', text: 'Um mês tranquilo.' }] });
-      year = m.state.year;
+    save();
+    const turn = world.turn || 0;
+    const rand = H.rng(world.seed * 7 + turn * 7919 + 13);
+    const start = H.clone(game), before = world;
+    const out = W.step(world, rand);
+    const items = out.news.map(n => ({ kind: n.kind, text: n.text }));
+    W.ORDER.filter(id => before.counties[id].owner === ME).forEach(id => {
+      const name = before.counties[id].name;
+      (out.reports[id] || []).forEach(r => {
+        if (r.kind === 'sum') { if (id === 'kent' || id === sel) items.push({ kind: 'sum', who: name, text: r.text }); return; }
+        if (/^Padaria assou/.test(r.text)) return;
+        if (id !== 'kent' && id !== sel && r.kind !== 'bad' && r.kind !== 'good') return;
+        items.push({ kind: r.kind, who: name, text: r.text });
+      });
     });
-    while (log.length > 60) log.shift();
-    game = out.state; game.turn = turn + 1;
+    log.push({ title: `${H.SEASONS[start.season]} do ano ${start.year}`, items: items.length ? items : [{ kind: 'sum', text: 'Uma estação tranquila.' }] });
+    while (log.length > 40) log.shift();
+    world = out.world; bind();
     save();
     seasonStart = start; seasonFc = H.forecast(start); playing = true;
     const firstMonth = start.season * 3;
+    const months = out.months[sel] || [];
     render(start, firstMonth);
-    out.months.forEach((m, i) => {
+    renderLog(log.length - 1);
+    months.forEach((m, i) => {
       timers.push(setTimeout(() => {
-        render(m.state, i < 2 ? firstMonth + i + 1 : firstMonth + 2);
-        renderLog(log.length - out.months.length + i + 1);
-        $('log').scrollTop = 0;
+        const v = m.state; v.name = start.name; v.note = start.note;
+        render(v, i < 2 ? firstMonth + i + 1 : firstMonth + 2);
       }, gap * (i + 1)));
     });
-    timers.push(setTimeout(() => { finish(); if (done) done(out, start); }, gap * out.months.length + 400));
+    timers.push(setTimeout(() => { finish(); if (done) done(out, before); }, gap * Math.max(1, months.length) + 400));
   }
   const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ===== Viver até algo importante =====
   const RARE = ['vinho', 'especiarias'];
   function needsAttention(prev, out) {
-    const s = game;
-    if (s.lost) return 'O condado se esvaziou.';
-    if (s.won && !prev.won) return 'Meta alcançada! Kent prospera.';
-    const rep = out ? out.report : [];
-    const bad = rep.find(r => r.kind === 'bad');
-    if (bad) return bad.text;
-    const ev = rep.find(r => r.kind === 'event' && !/^(O mercador chegou|Festa na aldeia|Ano de boa colheita)/.test(r.text));
-    if (ev) return ev.text;
-    if (s.market && RARE.some(k => s.market.stock[k] > 0)) return 'O mercador trouxe produtos raros: vale dar uma olhada no Mercado.';
-    const f = H.forecast(s);
-    if (f.food === 0) return 'A previsão mostra fome nesta estação. Reveja a comida.';
-    const need = H.woodNeedWinter(s);
-    if (s.season === 3 && s.wood < need) return `O inverno chegou e falta lenha: ele pede ${need}.`;
-    if (s.season === 2 && f.wood < need) return `A lenha não vai bastar para o inverno: ele pede ${need}.`;
-    if (s.happy < 30) return 'O povo está muito insatisfeito.';
-    const drop = (k, label) => autoBase && autoBase[k] >= 30 && (s[k] == null ? 70 : s[k]) < 30 ? label : '';
-    const res = drop('fish', 'O rio está ficando sem peixe.') || drop('hunt', 'A caça está ficando escassa.') || drop('forest', 'A floresta está rareando.');
-    if (res) return res;
-    return '';
+    if (world.lost) return 'Você perdeu Kent.';
+    if (world.won && !prev.won) return 'Ato I vencido! O sul e Londres são seus.';
+    const news = out ? out.news.filter(n => !/^(O mercador chegou|O administrador de)/.test(n.text)) : [];
+    if (news.length) return news[0].text;
+    for (const id of W.owned(world, ME)) {
+      const c = world.counties[id], rep = out && out.reports[id] || [];
+      const bad = rep.find(r => r.kind === 'bad');
+      if (bad) return `${c.name}: ${bad.text}`;
+      const ev = rep.find(r => r.kind === 'event' && !/^(O mercador chegou|Festa na aldeia|Ano de boa colheita)/.test(r.text));
+      if (ev && (id === 'kent' || c.focus === 'manual')) return `${c.name}: ${ev.text}`;
+      if (c.happy < 30) return `O povo de ${c.name} está muito insatisfeito.`;
+      if (c.focus === 'manual') {
+        const f = H.forecast(c), need = H.woodNeedWinter(c);
+        if (f.food === 0) return `A previsão mostra fome em ${c.name}. Reveja a comida.`;
+        if (c.season === 3 && c.wood < need) return `O inverno chegou e falta lenha em ${c.name}: ele pede ${need}.`;
+        if (c.season === 2 && f.wood < need) return `A lenha de ${c.name} não vai bastar para o inverno: ele pede ${need}.`;
+      }
+    }
+    if (world.market && RARE.some(k => world.market.stock[k] > 0)) return 'O mercador trouxe produtos raros: vale dar uma olhada no Mercado.';
+    const k = world.counties.kent;
+    const drop = (key, label) => autoBase && autoBase[key] >= 30 && (k[key] == null ? 70 : k[key]) < 30 ? label : '';
+    return drop('fish', 'O rio de Kent está ficando sem peixe.') || drop('hunt', 'A caça de Kent está ficando escassa.') || drop('forest', 'A floresta de Kent está rareando.') || '';
   }
   function stopAuto(msg) {
     autoRun = false; autoMsg = msg || '';
@@ -1290,33 +1932,33 @@ body.modal-open { overflow: hidden; }
   }
   function autoStep() {
     if (!autoRun) return;
-    if (game.lost) return stopAuto('O condado se esvaziou.');
-    const prev = H.clone(game);
-    playSeason(reduceMotion() ? 120 : 420, (out) => {
+    if (world.lost) return stopAuto('Você perdeu Kent.');
+    playSeason(reduceMotion() ? 120 : 420, (out, prev) => {
       autoSeasons++;
       if (!autoRun) return;
       const why = needsAttention(prev, out);
       if (why) return stopAuto(why);
-      if (autoSeasons >= 8) return stopAuto('Passaram dois anos sem nada urgente. Parei para você conferir o condado.');
+      if (autoSeasons >= 8) return stopAuto('Passaram dois anos sem nada urgente. Parei para você conferir suas terras.');
       timers.push(setTimeout(autoStep, 250));
     });
   }
   $('auto').addEventListener('click', () => {
     if (autoRun) { autoRun = false; finish(); stopAuto('Você parou o tempo.'); return; }
-    if (playing || game.lost) return;
+    if (playing || world.lost) return;
     autoRun = true; autoMsg = ''; autoSeasons = 0;
-    autoBase = { fish: game.fish, hunt: game.hunt == null ? 70 : game.hunt, forest: game.forest };
+    const k = world.counties.kent;
+    autoBase = { fish: k.fish, hunt: k.hunt == null ? 70 : k.hunt, forest: k.forest };
     render();
     autoStep();
   });
   $('go').addEventListener('click', () => {
     if (autoRun) { autoRun = false; finish(); stopAuto('Você parou o tempo.'); return; }
     if (playing) { finish(); return; }
-    if (game.lost) return;
+    if (world.lost) return;
     autoMsg = '';
     playSeason(reduceMotion() ? 500 : 1500);
   });
-  $('feast').addEventListener('click', () => { if (H.feast(game)) { save(); render(); } });
+  $('feast').addEventListener('click', () => { if (mine(sel) && H.feast(game)) commit(); });
 
   // Recomeçar com confirmação na própria página
   function bindReset() {
@@ -1327,8 +1969,6 @@ body.modal-open { overflow: hidden; }
     });
   }
   function restoreReset() { $('reset-area').innerHTML = '<button type="button" id="reset">Recomeçar</button>'; bindReset(); }
-
-
 
 
   // ===== Mercado =====
@@ -1349,11 +1989,11 @@ body.modal-open { overflow: hidden; }
         <span class="ft"><b>${came ? price + ' ouro' : '—'}</b><span>${status}</span></span></button>`;
     }).join('');
     const sub = $('mkt-sub');
-    sub.textContent = `Seu ouro: ${s.gold}. O mercador fica em Kent até o fim da estação; na próxima, volta com outros produtos.`;
+    sub.textContent = `Seu tesouro: ${s.gold}. O mercador percorre suas terras até o fim da estação; o que você comprar aqui vai para ${s.name}.`;
   }
   $('mkt').addEventListener('click', e => {
     const b = e.target.closest && e.target.closest('.mk'); if (!b || b.disabled) return;
-    if (H.buyMarket(game, b.dataset.id)) { save(); render(); }
+    if (mine(sel) && H.buyMarket(game, b.dataset.id)) commit();
   });
 
   // ===== Celeiro: a comida dividida por origem =====
@@ -1406,6 +2046,7 @@ body.modal-open { overflow: hidden; }
   }
   function openCeleiro() {
     lastFocus = document.activeElement;
+    $('cel-t').textContent = 'Celeiro de ' + game.name;
     renderCeleiro();
     const m = $('celeiro'); m.hidden = false;
     requestAnimationFrame(() => m.classList.add('show'));
@@ -1448,8 +2089,8 @@ body.modal-open { overflow: hidden; }
     } else { t.a.volume = to * volume / 100; if (done) done(); }
   }
   function wantedMusic() {
-    if (game.lost || game.won && !playing) return MUSIC.tema;
-    if (!playing && !(game.turn > 0)) return MUSIC.tema;
+    if (world.lost || world.won && !playing) return MUSIC.tema;
+    if (!playing && !(world.turn > 0)) return MUSIC.tema;
     const season = playing && seasonStart ? seasonStart.season : game.season;
     return MUSIC.s[season];
   }
@@ -1492,17 +2133,19 @@ body.modal-open { overflow: hidden; }
     try { if (document.visibilityState === 'hidden') ac.suspend(); else if (soundOn) ac.resume(); } catch (e) {}
   });
 
-  load();
+  load(); save();
+  if (/github\.io$/.test(location.hostname)) $('old-phase').hidden = false;
   buildTasks();
-  const setBake = v => { if (game.lost) return; H.migrate(game); game.bakePct = Math.max(0, Math.min(100, Math.round(v))); save(); render(); };
+  const canEdit = () => !world.lost && !playing && mine(sel);
+  const setBake = v => { if (!canEdit() || isAuto()) return; H.migrate(game); game.bakePct = Math.max(0, Math.min(100, Math.round(v))); save(); render(); };
   $('bake').addEventListener('input', e => setBake(Number(e.target.value)));
   hold($('bake-m'), () => setBake(H.bakePctOf(game) - 1));
   hold($('bake-p'), () => setBake(H.bakePctOf(game) + 1));
-  const setRation = v => { if (game.lost) return; game.rationPct = Math.max(50, Math.min(150, Math.round(v))); delete game.rations; save(); render(); };
+  const setRation = v => { if (!canEdit() || isAuto()) return; game.rationPct = Math.max(50, Math.min(150, Math.round(v))); delete game.rations; save(); render(); };
   $('rat').addEventListener('input', e => setRation(Number(e.target.value)));
   hold($('rat-m'), () => setRation(H.rationPctOf(game) - 1));
   hold($('rat-p'), () => setRation(H.rationPctOf(game) + 1));
-  const setTax = v => { if (game.lost) return; game.taxRate = Math.max(0, Math.min(100, v)); save(); render(); };
+  const setTax = v => { if (!canEdit()) return; game.taxRate = Math.max(0, Math.min(100, v)); save(); render(); };
   $('tax').addEventListener('input', e => setTax(Number(e.target.value)));
   hold($('tax-m'), () => setTax(H.taxRateOf(game) - 1));
   hold($('tax-p'), () => setTax(H.taxRateOf(game) + 1));
@@ -1515,7 +2158,7 @@ body.modal-open { overflow: hidden; }
 <script>
 /* Atualização automática: se houver versão nova no GitHub, recarrega sem cache */
 (function () {
-  var BUILD = '20261031215448';
+  var BUILD = '20261031235014';
   function check() {
     try {
       fetch('version.json?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
